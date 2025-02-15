@@ -9,9 +9,7 @@
 ---------------------------
 local line = false
 local FONT = "|cffffffff"
-local DEBUG_MODE = false
 
--- Updated reward tables using objects
 local DUNGEON_REWARDS = {
     { itemLevel = 597, upgradeTrack = "Champion 1" },  -- Key Level 2
     { itemLevel = 597, upgradeTrack = "Champion 1" },  -- Key Level 3
@@ -141,26 +139,19 @@ frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
-        -- Additional initialization can go here if needed.
+        -- Initialization go here
     end
 end)
 
 --------------------------
 -- Helper Functions     --
 --------------------------
-local function DebugPrint(msg)
-    if DEBUG_MODE then
-        print("|cffffd700[DEBUG]|r " .. msg)
-    end
-end
-
 local function GetItemString(link)
     return string.match(link, "keystone[%-?%d:]+")
 end
 
 local function GetKeyLevel(link)
     local keyField = select(4, strsplit(":", link))
-    DebugPrint("Raw key level field: " .. tostring(keyField))
     return tonumber(string.sub(keyField or "", 1, 2))
 end
 
@@ -168,7 +159,6 @@ local function GetMapID(link)
     local parts = { strsplit(":", link) }
     if #parts >= 3 then
         local mapID = tonumber(parts[3])
-        DebugPrint("Extracted mapID (field 3): " .. tostring(mapID))
         return mapID
     end
     return nil
@@ -177,19 +167,14 @@ end
 function GetCharacterMythicScore(itemString)
     local mapID = GetMapID(itemString)
     if not mapID then
-        DebugPrint("No mapID found in item string.")
         return 0
     end
-    DebugPrint("Querying C_MythicPlus.GetSeasonBestForMap with mapID: " .. tostring(mapID))
     local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapID)
     if intimeInfo and intimeInfo.dungeonScore then
-        DebugPrint("Found intimeInfo.dungeonScore: " .. tostring(intimeInfo.dungeonScore))
         return intimeInfo.dungeonScore
     elseif overtimeInfo and overtimeInfo.dungeonScore then
-        DebugPrint("Found overtimeInfo.dungeonScore: " .. tostring(overtimeInfo.dungeonScore))
         return overtimeInfo.dungeonScore
     else
-        DebugPrint("No valid season best score found for mapID: " .. tostring(mapID))
         return 0
     end
 end
@@ -221,13 +206,11 @@ function GetRewardsForKeyLevel(keyLevel)
         return rewards
     end
 
-    -- Dungeon rewards
     local dungeonIndex = math.min(keyLevel - 1, #DUNGEON_REWARDS)
     local dungeonReward = DUNGEON_REWARDS[dungeonIndex] or {}
     rewards.dungeonItem = tostring(dungeonReward.itemLevel or "Unknown")
     rewards.dungeonTrack = dungeonReward.upgradeTrack or "Unknown"
 
-    -- Vault rewards
     local vaultIndex = math.min(keyLevel - 1, #VAULT_REWARDS)
     local vaultReward = VAULT_REWARDS[vaultIndex] or {}
     rewards.vaultItem = tostring(vaultReward.itemLevel or "Unknown")
@@ -268,11 +251,6 @@ local function OnTooltipSetItem(tooltip, ...)
         local potentialScore = ScoreFormula(keyLevel)
         local scoreGain = potentialScore - currentScore
 
-        DebugPrint("Key Level: " .. tostring(keyLevel))
-        DebugPrint("Potential Score: " .. tostring(potentialScore))
-        DebugPrint("Current Score: " .. tostring(currentScore))
-        DebugPrint("Score Gain: " .. tostring(scoreGain))
-
         if not line then
             local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
                                     FONT, rewards.dungeonTrack, rewards.dungeonItem,
@@ -304,11 +282,6 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
         local crest = GetCrestReward(keyLevel)
         local potentialScore = ScoreFormula(keyLevel)
         local scoreGain = potentialScore - currentScore
-
-        DebugPrint("(Hyperlink) Key Level: " .. tostring(keyLevel))
-        DebugPrint("(Hyperlink) Potential Score: " .. tostring(potentialScore))
-        DebugPrint("(Hyperlink) Current Score: " .. tostring(currentScore))
-        DebugPrint("(Hyperlink) Score Gain: " .. tostring(scoreGain))
 
         local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
                                 FONT, rewards.dungeonTrack, rewards.dungeonItem,
