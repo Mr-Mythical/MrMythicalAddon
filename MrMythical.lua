@@ -248,21 +248,26 @@ local function OnTooltipSetItem(tooltip, ...)
         local currentScore = GetCharacterMythicScore(itemString)
         local rewards = GetRewardsForKeyLevel(keyLevel)
         local crest = GetCrestReward(keyLevel)
-        local potentialScore = ScoreFormula(keyLevel)
-        local scoreGain = potentialScore - currentScore
+        local baseScore = ScoreFormula(keyLevel)
+        local maxScore = baseScore + 15
+        local minGain = math.max(baseScore - currentScore, 0)
+        local maxGain = math.max(maxScore - currentScore, 0)
 
         if not line then
-            local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
-                                    FONT, rewards.dungeonTrack, rewards.dungeonItem,
-                                    rewards.vaultTrack, rewards.vaultItem)
-            tooltip:AddLine(rewardLine)
-            tooltip:AddLine(string.format("%sCrest: %s (%d)|r", FONT, crest.crestType, crest.crestAmount))
+            tooltip:AddLine(string.format("%sGear: %s (%s) / %s (%s)|r",
+                FONT, rewards.dungeonTrack, rewards.dungeonItem,
+                rewards.vaultTrack, rewards.vaultItem))
             
-            local gainStr = ""
-            if scoreGain >= 0 then
-                gainStr = string.format(" ( +%d )", scoreGain)
-            end
-            tooltip:AddLine(string.format("%sMythic+ Score: %d%s|r", FONT, potentialScore, gainStr))
+            tooltip:AddLine(string.format("%sCrest: %s (%d)|r", 
+                FONT, crest.crestType, crest.crestAmount))
+            
+            local gainStr = (maxGain > 0) and string.format("(+%d-%d)", minGain, maxGain) or ""
+            tooltip:AddLine(string.format("%sScore: %d-%d %s|r",
+                FONT,
+                baseScore,
+                maxScore,
+                gainStr))
+            
             line = true
         end
     end
@@ -280,8 +285,10 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
         local currentScore = GetCharacterMythicScore(itemString)
         local rewards = GetRewardsForKeyLevel(keyLevel)
         local crest = GetCrestReward(keyLevel)
-        local potentialScore = ScoreFormula(keyLevel)
-        local scoreGain = potentialScore - currentScore
+        local baseScore = ScoreFormula(keyLevel)
+        local maxScore = baseScore + 15
+        local minGain = math.max(baseScore - currentScore, 0)
+        local maxGain = math.max(maxScore - currentScore, 0)
 
         local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
                                 FONT, rewards.dungeonTrack, rewards.dungeonItem,
@@ -289,11 +296,12 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
         ItemRefTooltip:AddLine(rewardLine, 1, 1, 1, true)
         ItemRefTooltip:AddLine(string.format("%sCrest: %s (%d)|r", FONT, crest.crestType, crest.crestAmount), 1, 1, 1, true)
         
-        local gainStr = ""
-        if scoreGain >= 0 then
-            gainStr = string.format(" ( +%d )", scoreGain)
-        end
-        ItemRefTooltip:AddLine(string.format("%sMythic+ Score: %d%s|r", FONT, potentialScore, gainStr), 1, 1, 1, true)
+        local gainStr = (maxGain > 0) and string.format("(+%d-%d)", minGain, maxGain) or ""
+        ItemRefTooltip:AddLine(string.format("%sScore: %d-%d %s|r",
+        FONT,
+        baseScore,
+        maxScore,
+        gainStr), 1, 1, 1, true)
         ItemRefTooltip:Show()
     end
 end
