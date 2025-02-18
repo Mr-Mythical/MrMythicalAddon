@@ -426,7 +426,7 @@ local function OnTooltipSetItem(tooltip, ...)
         local minGain = math.max(baseScore - currentScore, 0)
         local maxGain = math.max(maxScore - currentScore, 0)
         
-        local baseColor = GetGradientColor(baseScore, 165, 500, gradientStops)
+        local baseColor = GetGradientColor(maxScore, 165, 500, gradientStops)
         local gainColor = GetGradientColor(maxGain, 0, 200, gradientStops)
 
         if not line then
@@ -465,7 +465,7 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
         local minGain = math.max(baseScore - currentScore, 0)
         local maxGain = math.max(maxScore - currentScore, 0)
 
-        local baseColor = GetGradientColor(baseScore, 165, 500, gradientStops)
+        local baseColor = GetGradientColor(maxScore, 165, 500, gradientStops)
         local gainColor = GetGradientColor(maxGain, 0, 200, gradientStops)
 
         local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
