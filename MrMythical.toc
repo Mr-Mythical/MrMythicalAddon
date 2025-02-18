@@ -1,6 +1,10 @@
 ## Interface: 110700
-## Title: Mr. Mythical
-## Notes: Shows the Mythic+ rewards and score gain for keystones in tooltips.
-## Version: 1.1.0
+## Title: Mr. Mythical - Mythic+ Rewards and Score Tooltips
+## Notes: Enhance your Mythic+ experience with detailed keystone rewards and score insights directly in your tooltips and chat!
+## Version: @project-version@
+## Author: Braunerr
 ## IconTexture: Interface\AddOns\MrMythical\Logo.tga
+## X-Curse-Project-ID: 1200437
+## X-Wago-ID: kNMdrZGz
+
 MrMythical.lua
