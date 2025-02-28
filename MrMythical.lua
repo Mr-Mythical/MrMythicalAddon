@@ -7,8 +7,19 @@
 ---------------------------
 -- Constants & Variables --
 ---------------------------
+MRM_SavedVars = MRM_SavedVars or {} -- Ensure it exists
+if MRM_SavedVars.COMPACT_MODE_ENABLED == nil then
+    MRM_SavedVars.COMPACT_MODE_ENABLED = true -- Default to ON
+end
+
 local line = false
 local FONT = "|cffffffff"
+
+local UNWANTED_STRINGS = {
+    '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
+    "Soulbound",
+    "Unique"
+}
 
 local DUNGEON_REWARDS = {
     { itemLevel = 597, upgradeTrack = "Champion 1" },  -- Key Level 2
@@ -241,9 +252,14 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
         table.insert(args, word)
     end
 
-    local mode = args[1] and args[1]:lower() or "rewards"
+    local mode = args[1] and args[1]:lower() or "help"
 
-    if mode == "rewards" then
+    if mode == "compact" then
+        MRM_SavedVars.COMPACT_MODE_ENABLED = not MRM_SavedVars.COMPACT_MODE_ENABLED
+        local status = MRM_SavedVars.COMPACT_MODE_ENABLED and "ENABLED" or "DISABLED"
+        print("Compact Mode is now: |cff00ff00" .. status .. "|r")
+
+    elseif mode == "rewards" then
         local level = args[2] and tonumber(args[2])
         if level then
             local rewards = GetRewardsForKeyLevel(level)
@@ -300,7 +316,10 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
             print("Usage: /mrm score <keystone level>")
         end
     else
-        print("Usage: /mrm <rewards|score> [<keystone level>]")
+        print("|cffffcc00Usage:|r")
+        print("  /mrm compact - Toggle Compact Mode (Removes unneeded keystone text)")
+        print("  /mrm rewards - Show keystone rewards")
+        print("  /mrm score <keystone level>- Show keystone score calculations")
     end
 end
 
@@ -366,6 +385,38 @@ function ScoreFormula(keyLevel)
     return parScore
 end
 
+local function IsUnwantedText(text)
+    if not text then return false end
+
+    for _, unwanted in ipairs(UNWANTED_STRINGS) do
+        if text == unwanted then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function RemoveSpecificTooltipText(tooltip)
+    if not MRM_SavedVars.COMPACT_MODE_ENABLED then return end -- Check setting
+    for i = tooltip:NumLines(), 1, -1 do
+        local leftLine = _G["GameTooltipTextLeft"..i]
+        if leftLine then
+            local lineText = leftLine:GetText()
+
+            -- Check if it matches one of your undesired strings
+            if IsUnwantedText(lineText) then
+                leftLine:SetText("")
+                local rightLine = _G["GameTooltipTextRight"..i]
+                if rightLine then
+                    rightLine:SetText("")
+                end
+            end
+        end
+    end
+
+    tooltip:Show()
+end
 -------------------------------
 -- Reward Lookup Functions   --
 -------------------------------
@@ -445,6 +496,7 @@ local function OnTooltipSetItem(tooltip, ...)
             
             line = true
         end
+        RemoveSpecificTooltipText(tooltip)
     end
 end
 
@@ -480,6 +532,7 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
             baseColor, maxScore,
             gainStr))
         ItemRefTooltip:Show()
+        RemoveSpecificTooltipText(tooltip)
     end
 end
 
