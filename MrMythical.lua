@@ -22,35 +22,36 @@ local UNWANTED_STRINGS = {
 }
 
 local DUNGEON_REWARDS = {
-    { itemLevel = 597, upgradeTrack = "Champion 1" },  -- Key Level 2
-    { itemLevel = 597, upgradeTrack = "Champion 1" },  -- Key Level 3
-    { itemLevel = 600, upgradeTrack = "Champion 2" },  -- Key Level 4
-    { itemLevel = 603, upgradeTrack = "Champion 3" },  -- Key Level 5
-    { itemLevel = 606, upgradeTrack = "Champion 4" },  -- Key Level 6
-    { itemLevel = 610, upgradeTrack = "Hero 1" },      -- Key Level 7
-    { itemLevel = 610, upgradeTrack = "Hero 1" },      -- Key Level 8
-    { itemLevel = 613, upgradeTrack = "Hero 2" },      -- Key Level 9+
+    { itemLevel = 639, upgradeTrack = "Champion 2" },  -- Key Level 2
+    { itemLevel = 639, upgradeTrack = "Champion 2" },  -- Key Level 3
+    { itemLevel = 642, upgradeTrack = "Champion 3" },  -- Key Level 4
+    { itemLevel = 645, upgradeTrack = "Champion 4" },  -- Key Level 5
+    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 6
+    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 7
+    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 8
+    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 9
+    { itemLevel = 655, upgradeTrack = "Hero 3"}        -- Key Level 10+
 }
 
 local VAULT_REWARDS = {
-    { itemLevel = 606, upgradeTrack = "Champion 4" },  -- Key Level 2
-    { itemLevel = 610, upgradeTrack = "Hero 1" },      -- Key Level 3
-    { itemLevel = 610, upgradeTrack = "Hero 1" },      -- Key Level 4
-    { itemLevel = 613, upgradeTrack = "Hero 2" },      -- Key Level 5
-    { itemLevel = 613, upgradeTrack = "Hero 2" },      -- Key Level 6
-    { itemLevel = 616, upgradeTrack = "Hero 3" },      -- Key Level 7
-    { itemLevel = 619, upgradeTrack = "Hero 4" },      -- Key Level 8
-    { itemLevel = 619, upgradeTrack = "Hero 4" },      -- Key Level 9
-    { itemLevel = 623, upgradeTrack = "Myth 1" },      -- Key Level 10+
+    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 2
+    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 3
+    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 4
+    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 5
+    { itemLevel = 655, upgradeTrack = "Hero 3" },      -- Key Level 6
+    { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 7
+    { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 8
+    { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 9
+    { itemLevel = 662, upgradeTrack = "Myth 1" },      -- Key Level 10+
 }
 
 local CREST_REWARDS = {
-    { crestType = "Carved", amount = 12 },  -- Key Level 2
-    { crestType = "Carved", amount = 14 },  -- Key Level 3
-    { crestType = "Runed",  amount = 12 },  -- Key Level 4
-    { crestType = "Runed",  amount = 14 },  -- Key Level 5
-    { crestType = "Runed",  amount = 16 },  -- Key Level 6
-    { crestType = "Runed",  amount = 18 },  -- Key Level 7
+    { crestType = "Runed", amount = 10 },  -- Key Level 2
+    { crestType = "Runed", amount = 12 },  -- Key Level 3
+    { crestType = "Runed",  amount = 14 },  -- Key Level 4
+    { crestType = "Runed",  amount = 16 },  -- Key Level 5
+    { crestType = "Runed",  amount = 18 },  -- Key Level 6
+    { crestType = "Gilded",  amount = 10 },  -- Key Level 7
     { crestType = "Gilded", amount = 12 },  -- Key Level 8
     { crestType = "Gilded", amount = 14 },  -- Key Level 9
     { crestType = "Gilded", amount = 16 },  -- Key Level 10
@@ -59,14 +60,14 @@ local CREST_REWARDS = {
 }
 
 local MYTHIC_MAPS = {
-    { id = 503, name = "Ara-Kara, City of Echoes" },
-    { id = 502, name = "City of Threads" },
-    { id = 507, name = "Grim Batol" },
-    { id = 375, name = "Mists of Tirna Scithe" },
-    { id = 353, name = "Siege of Boralus" },
-    { id = 505, name = "The Dawnbreaker" },
-    { id = 376, name = "The Necrotic Wake" },
-    { id = 501, name = "The Stonevault" }
+    { id = 506, name = "Cinderbrew Meadery" },
+    { id = 504, name = "Darkflame Cleft" },
+    { id = 370, name = "Mechagon Workshop" },
+    { id = 525, name = "Operation: Floodgate" },
+    { id = 499, name = "Priory of the Sacred Flame" },
+    { id = 247, name = "The MOTHERLODE!!" },
+    { id = 500, name = "The Rookery" },
+    { id = 382, name = "Theater of Pain" }
 }
 
 local gradientStops = {
@@ -373,8 +374,8 @@ end
 
 function ScoreFormula(keyLevel)
     if keyLevel < 2 then return 0 end
-    local affixBreakpoints = { [4] = 10, [7] = 15, [10] = 10, [12] = 15 }
-    local parScore = 165
+    local affixBreakpoints = { [4] = 15, [7] = 15, [10] = 15, [12] = 15 }
+    local parScore = 155
     for current = 2, keyLevel - 1 do
         parScore = parScore + 15
         local nextLevel = current + 1
