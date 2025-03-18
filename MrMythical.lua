@@ -18,7 +18,8 @@ local FONT = "|cffffffff"
 local UNWANTED_STRINGS = {
     '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
     "Soulbound",
-    "Unique"
+    "Unique",
+    "Dungeon Modifiers:"
 }
 
 local DUNGEON_REWARDS = {
