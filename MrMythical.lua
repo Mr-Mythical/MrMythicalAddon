@@ -553,12 +553,7 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
 
     local mode = args[1] and args[1]:lower() or "help"
 
-    if mode == "compact" then
-        MRM_SavedVars.COMPACT_MODE_ENABLED = not MRM_SavedVars.COMPACT_MODE_ENABLED
-        local status = MRM_SavedVars.COMPACT_MODE_ENABLED and "ENABLED" or "DISABLED"
-        print("Compact Mode is now: |cff00ff00" .. status .. "|r")
-
-    elseif mode == "rewards" then
+    if mode == "rewards" then
         local level = args[2] and tonumber(args[2])
         if level then
             local rewards = GetRewardsForKeyLevel(level)
@@ -616,20 +611,56 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
         end
     else
         print("|cffffcc00Usage:|r")
-        print("  /mrm compact - Toggle Compact Mode (Removes unneeded keystone text)")
         print("  /mrm rewards - Show keystone rewards")
         print("  /mrm score <keystone level> - Show keystone score calculations")
     end
 end
 
----------------------
--- Initialization  --
----------------------
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, ...)
-    if event == "ADDON_LOADED" then
-        local addonName = ...
-        -- Initialization go here
+local MrMythicalPanel = CreateFrame("Frame")
+MrMythicalPanel:RegisterEvent("ADDON_LOADED")
+
+function MrMythicalPanel:InitializeOptions(event, arg1)
+    if event == "ADDON_LOADED" and arg1 == "MrMythical" then
+        MrMythicalPanel.name = "Mr. Mythical"
+        local category, layout = Settings.RegisterCanvasLayoutCategory(MrMythicalPanel, MrMythicalPanel.name, MrMythicalPanel.name)
+        category.ID = MrMythicalPanel.name
+        Settings.RegisterAddOnCategory(category)
+
+        -- Create the scrolling parent frame and size it to fit inside the texture
+        MrMythicalPanel.scrollFrame = CreateFrame("ScrollFrame", nil, MrMythicalPanel, "UIPanelScrollFrameTemplate")
+        MrMythicalPanel.scrollFrame:SetPoint("TOPLEFT", 3, -4)
+        MrMythicalPanel.scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
+
+        -- Create the scrolling child frame, set its width to fit, and give it an arbitrary minimum height (such as 1)
+        MrMythicalPanel.scrollChild = CreateFrame("Frame")
+        MrMythicalPanel.scrollFrame:SetScrollChild(MrMythicalPanel.scrollChild)
+        MrMythicalPanel.scrollChild:SetWidth(SettingsPanel.Container:GetWidth() - 18)
+        MrMythicalPanel.scrollChild:SetHeight(1)
+
+        -- Add widgets to the scrolling child frame as desired
+        MrMythicalPanel.title = MrMythicalPanel.scrollChild:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
+        MrMythicalPanel.title:SetPoint("TOPLEFT", 10, -15)
+        MrMythicalPanel.title:SetText("Mr. Mythical")
+
+        MrMythicalPanel.CheckBox_Compact = CreateFrame("CheckButton", "MRM_CompactOptionsCheckbox", MrMythicalPanel.scrollChild, "UICheckButtonTemplate")
+        MrMythicalPanel.CheckBox_Compact:ClearAllPoints()
+        MrMythicalPanel.CheckBox_Compact:SetPoint("TOPLEFT", 50, -53)
+        getglobal(MrMythicalPanel.CheckBox_Compact:GetName() .. "Text"):SetText("Compact Keystone Tooltip")
+
+        -- Set the initial state of the checkbox based on MRM_SavedVars.COMPACT_MODE_ENABLED
+        MrMythicalPanel.CheckBox_Compact:SetChecked(MRM_SavedVars.COMPACT_MODE_ENABLED)
+
+        -- Update MRM_SavedVars.COMPACT_MODE_ENABLED when the checkbox is clicked
+        MrMythicalPanel.CheckBox_Compact:SetScript("OnClick", function(self)
+            if MrMythicalPanel.CheckBox_Compact:GetChecked() then
+                MRM_SavedVars.COMPACT_MODE_ENABLED = true
+                print("Compact Mode enabled.")
+            else
+                MRM_SavedVars.COMPACT_MODE_ENABLED = false
+                print("Compact Mode disabled.")
+            end
+        end)
     end
-end)
+end
+
+MrMythicalPanel:SetScript("OnEvent", MrMythicalPanel.InitializeOptions)
