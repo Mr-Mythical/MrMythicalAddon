@@ -8,4 +8,5 @@
 ## X-Wago-ID: kNMdrZGz
 ## SavedVariables: MRM_SavedVars
 
+GradientStops.lua
 MrMythical.lua
