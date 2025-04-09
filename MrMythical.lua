@@ -3,11 +3,6 @@
 ---------------------------
 gradientStops = gradientStops
 
-MRM_SavedVars = MRM_SavedVars or {} -- Ensure it exists
-if MRM_SavedVars.COMPACT_MODE_ENABLED == nil then
-    MRM_SavedVars.COMPACT_MODE_ENABLED = true -- Default to ON
-end
-
 local line = false
 local FONT = "|cffffffff"
 
@@ -473,51 +468,51 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     end
 end
 
-local MrMythicalPanel = CreateFrame("Frame")
-MrMythicalPanel:RegisterEvent("ADDON_LOADED")
-
-function MrMythicalPanel:InitializeOptions(event, arg1)
-    if event == "ADDON_LOADED" and arg1 == "MrMythical" then
-        MrMythicalPanel.name = "Mr. Mythical"
-        local category, layout = Settings.RegisterCanvasLayoutCategory(MrMythicalPanel, MrMythicalPanel.name, MrMythicalPanel.name)
-        category.ID = MrMythicalPanel.name
-        Settings.RegisterAddOnCategory(category)
-
-        -- Create the scrolling parent frame and size it to fit inside the texture
-        MrMythicalPanel.scrollFrame = CreateFrame("ScrollFrame", nil, MrMythicalPanel, "UIPanelScrollFrameTemplate")
-        MrMythicalPanel.scrollFrame:SetPoint("TOPLEFT", 3, -4)
-        MrMythicalPanel.scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
-
-        -- Create the scrolling child frame, set its width to fit, and give it an arbitrary minimum height (such as 1)
-        MrMythicalPanel.scrollChild = CreateFrame("Frame")
-        MrMythicalPanel.scrollFrame:SetScrollChild(MrMythicalPanel.scrollChild)
-        MrMythicalPanel.scrollChild:SetWidth(SettingsPanel.Container:GetWidth() - 18)
-        MrMythicalPanel.scrollChild:SetHeight(1)
-
-        -- Add widgets to the scrolling child frame as desired
-        MrMythicalPanel.title = MrMythicalPanel.scrollChild:CreateFontString("ARTWORK", nil, "GameFontNormalLarge")
-        MrMythicalPanel.title:SetPoint("TOPLEFT", 10, -15)
-        MrMythicalPanel.title:SetText("Mr. Mythical")
-
-        MrMythicalPanel.CheckBox_Compact = CreateFrame("CheckButton", "MRM_CompactOptionsCheckbox", MrMythicalPanel.scrollChild, "UICheckButtonTemplate")
-        MrMythicalPanel.CheckBox_Compact:ClearAllPoints()
-        MrMythicalPanel.CheckBox_Compact:SetPoint("TOPLEFT", 50, -53)
-        getglobal(MrMythicalPanel.CheckBox_Compact:GetName() .. "Text"):SetText("Compact Keystone Tooltip")
-
-        -- Set the initial state of the checkbox based on MRM_SavedVars.COMPACT_MODE_ENABLED
-        MrMythicalPanel.CheckBox_Compact:SetChecked(MRM_SavedVars.COMPACT_MODE_ENABLED)
-
-        -- Update MRM_SavedVars.COMPACT_MODE_ENABLED when the checkbox is clicked
-        MrMythicalPanel.CheckBox_Compact:SetScript("OnClick", function(self)
-            if MrMythicalPanel.CheckBox_Compact:GetChecked() then
-                MRM_SavedVars.COMPACT_MODE_ENABLED = true
-                print("Compact Mode enabled.")
-            else
-                MRM_SavedVars.COMPACT_MODE_ENABLED = false
-                print("Compact Mode disabled.")
-            end
-        end)
+local category
+local function InitializeSettings()
+    -- Ensure the saved variable is initialized properly
+    MRM_SavedVars = MRM_SavedVars or {}
+    if MRM_SavedVars.COMPACT_MODE_ENABLED == nil then
+        MRM_SavedVars.COMPACT_MODE_ENABLED = true -- Default to ON
     end
+
+    -- Register the settings category
+    category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical")
+
+    local function OnSettingChanged(setting, value)
+        -- Update the saved variable when the setting changes
+        MRM_SavedVars.COMPACT_MODE_ENABLED = value
+        print("Compact Mode changed to:", value and "Enabled" or "Disabled")
+    end
+
+    -- Register the setting for Compact Mode
+    local name = "Compact Mode"
+    local variable = "MRM_CompactMode"
+    local variableKey = "COMPACT_MODE_ENABLED"
+    local variableTbl = MRM_SavedVars
+    local defaultValue = true
+
+    -- Register the setting with the Settings API
+    local setting = Settings.RegisterAddOnSetting(category, variable, variableKey, variableTbl, type(defaultValue), name, defaultValue)
+    setting:SetValueChangedCallback(OnSettingChanged)
+
+    -- Synchronize the checkbox state with the saved variable
+    setting:SetValue(MRM_SavedVars.COMPACT_MODE_ENABLED)
+
+    -- Create the checkbox UI
+    local tooltip = "Enable or disable Compact Mode for keystone tooltips."
+    Settings.CreateCheckbox(category, setting, tooltip)
+
+    -- Register the category
+    Settings.RegisterAddOnCategory(category)
 end
 
-MrMythicalPanel:SetScript("OnEvent", MrMythicalPanel.InitializeOptions)
+-- Event handler for ADDON_LOADED
+local frame = CreateFrame("Frame")
+frame:RegisterEvent("ADDON_LOADED")
+frame:SetScript("OnEvent", function(self, event, addonName)
+    if addonName == "MrMythical" then
+        InitializeSettings()
+        self:UnregisterEvent("ADDON_LOADED") -- No need to listen for this event anymore
+    end
+end)
