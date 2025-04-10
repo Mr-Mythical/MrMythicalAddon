@@ -10,7 +10,14 @@ local UNWANTED_STRINGS = {
     '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
     "Soulbound",
     "Unique",
-    "Dungeon Modifiers:"
+    "Dungeon Modifiers:",
+    "  Xal'atath's Bargain: Ascendant",
+    "  Xal'atath's Bargain: Devour",
+    "  Xal'atath's Bargain: Voidbound",
+    "  Xal'atath's Bargain: Pulsar",
+    "  Xal'atath's Guile",
+    "  Fortified",
+    "  Tyrannical"
 }
 
 local regionMap = {
@@ -231,10 +238,18 @@ local function RemoveSpecificTooltipText(tooltip)
         if leftLine then
             local lineText = leftLine:GetText()
             if IsUnwantedText(lineText) then
-                leftLine:SetText("")
-                local rightLine = _G["GameTooltipTextRight"..i]
-                if rightLine then
-                    rightLine:SetText("")
+                if (lineText == "  Fortified" or lineText == "  Tyrannical" or 
+                    lineText == "  Xal'atath's Bargain: Ascendant" or 
+                    lineText == "  Xal'atath's Bargain: Devour" or 
+                    lineText == "  Xal'atath's Bargain: Voidbound" or 
+                    lineText == "  Xal'atath's Bargain: Pulsar" or 
+                    lineText == "  Xal'atath's Guile") and not MRM_SavedVars.CHILD_OPTION then
+                else
+                    leftLine:SetText("")
+                    local rightLine = _G["GameTooltipTextRight"..i]
+                    if rightLine then
+                        rightLine:SetText("")
+                    end
                 end
             end
         end
@@ -470,49 +485,56 @@ end
 
 local category
 local function InitializeSettings()
-    -- Ensure the saved variable is initialized properly
     MRM_SavedVars = MRM_SavedVars or {}
     if MRM_SavedVars.COMPACT_MODE_ENABLED == nil then
-        MRM_SavedVars.COMPACT_MODE_ENABLED = true -- Default to ON
+        MRM_SavedVars.COMPACT_MODE_ENABLED = true 
+    end
+    if MRM_SavedVars.CHILD_OPTION == nil then
+        MRM_SavedVars.CHILD_OPTION = false 
     end
 
-    -- Register the settings category
     category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical")
 
-    local function OnSettingChanged(setting, value)
-        -- Update the saved variable when the setting changes
+    local function OnCompactModeChanged(setting, value)
         MRM_SavedVars.COMPACT_MODE_ENABLED = value
-        print("Compact Mode changed to:", value and "Enabled" or "Disabled")
     end
 
-    -- Register the setting for Compact Mode
-    local name = "Compact Mode"
-    local variable = "MRM_CompactMode"
-    local variableKey = "COMPACT_MODE_ENABLED"
-    local variableTbl = MRM_SavedVars
-    local defaultValue = true
+    local compactName = "Compact Mode"
+    local compactVariable = "MRM_CompactMode"
+    local compactVariableKey = "COMPACT_MODE_ENABLED"
+    local defaultCompact = true
 
-    -- Register the setting with the Settings API
-    local setting = Settings.RegisterAddOnSetting(category, variable, variableKey, variableTbl, type(defaultValue), name, defaultValue)
-    setting:SetValueChangedCallback(OnSettingChanged)
+    local compactSetting = Settings.RegisterAddOnSetting(category, compactVariable, compactVariableKey, MRM_SavedVars, type(defaultCompact), compactName, defaultCompact)
+    compactSetting:SetValueChangedCallback(OnCompactModeChanged)
+    compactSetting:SetValue(MRM_SavedVars.COMPACT_MODE_ENABLED)
+    local compactTooltip = "Enable or disable Compact Mode for keystone tooltips."
+    local compactInitializer = Settings.CreateCheckbox(category, compactSetting, compactTooltip)
 
-    -- Synchronize the checkbox state with the saved variable
-    setting:SetValue(MRM_SavedVars.COMPACT_MODE_ENABLED)
+    local childName = "Hide Affix Text"
+    local childVariable = "MRM_AffixOption"
+    local childVariableKey = "Affix_OPTION"
+    local defaultChild = false
 
-    -- Create the checkbox UI
-    local tooltip = "Enable or disable Compact Mode for keystone tooltips."
-    Settings.CreateCheckbox(category, setting, tooltip)
+    local function OnChildOptionChanged(setting, value)
+        MRM_SavedVars.CHILD_OPTION = value
+    end
 
-    -- Register the category
+    local childSetting = Settings.RegisterAddOnSetting(category, childVariable, childVariableKey, MRM_SavedVars, type(defaultChild), childName, defaultChild)
+    childSetting:SetValueChangedCallback(OnChildOptionChanged)
+    childSetting:SetValue(MRM_SavedVars.CHILD_OPTION)
+    local childTooltip = "Enable or disable hidding current affixes in tooltip."
+    local childInitializer = Settings.CreateCheckbox(category, childSetting, childTooltip)
+
+    childInitializer:SetParentInitializer(compactInitializer, function()
+        return compactSetting:GetValue()
+    end)
     Settings.RegisterAddOnCategory(category)
 end
 
--- Event handler for ADDON_LOADED
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, addonName)
     if addonName == "MrMythical" then
         InitializeSettings()
-        self:UnregisterEvent("ADDON_LOADED") -- No need to listen for this event anymore
     end
 end)
