@@ -5,6 +5,7 @@ gradientStops = gradientStops
 
 local line = false
 local FONT = "|cffffffff"
+local currentPlayerRegion = "eu"
 
 local UNWANTED_STRINGS = {
     '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
@@ -138,7 +139,7 @@ function GetGroupMythicData_Party(playerScore, targetMapID)
     local playerName = UnitName("player")
     groupData[playerName] = playerScore
 
-    local region = GetRegionForRaiderIO() 
+    local region = currentPlayerRegion
     
     local numParty = GetNumGroupMembers() or 1
     for i = 1, numParty - 1 do
@@ -166,14 +167,6 @@ end
 ---------------------
 -- Helper Functions --
 ---------------------
-function GetRegionForRaiderIO()
-    if GetCurrentRegion then
-        local regNum = GetCurrentRegion()
-        return regionMap[regNum] or "us"
-    end
-    return "us"
-end
-
 local function GetItemString(link)
     return string.match(link, "keystone[%-?%d:]+")
 end
@@ -486,55 +479,51 @@ end
 local category
 local function InitializeSettings()
     MRM_SavedVars = MRM_SavedVars or {}
-    if MRM_SavedVars.COMPACT_MODE_ENABLED == nil then
-        MRM_SavedVars.COMPACT_MODE_ENABLED = true 
-    end
-    if MRM_SavedVars.CHILD_OPTION == nil then
-        MRM_SavedVars.CHILD_OPTION = false 
+    MRM_SavedVars.COMPACT_MODE_ENABLED = MRM_SavedVars.COMPACT_MODE_ENABLED ~= false
+    MRM_SavedVars.CHILD_OPTION = MRM_SavedVars.CHILD_OPTION == true
+
+    if not Settings or not Settings.RegisterVerticalLayoutCategory then
+        print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
+        return
     end
 
-    category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical")
+    category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical", "MrMythical")
 
-    local function OnCompactModeChanged(setting, value)
+    local compactSetting = Settings.RegisterAddOnSetting(category, "Compact Mode", "COMPACT_MODE_ENABLED", MRM_SavedVars, "boolean", "Compact Keystone Tooltips", true)
+    compactSetting:SetValueChangedCallback(function(setting, value)
         MRM_SavedVars.COMPACT_MODE_ENABLED = value
-    end
+    end)
+    local compactInitializer = Settings.CreateCheckbox(category, compactSetting, "Enable to remove extra lines like 'Soulbound' and 'Unique' from keystone tooltips.")
+    compactInitializer:SetSetting(compactSetting) 
 
-    local compactName = "Compact Mode"
-    local compactVariable = "MRM_CompactMode"
-    local compactVariableKey = "COMPACT_MODE_ENABLED"
-    local defaultCompact = true
 
-    local compactSetting = Settings.RegisterAddOnSetting(category, compactVariable, compactVariableKey, MRM_SavedVars, type(defaultCompact), compactName, defaultCompact)
-    compactSetting:SetValueChangedCallback(OnCompactModeChanged)
-    compactSetting:SetValue(MRM_SavedVars.COMPACT_MODE_ENABLED)
-    local compactTooltip = "Enable or disable Compact Mode for keystone tooltips."
-    local compactInitializer = Settings.CreateCheckbox(category, compactSetting, compactTooltip)
-
-    local childName = "Hide Affix Text"
-    local childVariable = "MRM_AffixOption"
-    local childVariableKey = "Affix_OPTION"
-    local defaultChild = false
-
-    local function OnChildOptionChanged(setting, value)
+    local childSetting = Settings.RegisterAddOnSetting(category, "Hide Affix Text", "CHILD_OPTION", MRM_SavedVars, "boolean", "Hide Current Affixes", false) 
+    childSetting:SetValueChangedCallback(function(setting, value)
         MRM_SavedVars.CHILD_OPTION = value
-    end
-
-    local childSetting = Settings.RegisterAddOnSetting(category, childVariable, childVariableKey, MRM_SavedVars, type(defaultChild), childName, defaultChild)
-    childSetting:SetValueChangedCallback(OnChildOptionChanged)
-    childSetting:SetValue(MRM_SavedVars.CHILD_OPTION)
-    local childTooltip = "Enable or disable hidding current affixes in tooltip."
-    local childInitializer = Settings.CreateCheckbox(category, childSetting, childTooltip)
+    end)
+    local childInitializer = Settings.CreateCheckbox(category, childSetting, "When Compact Mode is enabled, also hide the lines listing the current dungeon affixes.")
+    childInitializer:SetSetting(childSetting) 
 
     childInitializer:SetParentInitializer(compactInitializer, function()
-        return compactSetting:GetValue()
+        return compactSetting:GetValue() == true
     end)
+
     Settings.RegisterAddOnCategory(category)
 end
 
+-----------------------------
+-- Event Handling Frame    --
+-----------------------------
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, addonName)
     if addonName == "MrMythical" then
         InitializeSettings()
+        if GetCurrentRegion then
+            local regNum = GetCurrentRegion()
+            currentPlayerRegion = regionMap[regNum] or "eu"
+        else
+            currentPlayerRegion = "eu"
+        end
     end
 end)
