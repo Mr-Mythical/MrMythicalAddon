@@ -1,4 +1,6 @@
-gradientStops = {
+GradientsData = {}
+
+GradientsData.GRADIENTS = {
     { score = 3725, rgbInteger = { 255, 128, 0 } },
     { score = 3660, rgbInteger = { 254, 126, 20 } },
     { score = 3635, rgbInteger = { 253, 124, 31 } },
@@ -142,3 +144,5 @@ gradientStops = {
     { score = 225,  rgbInteger = { 251, 255, 250 } },
     { score = 200,  rgbInteger = { 255, 255, 255 } }
 }
+
+return GradientsData

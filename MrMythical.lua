@@ -1,11 +1,12 @@
 ---------------------------
 -- Constants & Variables --
 ---------------------------
-gradientStops = gradientStops
+local GRADIENTS = GradientsData.GRADIENTS -- Use the global GradientsData table
+local RewardsFunctions = RewardsFunctions -- RewardsFunctions is already loaded as a global
 
 local line = false
 local FONT = "|cffffffff"
-local currentPlayerRegion = "eu"
+local currentPlayerRegion = "us" -- Default to us if region cannot be determined
 
 local UNWANTED_STRINGS = {
     '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
@@ -27,44 +28,6 @@ local regionMap = {
     [3] = "eu",
     [4] = "tw",
     [5] = "cn",
-}
-
-local DUNGEON_REWARDS = {
-    { itemLevel = 639, upgradeTrack = "Champion 2" },  -- Key Level 2
-    { itemLevel = 639, upgradeTrack = "Champion 2" },  -- Key Level 3
-    { itemLevel = 642, upgradeTrack = "Champion 3" },  -- Key Level 4
-    { itemLevel = 645, upgradeTrack = "Champion 4" },  -- Key Level 5
-    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 6
-    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 7
-    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 8
-    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 9
-    { itemLevel = 655, upgradeTrack = "Hero 3" }       -- Key Level 10+
-}
-
-local VAULT_REWARDS = {
-    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 2
-    { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 3
-    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 4
-    { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 5
-    { itemLevel = 655, upgradeTrack = "Hero 3" },      -- Key Level 6
-    { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 7
-    { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 8
-    { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 9
-    { itemLevel = 662, upgradeTrack = "Myth 1" }       -- Key Level 10+
-}
-
-local CREST_REWARDS = {
-    { crestType = "Runed", amount = 10 },  -- Key Level 2
-    { crestType = "Runed", amount = 12 },  -- Key Level 3
-    { crestType = "Runed",  amount = 14 },  -- Key Level 4
-    { crestType = "Runed",  amount = 16 },  -- Key Level 5
-    { crestType = "Runed",  amount = 18 },  -- Key Level 6
-    { crestType = "Gilded",  amount = 10 },  -- Key Level 7
-    { crestType = "Gilded", amount = 12 },  -- Key Level 8
-    { crestType = "Gilded", amount = 14 },  -- Key Level 9
-    { crestType = "Gilded", amount = 16 },  -- Key Level 10
-    { crestType = "Gilded", amount = 18 },  -- Key Level 11
-    { crestType = "Gilded", amount = 20 },  -- Key Level 12
 }
 
 local MYTHIC_MAPS = {
@@ -111,7 +74,7 @@ local function GetDungeonScoreFromProfile(profile, targetMapID)
             if entry.dungeon and entry.dungeon.keystone_instance == targetMapID then
                 local level = entry.level or 0
                 local chests = entry.chests or 0
-                local baseScore = ScoreFormula(level)
+                local baseScore = RewardsFunctions.ScoreFormula(level) -- Updated to use RewardsFunctions
                 local chestBonus = 0
                 if chests == 2 then
                     chestBonus = 7.5
@@ -164,9 +127,6 @@ function GetGroupMythicData_Party(playerScore, targetMapID)
     return groupData
 end
 
----------------------
--- Helper Functions --
----------------------
 local function GetItemString(link)
     return string.match(link, "keystone[%-?%d:]+")
 end
@@ -198,20 +158,6 @@ function GetCharacterMythicScore(itemString)
     else
         return 0
     end
-end
-
-function ScoreFormula(keyLevel)
-    if keyLevel < 2 then return 0 end
-    local affixBreakpoints = { [4] = 15, [7] = 15, [10] = 15, [12] = 15 }
-    local parScore = 155
-    for current = 2, keyLevel - 1 do
-        parScore = parScore + 15
-        local nextLevel = current + 1
-        if affixBreakpoints[nextLevel] then
-            parScore = parScore + affixBreakpoints[nextLevel]
-        end
-    end
-    return parScore
 end
 
 local function IsUnwantedText(text)
@@ -250,46 +196,6 @@ local function RemoveSpecificTooltipText(tooltip)
     tooltip:Show()
 end
 
--------------------------------
--- Reward Lookup Functions   --
--------------------------------
-function GetRewardsForKeyLevel(keyLevel)
-    local rewards = {}
-    if not keyLevel or keyLevel < 2 then
-        rewards.dungeonItem = "Unknown"
-        rewards.dungeonTrack = "Unknown"
-        rewards.vaultItem = "Unknown"
-        rewards.vaultTrack = "Unknown"
-        return rewards
-    end
-
-    local dungeonIndex = math.min(keyLevel - 1, #DUNGEON_REWARDS)
-    local dungeonReward = DUNGEON_REWARDS[dungeonIndex] or {}
-    rewards.dungeonItem = tostring(dungeonReward.itemLevel or "Unknown")
-    rewards.dungeonTrack = dungeonReward.upgradeTrack or "Unknown"
-
-    local vaultIndex = math.min(keyLevel - 1, #VAULT_REWARDS)
-    local vaultReward = VAULT_REWARDS[vaultIndex] or {}
-    rewards.vaultItem = tostring(vaultReward.itemLevel or "Unknown")
-    rewards.vaultTrack = vaultReward.upgradeTrack or "Unknown"
-
-    return rewards
-end
-
-function GetCrestReward(keyLevel)
-    local crest = {}
-    if not keyLevel or keyLevel < 2 or keyLevel > 12 then
-        crest.crestType = "Unknown"
-        crest.crestAmount = "Unknown"
-        return crest
-    end
-
-    local crestReward = CREST_REWARDS[keyLevel - 1] or {}
-    crest.crestType = crestReward.crestType or "Unknown"
-    crest.crestAmount = crestReward.amount or "Unknown"
-    return crest
-end
-
 --------------------------
 -- Tooltip Handlers     --
 --------------------------
@@ -309,20 +215,20 @@ local function OnTooltipSetItem(tooltip, ...)
 
         local totalGain, count = 0, 0
         for name, score in pairs(groupData) do
-            local playerGain = math.max(ScoreFormula(keyLevel) - score, 0)
+            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0) -- Updated
             totalGain = totalGain + playerGain
             count = count + 1
         end
 
         local avgGain = (count > 0) and (totalGain / count) or 0
 
-        local potentialScore = ScoreFormula(keyLevel)
-        local groupColor = GetGradientColor(avgGain, 0, 200, gradientStops)
-        local baseColor = GetGradientColor(potentialScore, 165, 500, gradientStops)
-        local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, gradientStops)
+        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) -- Updated
+        local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
+        local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
+        local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, GRADIENTS)
 
-        local rewards = GetRewardsForKeyLevel(keyLevel)
-        local crest = GetCrestReward(keyLevel)
+        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) -- Updated
+        local crest = RewardsFunctions.GetCrestReward(keyLevel) -- Updated
 
         if not line then
             tooltip:AddLine(string.format("%sGear: %s (%s) / %s (%s)|r",
@@ -355,9 +261,9 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
         local keyLevel = GetKeyLevel(hyperlink)
         local mapID = GetMapID(hyperlink) 
         local currentScore = GetCharacterMythicScore(itemString)
-        local rewards = GetRewardsForKeyLevel(keyLevel)
-        local crest = GetCrestReward(keyLevel)
-        local potentialScore = ScoreFormula(keyLevel)
+        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) -- Updated
+        local crest = RewardsFunctions.GetCrestReward(keyLevel) -- Updated
+        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) -- Updated
         local maxScore = potentialScore + 15
         local minGain = math.max(potentialScore - currentScore, 0)
         local maxGain = math.max(maxScore - currentScore, 0)
@@ -366,15 +272,15 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
 
         local totalGain, count = 0, 0
         for name, score in pairs(groupData) do
-            local playerGain = math.max(ScoreFormula(keyLevel) - score, 0)
+            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0) -- Updated
             totalGain = totalGain + playerGain
             count = count + 1
         end
 
         local avgGain = (count > 0) and (totalGain / count) or 0
-        local groupColor = GetGradientColor(avgGain, 0, 200, gradientStops)
-        local baseColor = GetGradientColor(potentialScore, 165, 500, gradientStops)
-        local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, gradientStops)
+        local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
+        local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
+        local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, GRADIENTS)
 
         local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
             FONT, rewards.dungeonTrack, rewards.dungeonItem,
@@ -416,8 +322,8 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     if mode == "rewards" then
         local level = args[2] and tonumber(args[2])
         if level then
-            local rewards = GetRewardsForKeyLevel(level)
-            local crest = GetCrestReward(level)
+            local rewards = RewardsFunctions.GetRewardsForKeyLevel(level) -- Updated
+            local crest = RewardsFunctions.GetCrestReward(level) -- Updated
             local rewardLine = string.format("Key Level %d: %s (%s) / %s (%s) | %s (%s)",
                                     level,
                                     rewards.dungeonTrack, rewards.dungeonItem,
@@ -427,8 +333,8 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
         else
             print("Mythic Keystone Rewards by Key Level:")
             for keyLevel = 2, 12 do
-                local rewards = GetRewardsForKeyLevel(keyLevel)
-                local crest = GetCrestReward(keyLevel)
+                local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) -- Updated
+                local crest = RewardsFunctions.GetCrestReward(keyLevel) -- Updated
                 local rewardLine = string.format("Key Level %d: %s (%s) / %s (%s) | %s (%s)",
                                         keyLevel,
                                         rewards.dungeonTrack, rewards.dungeonItem,
@@ -440,7 +346,7 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     elseif mode == "score" then
         local level = args[2] and tonumber(args[2])
         if level then
-            local potentialScore = ScoreFormula(level)
+            local potentialScore = RewardsFunctions.ScoreFormula(level) -- Updated
             print(string.format("Potential Mythic+ Score for keystone level %d is %d", level, potentialScore))
             local gains = {}
             for _, mapInfo in ipairs(MYTHIC_MAPS) do
@@ -521,9 +427,7 @@ frame:SetScript("OnEvent", function(self, event, addonName)
         InitializeSettings()
         if GetCurrentRegion then
             local regNum = GetCurrentRegion()
-            currentPlayerRegion = regionMap[regNum] or "eu"
-        else
-            currentPlayerRegion = "eu"
+            currentPlayerRegion = regionMap[regNum]
         end
     end
 end)
