@@ -1,12 +1,9 @@
----------------------------
--- Constants & Variables --
----------------------------
-local GRADIENTS = GradientsData.GRADIENTS -- Use the global GradientsData table
-local RewardsFunctions = RewardsFunctions -- RewardsFunctions is already loaded as a global
+local GRADIENTS = GradientsData.GRADIENTS
+local RewardsFunctions = RewardsFunctions
 
 local line = false
 local FONT = "|cffffffff"
-local currentPlayerRegion = "us" -- Default to us if region cannot be determined
+local currentPlayerRegion = "us" -- Default to us
 
 local UNWANTED_STRINGS = {
     '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
@@ -74,7 +71,7 @@ local function GetDungeonScoreFromProfile(profile, targetMapID)
             if entry.dungeon and entry.dungeon.keystone_instance == targetMapID then
                 local level = entry.level or 0
                 local chests = entry.chests or 0
-                local baseScore = RewardsFunctions.ScoreFormula(level) -- Updated to use RewardsFunctions
+                local baseScore = RewardsFunctions.ScoreFormula(level)
                 local chestBonus = 0
                 if chests == 2 then
                     chestBonus = 7.5
@@ -196,9 +193,6 @@ local function RemoveSpecificTooltipText(tooltip)
     tooltip:Show()
 end
 
---------------------------
--- Tooltip Handlers     --
---------------------------
 local function OnTooltipSetItem(tooltip, ...)
     local name, link = GameTooltip:GetItem()
     if not link then return end
@@ -208,27 +202,27 @@ local function OnTooltipSetItem(tooltip, ...)
         if not itemString then return end
 
         local keyLevel = GetKeyLevel(itemString)
-        local mapID = GetMapID(itemString)  -- Extract the map id from the keystone link
+        local mapID = GetMapID(itemString) 
 
         local currentScore = GetCharacterMythicScore(itemString)
         local groupData = GetGroupMythicData_Party(currentScore, mapID)
 
         local totalGain, count = 0, 0
         for name, score in pairs(groupData) do
-            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0) -- Updated
+            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0)
             totalGain = totalGain + playerGain
             count = count + 1
         end
 
         local avgGain = (count > 0) and (totalGain / count) or 0
 
-        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) -- Updated
+        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) 
         local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
         local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
         local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, GRADIENTS)
 
-        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) -- Updated
-        local crest = RewardsFunctions.GetCrestReward(keyLevel) -- Updated
+        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) 
+        local crest = RewardsFunctions.GetCrestReward(keyLevel) 
 
         if not line then
             tooltip:AddLine(string.format("%sGear: %s (%s) / %s (%s)|r",
@@ -261,9 +255,9 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
         local keyLevel = GetKeyLevel(hyperlink)
         local mapID = GetMapID(hyperlink) 
         local currentScore = GetCharacterMythicScore(itemString)
-        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) -- Updated
-        local crest = RewardsFunctions.GetCrestReward(keyLevel) -- Updated
-        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) -- Updated
+        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) 
+        local crest = RewardsFunctions.GetCrestReward(keyLevel) 
+        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) 
         local maxScore = potentialScore + 15
         local minGain = math.max(potentialScore - currentScore, 0)
         local maxGain = math.max(maxScore - currentScore, 0)
@@ -272,7 +266,7 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
 
         local totalGain, count = 0, 0
         for name, score in pairs(groupData) do
-            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0) -- Updated
+            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0) 
             totalGain = totalGain + playerGain
             count = count + 1
         end
@@ -300,16 +294,10 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
     end
 end
 
------------------------------
--- Register Tooltip Hooks  --
------------------------------
 GameTooltip:HookScript("OnTooltipCleared", OnTooltipCleared)
 hooksecurefunc("ChatFrame_OnHyperlinkShow", SetHyperlink_Hook)
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, OnTooltipSetItem)
 
----------------------
--- Slash Commands  --
----------------------
 SLASH_MYTHICALREWARDS1 = "/mrm"
 SlashCmdList["MYTHICALREWARDS"] = function(msg)
     local args = {}
@@ -417,9 +405,6 @@ local function InitializeSettings()
     Settings.RegisterAddOnCategory(category)
 end
 
------------------------------
--- Event Handling Frame    --
------------------------------
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, addonName)

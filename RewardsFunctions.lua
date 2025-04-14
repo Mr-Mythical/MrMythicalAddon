@@ -1,7 +1,6 @@
 RewardsFunctions = {}
 local RewardsData = RewardsData
 
--- Function to calculate rewards for a given key level
 function RewardsFunctions.GetRewardsForKeyLevel(keyLevel)
     local rewards = {}
     if not keyLevel or keyLevel < 2 then
@@ -25,7 +24,6 @@ function RewardsFunctions.GetRewardsForKeyLevel(keyLevel)
     return rewards
 end
 
--- Function to calculate crest rewards for a given key level
 function RewardsFunctions.GetCrestReward(keyLevel)
     local crest = {}
     if not keyLevel or keyLevel < 2 or keyLevel > #RewardsData.CRESTS + 1 then
@@ -40,7 +38,6 @@ function RewardsFunctions.GetCrestReward(keyLevel)
     return crest
 end
 
--- Function to calculate the score formula for a given key level
 function RewardsFunctions.ScoreFormula(keyLevel)
     if keyLevel < 2 then return 0 end
     local affixBreakpoints = { [4] = 15, [7] = 15, [10] = 15, [12] = 15 }

@@ -25,12 +25,12 @@ RewardsData.VAULT_GEAR = {
 }
 
 RewardsData.CRESTS = {
-        { crestType = "Runed", amount = 10 },  -- Key Level 2
-        { crestType = "Runed", amount = 12 },  -- Key Level 3
+        { crestType = "Runed", amount = 10 },   -- Key Level 2
+        { crestType = "Runed", amount = 12 },   -- Key Level 3
         { crestType = "Runed",  amount = 14 },  -- Key Level 4
         { crestType = "Runed",  amount = 16 },  -- Key Level 5
         { crestType = "Runed",  amount = 18 },  -- Key Level 6
-        { crestType = "Gilded",  amount = 10 },  -- Key Level 7
+        { crestType = "Gilded",  amount = 10 }, -- Key Level 7
         { crestType = "Gilded", amount = 12 },  -- Key Level 8
         { crestType = "Gilded", amount = 14 },  -- Key Level 9
         { crestType = "Gilded", amount = 16 },  -- Key Level 10
