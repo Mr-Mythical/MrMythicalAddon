@@ -5,18 +5,22 @@ local line = false
 local FONT = "|cffffffff"
 local currentPlayerRegion = "us" -- Default to us
 
+local AFFIX_STRINGS = {
+    "  Fortified",
+    "  Tyrannical",
+    "  Xal'atath's Bargain: Ascendant",
+    "  Xal'atath's Bargain: Devour", 
+    "  Xal'atath's Bargain: Voidbound",
+    "  Xal'atath's Bargain: Pulsar",
+    "  Xal'atath's Guile"
+}
+
 local UNWANTED_STRINGS = {
     '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
     "Soulbound",
-    "Unique",
+    "Unique", 
     "Dungeon Modifiers:",
-    "  Xal'atath's Bargain: Ascendant",
-    "  Xal'atath's Bargain: Devour",
-    "  Xal'atath's Bargain: Voidbound",
-    "  Xal'atath's Bargain: Pulsar",
-    "  Xal'atath's Guile",
-    "  Fortified",
-    "  Tyrannical"
+    unpack(AFFIX_STRINGS)
 }
 
 local regionMap = {
@@ -174,12 +178,16 @@ local function RemoveSpecificTooltipText(tooltip)
         if leftLine then
             local lineText = leftLine:GetText()
             if IsUnwantedText(lineText) then
-                if (lineText == "  Fortified" or lineText == "  Tyrannical" or 
-                    lineText == "  Xal'atath's Bargain: Ascendant" or 
-                    lineText == "  Xal'atath's Bargain: Devour" or 
-                    lineText == "  Xal'atath's Bargain: Voidbound" or 
-                    lineText == "  Xal'atath's Bargain: Pulsar" or 
-                    lineText == "  Xal'atath's Guile") and not MRM_SavedVars.CHILD_OPTION then
+                local isAffix = false
+                for _, affix in ipairs(AFFIX_STRINGS) do
+                    if lineText == affix then
+                        isAffix = true
+                        break
+                    end
+                end
+                
+                if isAffix and not MRM_SavedVars.CHILD_OPTION then
+                    -- Skip removal for affixes when CHILD_OPTION is false
                 else
                     leftLine:SetText("")
                     local rightLine = _G["GameTooltipTextRight"..i]
@@ -193,6 +201,44 @@ local function RemoveSpecificTooltipText(tooltip)
     tooltip:Show()
 end
 
+local function AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
+    local currentScore = GetCharacterMythicScore(itemString)
+    local groupData = GetGroupMythicData_Party(currentScore, mapID)
+    
+    local totalGain, count = 0, 0
+    for name, score in pairs(groupData) do
+        local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0)
+        totalGain = totalGain + playerGain
+        count = count + 1
+    end
+
+    local avgGain = (count > 0) and (totalGain / count) or 0
+    local potentialScore = RewardsFunctions.ScoreFormula(keyLevel)
+    local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
+    local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
+    local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, GRADIENTS)
+
+    local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel)
+    local crest = RewardsFunctions.GetCrestReward(keyLevel)
+
+    tooltip:AddLine(string.format("%sGear: %s (%s) / %s (%s)|r",
+        FONT, rewards.dungeonTrack, rewards.dungeonItem,
+        rewards.vaultTrack, rewards.vaultItem))
+    tooltip:AddLine(string.format("%sCrest: %s (%d)|r", FONT, crest.crestType, crest.crestAmount))
+    
+    local gainStr = (math.max(potentialScore - currentScore,0) > 0) and 
+        string.format(" %s(+%d-%d)|r", gainColor, math.max(potentialScore - currentScore,0), math.max(potentialScore + 15 - currentScore,0)) or ""
+    
+    tooltip:AddLine(string.format("%sScore: %s%d|r - %s%d|r%s", FONT,
+        baseColor, potentialScore,
+        baseColor, potentialScore + 15,
+        gainStr))
+        
+    if IsInGroup() and GetNumGroupMembers() > 1 then
+        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", FONT, groupColor, avgGain))
+    end
+end
+
 local function OnTooltipSetItem(tooltip, ...)
     local name, link = GameTooltip:GetItem()
     if not link then return end
@@ -204,42 +250,7 @@ local function OnTooltipSetItem(tooltip, ...)
         local keyLevel = GetKeyLevel(itemString)
         local mapID = GetMapID(itemString) 
 
-        local currentScore = GetCharacterMythicScore(itemString)
-        local groupData = GetGroupMythicData_Party(currentScore, mapID)
-
-        local totalGain, count = 0, 0
-        for name, score in pairs(groupData) do
-            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0)
-            totalGain = totalGain + playerGain
-            count = count + 1
-        end
-
-        local avgGain = (count > 0) and (totalGain / count) or 0
-
-        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) 
-        local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
-        local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
-        local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, GRADIENTS)
-
-        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) 
-        local crest = RewardsFunctions.GetCrestReward(keyLevel) 
-
-        if not line then
-            tooltip:AddLine(string.format("%sGear: %s (%s) / %s (%s)|r",
-                FONT, rewards.dungeonTrack, rewards.dungeonItem,
-                rewards.vaultTrack, rewards.vaultItem))
-            tooltip:AddLine(string.format("%sCrest: %s (%d)|r", FONT, crest.crestType, crest.crestAmount))
-            local gainStr = (math.max(potentialScore - currentScore,0) > 0) and 
-                string.format(" %s(+%d-%d)|r", gainColor, math.max(potentialScore - currentScore,0), math.max(potentialScore + 15 - currentScore,0)) or ""
-            tooltip:AddLine(string.format("%sScore: %s%d|r - %s%d|r%s", FONT,
-                baseColor, potentialScore,
-                baseColor, potentialScore + 15,
-                gainStr))
-                if IsInGroup() and GetNumGroupMembers() > 1 then
-                    tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", FONT, groupColor, avgGain))
-                end
-            line = true
-        end
+        AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
         RemoveSpecificTooltipText(tooltip)
     end
 end
@@ -254,41 +265,7 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
     if strsplit(":", itemString) == "keystone" then
         local keyLevel = GetKeyLevel(hyperlink)
         local mapID = GetMapID(hyperlink) 
-        local currentScore = GetCharacterMythicScore(itemString)
-        local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) 
-        local crest = RewardsFunctions.GetCrestReward(keyLevel) 
-        local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) 
-        local maxScore = potentialScore + 15
-        local minGain = math.max(potentialScore - currentScore, 0)
-        local maxGain = math.max(maxScore - currentScore, 0)
-
-        local groupData = GetGroupMythicData_Party(currentScore, mapID)
-
-        local totalGain, count = 0, 0
-        for name, score in pairs(groupData) do
-            local playerGain = math.max(RewardsFunctions.ScoreFormula(keyLevel) - score, 0) 
-            totalGain = totalGain + playerGain
-            count = count + 1
-        end
-
-        local avgGain = (count > 0) and (totalGain / count) or 0
-        local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
-        local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
-        local gainColor = GetGradientColor(math.max(potentialScore - currentScore,0), 0, 200, GRADIENTS)
-
-        local rewardLine = string.format("%sGear: %s (%s) / %s (%s)|r",
-            FONT, rewards.dungeonTrack, rewards.dungeonItem,
-            rewards.vaultTrack, rewards.vaultItem)
-        ItemRefTooltip:AddLine(rewardLine)
-        ItemRefTooltip:AddLine(string.format("%sCrest: %s (%d)|r", FONT, crest.crestType, crest.crestAmount))
-        local gainStr = (maxGain > 0) and string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain) or ""
-        ItemRefTooltip:AddLine(string.format("%sScore: %s%d|r - %s%d|r%s", FONT,
-            baseColor, potentialScore,
-            baseColor, maxScore,
-            gainStr))
-            if IsInGroup() and GetNumGroupMembers() > 1 then
-                ItemRefTooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", FONT, groupColor, avgGain))
-            end
+        AddTooltipRewardInfo(ItemRefTooltip, itemString, keyLevel, mapID)
         ItemRefTooltip:Show()
         RemoveSpecificTooltipText(ItemRefTooltip)
     end
@@ -310,8 +287,8 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     if mode == "rewards" then
         local level = args[2] and tonumber(args[2])
         if level then
-            local rewards = RewardsFunctions.GetRewardsForKeyLevel(level) -- Updated
-            local crest = RewardsFunctions.GetCrestReward(level) -- Updated
+            local rewards = RewardsFunctions.GetRewardsForKeyLevel(level)
+            local crest = RewardsFunctions.GetCrestReward(level)
             local rewardLine = string.format("Key Level %d: %s (%s) / %s (%s) | %s (%s)",
                                     level,
                                     rewards.dungeonTrack, rewards.dungeonItem,
@@ -321,8 +298,8 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
         else
             print("Mythic Keystone Rewards by Key Level:")
             for keyLevel = 2, 12 do
-                local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel) -- Updated
-                local crest = RewardsFunctions.GetCrestReward(keyLevel) -- Updated
+                local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel)
+                local crest = RewardsFunctions.GetCrestReward(keyLevel)
                 local rewardLine = string.format("Key Level %d: %s (%s) / %s (%s) | %s (%s)",
                                         keyLevel,
                                         rewards.dungeonTrack, rewards.dungeonItem,
@@ -334,7 +311,7 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     elseif mode == "score" then
         local level = args[2] and tonumber(args[2])
         if level then
-            local potentialScore = RewardsFunctions.ScoreFormula(level) -- Updated
+            local potentialScore = RewardsFunctions.ScoreFormula(level)
             print(string.format("Potential Mythic+ Score for keystone level %d is %d", level, potentialScore))
             local gains = {}
             for _, mapInfo in ipairs(MYTHIC_MAPS) do
