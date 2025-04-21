@@ -62,6 +62,10 @@ local function GetColorFromStops(normalizedValue, stops)
 end
 
 local function GetGradientColor(value, domainMin, domainMax, stops)
+    if MRM_SavedVars.PLAIN_SCORE_COLORS then
+        return FONT
+    end
+    
     local ratio = (value - domainMin) / (domainMax - domainMin)
     ratio = 1 - ratio
     if ratio < 0 then ratio = 0 end
@@ -206,17 +210,16 @@ local function AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
     local groupData = GetGroupMythicData_Party(currentScore, mapID)
 
     local totalGain, count = 0, 0
-    local potentialScore = RewardsFunctions.ScoreFormula(keyLevel) -- Base score
+    local potentialScore = RewardsFunctions.ScoreFormula(keyLevel)
 
     for name, score in pairs(groupData) do
-        local playerGain = math.max(potentialScore - score, 0) -- Base gain calculation
+        local playerGain = math.max(potentialScore - score, 0)
         totalGain = totalGain + playerGain
         count = count + 1
     end
 
     local avgGain = (count > 0) and (totalGain / count) or 0
 
-    -- Calculate colors based on base potential score and base gain
     local groupColor = GetGradientColor(avgGain, 0, 200, GRADIENTS)
     local baseColor = GetGradientColor(potentialScore, 165, 500, GRADIENTS)
     local selfBaseGain = math.max(potentialScore - currentScore, 0)
@@ -225,44 +228,36 @@ local function AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
     local rewards = RewardsFunctions.GetRewardsForKeyLevel(keyLevel)
     local crest = RewardsFunctions.GetCrestReward(keyLevel)
 
-    -- Add Gear and Crest lines (using hardcoded labels)
-    tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r", -- Hardcoded labels
+    tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
         FONT, rewards.dungeonTrack, rewards.dungeonItem,
         rewards.vaultTrack, rewards.vaultItem))
-    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", FONT, crest.crestType, tostring(crest.crestAmount))) -- Hardcoded label, ensure amount is string
+    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", FONT, crest.crestType, tostring(crest.crestAmount))) 
 
-    -- << MODIFIED >> Score and Gain Line Logic (using hardcoded labels)
     local scoreLine = ""
     local gainStr = ""
 
     if MRM_SavedVars.SHOW_TIMING then
-        -- Show range including +15 bonus
         local maxScore = potentialScore + 15
-        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", FONT, baseColor, potentialScore, baseColor, maxScore) -- Hardcoded label
+        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", FONT, baseColor, potentialScore, baseColor, maxScore) 
 
-        -- Calculate gain range
         local minGain = selfBaseGain
         local maxGain = math.max(maxScore - currentScore, 0)
         if maxGain > 0 then
             gainStr = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
         end
     else
-        -- Show only base score
-        scoreLine = string.format("%sScore: %s%d|r", FONT, baseColor, potentialScore) -- Hardcoded label
+        scoreLine = string.format("%sScore: %s%d|r", FONT, baseColor, potentialScore) 
 
-        -- Calculate only base gain
         local minGain = selfBaseGain
         if minGain > 0 then
             gainStr = string.format(" %s(+%d)|r", gainColor, minGain)
         end
     end
 
-    -- Add the combined score and gain string
     tooltip:AddLine(scoreLine .. gainStr)
 
-    -- Group Avg Gain Line (using hardcoded label)
     if IsInGroup() and GetNumGroupMembers() > 1 then
-        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", FONT, groupColor, avgGain)) -- Hardcoded label
+        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", FONT, groupColor, avgGain))
     end
 end
 
@@ -380,6 +375,7 @@ local function InitializeSettings()
     MRM_SavedVars.COMPACT_MODE_ENABLED = MRM_SavedVars.COMPACT_MODE_ENABLED ~= false
     MRM_SavedVars.CHILD_OPTION = MRM_SavedVars.CHILD_OPTION == true
     MRM_SavedVars.SHOW_TIMING = MRM_SavedVars.SHOW_TIMING == true
+    MRM_SavedVars.PLAIN_SCORE_COLORS = MRM_SavedVars.PLAIN_SCORE_COLORS == true
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
         print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
@@ -416,6 +412,14 @@ local function InitializeSettings()
     local timingBonusInitializer = Settings.CreateCheckbox(category, timingBonusSetting, timingBonusTooltip)
     timingBonusInitializer:SetSetting(timingBonusSetting)
 
+    local plainScoreName = "Remove Score Colors"
+    local plainScoreTooltip = "Display score and score gains in white instead of gradient colors."
+    local plainScoreSetting = Settings.RegisterAddOnSetting(category, plainScoreName, "PLAIN_SCORE_COLORS", MRM_SavedVars, "boolean", plainScoreName, false)
+    plainScoreSetting:SetValueChangedCallback(function(setting, value)
+        MRM_SavedVars.PLAIN_SCORE_COLORS = value
+    end)
+    local plainScoreInitializer = Settings.CreateCheckbox(category, plainScoreSetting, plainScoreTooltip)
+    plainScoreInitializer:SetSetting(plainScoreSetting)
 
     Settings.RegisterAddOnCategory(category)
 end
