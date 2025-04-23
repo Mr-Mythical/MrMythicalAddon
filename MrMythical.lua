@@ -265,7 +265,7 @@ local function OnTooltipSetItem(tooltip, ...)
     local name, link = GameTooltip:GetItem()
     if not link then return end
 
-    for itemLink in link:gmatch("|%x+|Hkeystone:.-|h.-|h|r") do
+    for itemLink in link:gmatch("|Hkeystone:.-|h.-|h|r") do
         local itemString = GetItemString(itemLink)
         if not itemString then return end
 
