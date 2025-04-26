@@ -1,7 +1,6 @@
 local GRADIENTS = GradientsData.GRADIENTS
 local RewardsFunctions = RewardsFunctions
 
-local line = false
 local FONT = "|cffffffff"
 local currentPlayerRegion = "us" -- Default to us
 
@@ -277,9 +276,6 @@ local function OnTooltipSetItem(tooltip, ...)
     end
 end
 
-local function OnTooltipCleared(tooltip, ...)
-    line = false
-end
 
 local function SetHyperlink_Hook(self, hyperlink, text, button)
     local itemString = GetItemString(hyperlink)
@@ -293,7 +289,6 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
     end
 end
 
-GameTooltip:HookScript("OnTooltipCleared", OnTooltipCleared)
 hooksecurefunc("ChatFrame_OnHyperlinkShow", SetHyperlink_Hook)
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, OnTooltipSetItem)
 
