@@ -35,7 +35,7 @@ RewardsData.CRESTS = {
         { crestType = "Gilded", amount = 14 },  -- Key Level 9
         { crestType = "Gilded", amount = 16 },  -- Key Level 10
         { crestType = "Gilded", amount = 18 },  -- Key Level 11
-        { crestType = "Gilded", amount = 20 },  -- Key Level 12
+        { crestType = "Gilded", amount = 20 },  -- Key Level 12+
 }
 
 return RewardsData

@@ -26,13 +26,14 @@ end
 
 function RewardsFunctions.GetCrestReward(keyLevel)
     local crest = {}
-    if not keyLevel or keyLevel < 2 or keyLevel > #RewardsData.CRESTS + 1 then
+    if not keyLevel or keyLevel < 2 then
         crest.crestType = "Unknown"
         crest.crestAmount = "Unknown"
         return crest
     end
 
-    local crestReward = RewardsData.CRESTS[keyLevel - 1] or {}
+    local crestIndex = math.min(keyLevel - 1, #RewardsData.CRESTS)
+    local crestReward = RewardsData.CRESTS[crestIndex] or {}
     crest.crestType = crestReward.crestType or "Unknown"
     crest.crestAmount = crestReward.amount or "Unknown"
     return crest
