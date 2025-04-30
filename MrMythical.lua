@@ -5,21 +5,22 @@ local FONT = "|cffffffff"
 local currentPlayerRegion = "us" -- Default to us
 
 local AFFIX_STRINGS = {
-    "  Fortified",
-    "  Tyrannical",
-    "  Xal'atath's Bargain: Ascendant",
-    "  Xal'atath's Bargain: Devour", 
-    "  Xal'atath's Bargain: Voidbound",
-    "  Xal'atath's Bargain: Pulsar",
-    "  Xal'atath's Guile"
+    "Fortified",
+    "Tyrannical",
+    "Xal'atath",
+}
+
+local DURATION_STRINGS = {
+    "Duration",
 }
 
 local UNWANTED_STRINGS = {
-    '"Place within the Font of Power inside the dungeon on Mythic difficulty."',
+    "Font of Power",
     "Soulbound",
     "Unique", 
     "Dungeon Modifiers:",
-    unpack(AFFIX_STRINGS)
+    unpack(AFFIX_STRINGS),
+    unpack(DURATION_STRINGS)
 }
 
 local regionMap = {
@@ -166,41 +167,80 @@ end
 
 local function IsUnwantedText(text)
     if not text then return false end
+    
+    for _, duration in ipairs(DURATION_STRINGS) do
+        if text:find(duration, 1, true) then
+            return MRM_SavedVars.HIDE_DURATION
+        end
+    end
+    
+    for _, affix in ipairs(AFFIX_STRINGS) do
+        if text:find(affix, 1, true) then
+            return MRM_SavedVars.CHILD_OPTION
+        end
+    end
+    
     for _, unwanted in ipairs(UNWANTED_STRINGS) do
-        if text == unwanted then
+        if text:find(unwanted, 1, true) then
             return true
         end
     end
+    
     return false
 end
 
 local function RemoveSpecificTooltipText(tooltip)
     if not MRM_SavedVars.COMPACT_MODE_ENABLED then return end
-    for i = tooltip:NumLines(), 1, -1 do
+    
+    local validLines = {}
+    local firstLine = _G["GameTooltipTextLeft1"]
+    if firstLine then
+        table.insert(validLines, {
+            left = firstLine:GetText(),
+            right = _G["GameTooltipTextRight1"] and _G["GameTooltipTextRight1"]:GetText(),
+            color = {firstLine:GetTextColor()}
+        })
+    end
+    
+    for i = 2, tooltip:NumLines() do
         local leftLine = _G["GameTooltipTextLeft"..i]
+        local rightLine = _G["GameTooltipTextRight"..i]
+        
         if leftLine then
-            local lineText = leftLine:GetText()
-            if IsUnwantedText(lineText) then
-                local isAffix = false
-                for _, affix in ipairs(AFFIX_STRINGS) do
-                    if lineText == affix then
-                        isAffix = true
-                        break
-                    end
+            local lineText = leftLine:GetText() or ""
+            local r, g, b = leftLine:GetTextColor()
+            
+            if MRM_SavedVars.COMPACT_LEVEL then
+                local level = lineText:match("Mythic Level (%d+)")
+                if level then
+                    lineText = string.format("|cff%02x%02x%02x+%s|r", r * 255, g * 255, b * 255, level)
                 end
-                
-                if isAffix and not MRM_SavedVars.CHILD_OPTION then
-                    -- Skip removal for affixes when CHILD_OPTION is false
-                else
-                    leftLine:SetText("")
-                    local rightLine = _G["GameTooltipTextRight"..i]
-                    if rightLine then
-                        rightLine:SetText("")
-                    end
+            end
+            
+            if not IsUnwantedText(lineText) then
+                table.insert(validLines, {
+                    left = lineText,
+                    right = rightLine and rightLine:GetText(),
+                    color = {r, g, b}
+                })
+            end
+        end
+    end
+    
+    tooltip:ClearLines()
+    
+    for i, line in ipairs(validLines) do
+        if line.color then
+            tooltip:AddLine(line.left, line.color[1], line.color[2], line.color[3])
+            if line.right then
+                local rightLine = _G["GameTooltipTextRight" .. i]
+                if rightLine then
+                    rightLine:SetText(line.right)
                 end
             end
         end
     end
+    
     tooltip:Show()
 end
 
@@ -369,8 +409,10 @@ local function InitializeSettings()
     MRM_SavedVars = MRM_SavedVars or {}
     MRM_SavedVars.COMPACT_MODE_ENABLED = MRM_SavedVars.COMPACT_MODE_ENABLED ~= false
     MRM_SavedVars.CHILD_OPTION = MRM_SavedVars.CHILD_OPTION == true
+    MRM_SavedVars.HIDE_DURATION = MRM_SavedVars.HIDE_DURATION == true
     MRM_SavedVars.SHOW_TIMING = MRM_SavedVars.SHOW_TIMING == true
     MRM_SavedVars.PLAIN_SCORE_COLORS = MRM_SavedVars.PLAIN_SCORE_COLORS == true
+    MRM_SavedVars.COMPACT_LEVEL = MRM_SavedVars.COMPACT_LEVEL == true
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
         print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
@@ -398,6 +440,30 @@ local function InitializeSettings()
         return compactSetting:GetValue() == true
     end)
 
+    local durationSetting = Settings.RegisterAddOnSetting(category, "Hide Duration Text", "HIDE_DURATION", MRM_SavedVars, "boolean", "Hide Duration", false)
+    durationSetting:SetValueChangedCallback(function(setting, value)
+        MRM_SavedVars.HIDE_DURATION = value
+    end)
+    local durationInitializer = Settings.CreateCheckbox(category, durationSetting, "When Compact Mode is enabled, hide the duration line from keystone tooltips.")
+    durationInitializer:SetSetting(durationSetting)
+
+    durationInitializer:SetParentInitializer(compactInitializer, function()
+        return compactSetting:GetValue() == true
+    end)
+
+    local compactLevelName = "Compact Level Display"
+    local compactLevelTooltip = "Change 'Mythic Level X' to '+X'"
+    local compactLevelSetting = Settings.RegisterAddOnSetting(category, compactLevelName, "COMPACT_LEVEL", MRM_SavedVars, "boolean", compactLevelName, false)
+    compactLevelSetting:SetValueChangedCallback(function(setting, value)
+        MRM_SavedVars.COMPACT_LEVEL = value
+    end)
+    local compactLevelInitializer = Settings.CreateCheckbox(category, compactLevelSetting, compactLevelTooltip)
+    compactLevelInitializer:SetSetting(compactLevelSetting)
+    
+    compactLevelInitializer:SetParentInitializer(compactInitializer, function()
+        return compactSetting:GetValue() == true
+    end)
+
     local timingBonusName = "Show Score Timing Bonus"
     local timingBonusTooltip = "Show the potential timing bonus (0-15)."
     local timingBonusSetting = Settings.RegisterAddOnSetting(category, timingBonusName, "SHOW_TIMING", MRM_SavedVars, "boolean", timingBonusName, true)
@@ -415,6 +481,7 @@ local function InitializeSettings()
     end)
     local plainScoreInitializer = Settings.CreateCheckbox(category, plainScoreSetting, plainScoreTooltip)
     plainScoreInitializer:SetSetting(plainScoreSetting)
+
 
     Settings.RegisterAddOnCategory(category)
 end
