@@ -194,6 +194,14 @@ local function RemoveSpecificTooltipText(tooltip)
     
     local validLines = {}
     local firstLine = _G["GameTooltipTextLeft1"]
+    if firstLine and MRM_SavedVars.SHORT_TITLE then
+        local text = firstLine:GetText()
+        if text and text:find("^Keystone: ") then
+            text = text:gsub("^Keystone: ", "")
+            firstLine:SetText(text)
+        end
+    end
+    
     if firstLine then
         table.insert(validLines, {
             left = firstLine:GetText(),
@@ -413,6 +421,7 @@ local function InitializeSettings()
     MRM_SavedVars.SHOW_TIMING = MRM_SavedVars.SHOW_TIMING == true
     MRM_SavedVars.PLAIN_SCORE_COLORS = MRM_SavedVars.PLAIN_SCORE_COLORS == true
     MRM_SavedVars.COMPACT_LEVEL = MRM_SavedVars.COMPACT_LEVEL == true
+    MRM_SavedVars.SHORT_TITLE = MRM_SavedVars.SHORT_TITLE == true
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
         print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
@@ -463,6 +472,19 @@ local function InitializeSettings()
     compactLevelInitializer:SetParentInitializer(compactInitializer, function()
         return compactSetting:GetValue() == true
     end)
+    
+    local shortTitleName = "Short Keystone Title"
+    local shortTitleTooltip = "Remove 'Keystone:' from keystone titles"
+    local shortTitleSetting = Settings.RegisterAddOnSetting(category, shortTitleName, "SHORT_TITLE", MRM_SavedVars, "boolean", shortTitleName, false)
+    shortTitleSetting:SetValueChangedCallback(function(setting, value)
+        MRM_SavedVars.SHORT_TITLE = value
+    end)
+    local shortTitleInitializer = Settings.CreateCheckbox(category, shortTitleSetting, shortTitleTooltip)
+    shortTitleInitializer:SetSetting(shortTitleSetting)
+
+    shortTitleInitializer:SetParentInitializer(compactInitializer, function()
+        return compactSetting:GetValue() == true
+    end)
 
     local timingBonusName = "Show Score Timing Bonus"
     local timingBonusTooltip = "Show the potential timing bonus (0-15)."
@@ -482,7 +504,7 @@ local function InitializeSettings()
     local plainScoreInitializer = Settings.CreateCheckbox(category, plainScoreSetting, plainScoreTooltip)
     plainScoreInitializer:SetSetting(plainScoreSetting)
 
-
+    
     Settings.RegisterAddOnCategory(category)
 end
 
