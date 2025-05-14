@@ -412,99 +412,107 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     end
 end
 
-local category
+local function CreateSetting(category, name, key, defaultValue, tooltip, parentInitializer)
+    local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "boolean", name, defaultValue)
+    setting:SetValueChangedCallback(function(_, value)
+        MRM_SavedVars[key] = value
+    end)
+    
+    local initializer = Settings.CreateCheckbox(category, setting, tooltip)
+    initializer:SetSetting(setting)
+    
+    if parentInitializer then
+        initializer:SetParentInitializer(parentInitializer.checkbox, function()
+            return parentInitializer.setting:GetValue() == true
+        end)
+    end
+    
+    return {setting = setting, checkbox = initializer}
+end
+
 local function InitializeSettings()
+    local defaults = {
+        COMPACT_MODE_ENABLED = true,
+        CHILD_OPTION = false,
+        HIDE_DURATION = false,
+        SHOW_TIMING = true,
+        PLAIN_SCORE_COLORS = false,
+        COMPACT_LEVEL = false,
+        SHORT_TITLE = false
+    }
+    
     MRM_SavedVars = MRM_SavedVars or {}
-    MRM_SavedVars.COMPACT_MODE_ENABLED = MRM_SavedVars.COMPACT_MODE_ENABLED ~= false
-    MRM_SavedVars.CHILD_OPTION = MRM_SavedVars.CHILD_OPTION == true
-    MRM_SavedVars.HIDE_DURATION = MRM_SavedVars.HIDE_DURATION == true
-    MRM_SavedVars.SHOW_TIMING = MRM_SavedVars.SHOW_TIMING == true
-    MRM_SavedVars.PLAIN_SCORE_COLORS = MRM_SavedVars.PLAIN_SCORE_COLORS == true
-    MRM_SavedVars.COMPACT_LEVEL = MRM_SavedVars.COMPACT_LEVEL == true
-    MRM_SavedVars.SHORT_TITLE = MRM_SavedVars.SHORT_TITLE == true
+    for key, default in pairs(defaults) do
+        if MRM_SavedVars[key] == nil then
+            MRM_SavedVars[key] = default
+        end
+    end
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
         print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
         return
     end
 
-    category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical", "MrMythical")
+    local category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical", "MrMythical")
 
-    local compactSetting = Settings.RegisterAddOnSetting(category, "Compact Mode", "COMPACT_MODE_ENABLED", MRM_SavedVars, "boolean", "Compact Keystone Tooltips", true)
-    compactSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.COMPACT_MODE_ENABLED = value
-    end)
-    local compactInitializer = Settings.CreateCheckbox(category, compactSetting, "Enable to remove extra lines like 'Soulbound' and 'Unique' from keystone tooltips.")
-    compactInitializer:SetSetting(compactSetting) 
+    local compactMode = CreateSetting(
+        category,
+        "Compact Mode",
+        "COMPACT_MODE_ENABLED",
+        true,
+        "Enable to remove extra lines like 'Soulbound' and 'Unique' from keystone tooltips."
+    )
 
+    local compactSettings = {
+        {
+            name = "Hide Affix Text",
+            key = "CHILD_OPTION",
+            tooltip = "When Compact Mode is enabled, also hide the lines listing the current dungeon affixes."
+        },
+        {
+            name = "Hide Duration Text", 
+            key = "HIDE_DURATION",
+            tooltip = "When Compact Mode is enabled, hide the duration line from keystone tooltips."
+        },
+        {
+            name = "Compact Level Display",
+            key = "COMPACT_LEVEL", 
+            tooltip = "Change 'Mythic Level X' to '+X'"
+        },
+        {
+            name = "Short Keystone Title",
+            key = "SHORT_TITLE",
+            tooltip = "Remove 'Keystone:' from keystone titles"
+        }
+    }
 
-    local childSetting = Settings.RegisterAddOnSetting(category, "Hide Affix Text", "CHILD_OPTION", MRM_SavedVars, "boolean", "Hide Current Affixes", false) 
-    childSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.CHILD_OPTION = value
-    end)
-    local childInitializer = Settings.CreateCheckbox(category, childSetting, "When Compact Mode is enabled, also hide the lines listing the current dungeon affixes.")
-    childInitializer:SetSetting(childSetting) 
+    for _, settingInfo in ipairs(compactSettings) do
+        CreateSetting(
+            category,
+            settingInfo.name,
+            settingInfo.key,
+            false,
+            settingInfo.tooltip,
+            compactMode
+        )
+    end
 
-    childInitializer:SetParentInitializer(compactInitializer, function()
-        return compactSetting:GetValue() == true
-    end)
+    CreateSetting(
+        category,
+        "Show Score Timing Bonus",
+        "SHOW_TIMING",
+        true,
+        "Show the potential timing bonus (0-15)."
+    )
 
-    local durationSetting = Settings.RegisterAddOnSetting(category, "Hide Duration Text", "HIDE_DURATION", MRM_SavedVars, "boolean", "Hide Duration", false)
-    durationSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.HIDE_DURATION = value
-    end)
-    local durationInitializer = Settings.CreateCheckbox(category, durationSetting, "When Compact Mode is enabled, hide the duration line from keystone tooltips.")
-    durationInitializer:SetSetting(durationSetting)
+    CreateSetting(
+        category,
+        "Remove Score Colors",
+        "PLAIN_SCORE_COLORS",
+        false,
+        "Display score and score gains in white instead of gradient colors."
+    )
 
-    durationInitializer:SetParentInitializer(compactInitializer, function()
-        return compactSetting:GetValue() == true
-    end)
-
-    local compactLevelName = "Compact Level Display"
-    local compactLevelTooltip = "Change 'Mythic Level X' to '+X'"
-    local compactLevelSetting = Settings.RegisterAddOnSetting(category, compactLevelName, "COMPACT_LEVEL", MRM_SavedVars, "boolean", compactLevelName, false)
-    compactLevelSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.COMPACT_LEVEL = value
-    end)
-    local compactLevelInitializer = Settings.CreateCheckbox(category, compactLevelSetting, compactLevelTooltip)
-    compactLevelInitializer:SetSetting(compactLevelSetting)
-    
-    compactLevelInitializer:SetParentInitializer(compactInitializer, function()
-        return compactSetting:GetValue() == true
-    end)
-    
-    local shortTitleName = "Short Keystone Title"
-    local shortTitleTooltip = "Remove 'Keystone:' from keystone titles"
-    local shortTitleSetting = Settings.RegisterAddOnSetting(category, shortTitleName, "SHORT_TITLE", MRM_SavedVars, "boolean", shortTitleName, false)
-    shortTitleSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.SHORT_TITLE = value
-    end)
-    local shortTitleInitializer = Settings.CreateCheckbox(category, shortTitleSetting, shortTitleTooltip)
-    shortTitleInitializer:SetSetting(shortTitleSetting)
-
-    shortTitleInitializer:SetParentInitializer(compactInitializer, function()
-        return compactSetting:GetValue() == true
-    end)
-
-    local timingBonusName = "Show Score Timing Bonus"
-    local timingBonusTooltip = "Show the potential timing bonus (0-15)."
-    local timingBonusSetting = Settings.RegisterAddOnSetting(category, timingBonusName, "SHOW_TIMING", MRM_SavedVars, "boolean", timingBonusName, true)
-    timingBonusSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.SHOW_TIMING = value
-    end)
-    local timingBonusInitializer = Settings.CreateCheckbox(category, timingBonusSetting, timingBonusTooltip)
-    timingBonusInitializer:SetSetting(timingBonusSetting)
-
-    local plainScoreName = "Remove Score Colors"
-    local plainScoreTooltip = "Display score and score gains in white instead of gradient colors."
-    local plainScoreSetting = Settings.RegisterAddOnSetting(category, plainScoreName, "PLAIN_SCORE_COLORS", MRM_SavedVars, "boolean", plainScoreName, false)
-    plainScoreSetting:SetValueChangedCallback(function(setting, value)
-        MRM_SavedVars.PLAIN_SCORE_COLORS = value
-    end)
-    local plainScoreInitializer = Settings.CreateCheckbox(category, plainScoreSetting, plainScoreTooltip)
-    plainScoreInitializer:SetSetting(plainScoreSetting)
-
-    
     Settings.RegisterAddOnCategory(category)
 end
 
