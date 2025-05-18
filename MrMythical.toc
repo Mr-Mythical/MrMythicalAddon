@@ -11,4 +11,5 @@
 Data/GradientsData.lua
 Data/RewardsData.lua
 RewardsFunctions.lua
+UI.lua
 MrMythical.lua

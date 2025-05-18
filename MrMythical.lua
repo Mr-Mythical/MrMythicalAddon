@@ -8,19 +8,18 @@ local AFFIX_STRINGS = {
     "Fortified",
     "Tyrannical",
     "Xal'atath",
+    "Dungeon Modifiers:"
 }
 
 local DURATION_STRINGS = {
-    "Duration",
+    "Duration"
 }
 
 local UNWANTED_STRINGS = {
     "Font of Power",
     "Soulbound",
-    "Unique", 
-    "Dungeon Modifiers:",
-    unpack(AFFIX_STRINGS),
-    unpack(DURATION_STRINGS)
+    "Unique"
+
 }
 
 local regionMap = {
@@ -28,7 +27,7 @@ local regionMap = {
     [2] = "kr",
     [3] = "eu",
     [4] = "tw",
-    [5] = "cn",
+    [5] = "cn"
 }
 
 local MYTHIC_MAPS = {
@@ -176,13 +175,13 @@ local function IsUnwantedText(text)
     
     for _, affix in ipairs(AFFIX_STRINGS) do
         if text:find(affix, 1, true) then
-            return MRM_SavedVars.CHILD_OPTION
+            return MRM_SavedVars.HIDE_AFFIX_TEXT
         end
     end
     
     for _, unwanted in ipairs(UNWANTED_STRINGS) do
         if text:find(unwanted, 1, true) then
-            return true
+            return MRM_SavedVars.HIDE_UNWANTED_TEXT
         end
     end
     
@@ -190,8 +189,6 @@ local function IsUnwantedText(text)
 end
 
 local function RemoveSpecificTooltipText(tooltip)
-    if not MRM_SavedVars.COMPACT_MODE_ENABLED then return end
-    
     local validLines = {}
     local firstLine = _G["GameTooltipTextLeft1"]
     if firstLine and MRM_SavedVars.SHORT_TITLE then
@@ -412,115 +409,11 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     end
 end
 
-local function CreateSetting(category, name, key, defaultValue, tooltip, parentInitializer)
-    local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "boolean", name, defaultValue)
-    setting:SetValueChangedCallback(function(_, value)
-        MRM_SavedVars[key] = value
-    end)
-    
-    local initializer = Settings.CreateCheckbox(category, setting, tooltip)
-    initializer:SetSetting(setting)
-    
-    if parentInitializer then
-        initializer:SetParentInitializer(parentInitializer.checkbox, function()
-            return parentInitializer.setting:GetValue() == true
-        end)
-    end
-    
-    return {setting = setting, checkbox = initializer}
-end
-
-local function InitializeSettings()
-    local defaults = {
-        COMPACT_MODE_ENABLED = true,
-        CHILD_OPTION = false,
-        HIDE_DURATION = false,
-        SHOW_TIMING = true,
-        PLAIN_SCORE_COLORS = false,
-        COMPACT_LEVEL = false,
-        SHORT_TITLE = false
-    }
-    
-    MRM_SavedVars = MRM_SavedVars or {}
-    for key, default in pairs(defaults) do
-        if MRM_SavedVars[key] == nil then
-            MRM_SavedVars[key] = default
-        end
-    end
-
-    if not Settings or not Settings.RegisterVerticalLayoutCategory then
-        print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
-        return
-    end
-
-    local category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical", "MrMythical")
-
-    local compactMode = CreateSetting(
-        category,
-        "Compact Mode",
-        "COMPACT_MODE_ENABLED",
-        true,
-        "Enable to remove extra lines like 'Soulbound' and 'Unique' from keystone tooltips."
-    )
-
-    local compactSettings = {
-        {
-            name = "Hide Affix Text",
-            key = "CHILD_OPTION",
-            tooltip = "When Compact Mode is enabled, also hide the lines listing the current dungeon affixes."
-        },
-        {
-            name = "Hide Duration Text", 
-            key = "HIDE_DURATION",
-            tooltip = "When Compact Mode is enabled, hide the duration line from keystone tooltips."
-        },
-        {
-            name = "Compact Level Display",
-            key = "COMPACT_LEVEL", 
-            tooltip = "Change 'Mythic Level X' to '+X'"
-        },
-        {
-            name = "Short Keystone Title",
-            key = "SHORT_TITLE",
-            tooltip = "Remove 'Keystone:' from keystone titles"
-        }
-    }
-
-    for _, settingInfo in ipairs(compactSettings) do
-        CreateSetting(
-            category,
-            settingInfo.name,
-            settingInfo.key,
-            false,
-            settingInfo.tooltip,
-            compactMode
-        )
-    end
-
-    CreateSetting(
-        category,
-        "Show Score Timing Bonus",
-        "SHOW_TIMING",
-        true,
-        "Show the potential timing bonus (0-15)."
-    )
-
-    CreateSetting(
-        category,
-        "Remove Score Colors",
-        "PLAIN_SCORE_COLORS",
-        false,
-        "Display score and score gains in white instead of gradient colors."
-    )
-
-    Settings.RegisterAddOnCategory(category)
-end
-
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, addonName)
     if addonName == "MrMythical" then
-        InitializeSettings()
+        MrMythicalUI.InitializeSettings()
         if GetCurrentRegion then
             local regNum = GetCurrentRegion()
             currentPlayerRegion = regionMap[regNum]
