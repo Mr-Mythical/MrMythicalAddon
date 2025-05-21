@@ -10,6 +10,29 @@ local function CreateSetting(category, name, key, defaultValue, tooltip)
     return {setting = setting, checkbox = initializer}
 end
 
+local function CreateDropdownSetting(category, name, key, defaultValue, tooltip, options)
+    local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "string", name, defaultValue)
+    setting:SetValueChangedCallback(function(_, value)
+        MRM_SavedVars[key] = value
+    end)
+    
+    local function GetOptions()
+        local dropdownOptions = {}
+        for _, option in ipairs(options) do
+            table.insert(dropdownOptions, {
+                text = option.text,
+                label = option.text,
+                value = option.value,
+            })
+        end
+        return dropdownOptions
+    end
+
+    local initializer = Settings.CreateDropdown(category, setting, GetOptions, tooltip)
+    
+    return {setting = setting, dropdown = initializer}
+end
+
 local function InitializeSettings()
     local defaults = {
         HIDE_UNWANTED_TEXT = true,
@@ -17,7 +40,7 @@ local function InitializeSettings()
         HIDE_DURATION = false,
         SHOW_TIMING = true,
         PLAIN_SCORE_COLORS = false,
-        COMPACT_LEVEL = false,
+        LEVEL_DISPLAY = "OFF",
         SHORT_TITLE = false
     }
     
@@ -67,12 +90,31 @@ local function InitializeSettings()
         "Hide the duration line from keystone tooltips."
     )
 
-    CreateSetting(
+    local levelDisplayOptions = {
+        { 
+            text = "Default",
+            value = "OFF"
+        },
+        { 
+            text = "Compact (+X)",
+            value = "COMPACT"
+        },
+        { 
+            text = "In Title",
+            value = "TITLE"
+        }
+    }
+    
+    CreateDropdownSetting(
         category,
-        "Compact Level Display",
-        "COMPACT_LEVEL", 
-        false,
-        "Change 'Mythic Level X' to '+X'"
+        "Level Display Style",
+        "LEVEL_DISPLAY",
+        "OFF",
+        "Choose how the mythic keystone level is displayed:\n\n" ..
+        "|cffffffffDefault:|r Show level in its own line (e.g. 'Mythic Level 15')\n\n" ..
+        "|cffffffffCompact:|r Show level as +X (e.g. '+15')\n\n" ..
+        "|cffffffffIn Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
+        levelDisplayOptions
     )
 
     CreateSetting(

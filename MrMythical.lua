@@ -191,17 +191,35 @@ end
 local function RemoveSpecificTooltipText(tooltip)
     local validLines = {}
     local firstLine = _G["GameTooltipTextLeft1"]
-    if firstLine and MRM_SavedVars.SHORT_TITLE then
-        local text = firstLine:GetText()
-        if text and text:find("^Keystone: ") then
-            text = text:gsub("^Keystone: ", "")
-            firstLine:SetText(text)
-        end
-    end
+    local levelDisplay = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
     
     if firstLine then
+        local text = firstLine:GetText()
+        if text then
+            if MRM_SavedVars.SHORT_TITLE and text:find("^Keystone: ") then
+                text = text:gsub("^Keystone: ", "")
+            end
+            
+            if levelDisplay == "TITLE" then
+                local keyLevel
+                for i = 2, tooltip:NumLines() do
+                    local line = _G["GameTooltipTextLeft"..i]:GetText() or ""
+                    local level = line:match("Mythic Level (%d+)")
+                    if level then
+                        keyLevel = level
+                        break
+                    end
+                end
+                if keyLevel then
+                    text = text .. " +" .. keyLevel
+                end
+            end
+            
+            firstLine:SetText(text)
+        end
+        
         table.insert(validLines, {
-            left = firstLine:GetText(),
+            left = text,
             right = _G["GameTooltipTextRight1"] and _G["GameTooltipTextRight1"]:GetText(),
             color = {firstLine:GetTextColor()}
         })
@@ -215,19 +233,23 @@ local function RemoveSpecificTooltipText(tooltip)
             local lineText = leftLine:GetText() or ""
             local r, g, b = leftLine:GetTextColor()
             
-            if MRM_SavedVars.COMPACT_LEVEL then
-                local level = lineText:match("Mythic Level (%d+)")
-                if level then
-                    lineText = string.format("|cff%02x%02x%02x+%s|r", r * 255, g * 255, b * 255, level)
+            if levelDisplay == "TITLE" and lineText:match("Mythic Level") then
+                -- Skip this iteration
+            else
+                if levelDisplay == "COMPACT" then
+                    local level = lineText:match("Mythic Level (%d+)")
+                    if level then
+                        lineText = string.format("|cff%02x%02x%02x+%s|r", r * 255, g * 255, b * 255, level)
+                    end
                 end
-            end
-            
-            if not IsUnwantedText(lineText) then
-                table.insert(validLines, {
-                    left = lineText,
-                    right = rightLine and rightLine:GetText(),
-                    color = {r, g, b}
-                })
+                
+                if not IsUnwantedText(lineText) then
+                    table.insert(validLines, {
+                        left = lineText,
+                        right = rightLine and rightLine:GetText(),
+                        color = {r, g, b}
+                    })
+                end
             end
         end
     end
