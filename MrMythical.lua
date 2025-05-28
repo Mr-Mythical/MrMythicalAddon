@@ -1,5 +1,6 @@
 local GRADIENTS = GradientsData.GRADIENTS
 local RewardsFunctions = RewardsFunctions
+local CompletionTracker = CompletionTracker
 
 local FONT = "|cffffffff"
 local currentPlayerRegion = "us" -- Default to us
@@ -359,6 +360,47 @@ end
 hooksecurefunc("ChatFrame_OnHyperlinkShow", SetHyperlink_Hook)
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, OnTooltipSetItem)
 
+local function ShowCompletionStats()
+    local stats = CompletionTracker:GetStats()
+    
+    -- Header
+    print("|cffffcc00=== Mythic+ Completion Statistics ===|r")
+    
+    local seasonTotal = stats.seasonal.completed + stats.seasonal.failed
+    print("\n|cff00ff00Season Overview:|r")
+    print(string.format("Total Runs: %d", seasonTotal))
+    print(string.format("Completed: %d (%d%%)", 
+        stats.seasonal.completed,
+        stats.seasonal.rate))
+    print(string.format("Failed: %d (%d%%)", 
+        stats.seasonal.failed,
+        100 - stats.seasonal.rate))
+    
+    local weeklyTotal = stats.weekly.completed + stats.weekly.failed
+    print("\n|cff00ff00This Week:|r")
+    print(string.format("Total Runs: %d", weeklyTotal))
+    print(string.format("Completed: %d (%d%%)", 
+        stats.weekly.completed,
+        stats.weekly.rate))
+    print(string.format("Failed: %d (%d%%)", 
+        stats.weekly.failed,
+        100 - stats.weekly.rate))
+    
+    if weeklyTotal > 0 then
+        print("\n|cff00ff00Weekly Dungeon Breakdown:|r")
+        for _, dungeon in pairs(stats.weekly.dungeons) do
+            local total = dungeon.completed + dungeon.failed
+            if total > 0 then
+                print(string.format("|cffffffff%s|r", dungeon.name))
+                print(string.format("  Completed: %d, Failed: %d (Success Rate: %d%%)", 
+                    dungeon.completed,
+                    dungeon.failed,
+                    dungeon.rate))
+            end
+        end
+    end
+end
+
 SLASH_MYTHICALREWARDS1 = "/mrm"
 SlashCmdList["MYTHICALREWARDS"] = function(msg)
     local args = {}
@@ -424,21 +466,50 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
         else
             print("Usage: /mrm score <keystone level>")
         end
+    elseif mode == "stats" then
+        ShowCompletionStats()
+    elseif mode == "reset" then
+        local scope = args[2] and args[2]:lower() or "all"
+        if scope == "all" or scope == "weekly" or scope == "seasonal" then
+            CompletionTracker:ResetStats(scope)
+        else
+            print("Usage: /mrm reset [all|weekly|seasonal]")
+        end
     else
         print("|cffffcc00Usage:|r")
         print("  /mrm rewards - Show keystone rewards")
         print("  /mrm score <keystone level> - Show keystone score calculations")
+        print("  /mrm stats - Show completion statistics")
+        print("  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
     end
 end
 
+local activeRun = nil
+
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, addonName)
-    if addonName == "MrMythical" then
-        MrMythicalUI.InitializeSettings()
-        if GetCurrentRegion then
-            local regNum = GetCurrentRegion()
-            currentPlayerRegion = regionMap[regNum]
+frame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+
+frame:SetScript("OnEvent", function(self, event, ...)
+    if event == "ADDON_LOADED" then
+        local addonName = ...
+        if addonName == "MrMythical" then
+            MrMythicalUI.InitializeSettings()
+            CompletionTracker:SetMythicMaps(MYTHIC_MAPS)
+            CompletionTracker:Initialize()
+            if GetCurrentRegion then
+                local regNum = GetCurrentRegion()
+                currentPlayerRegion = regionMap[regNum]
+            end
         end
+    elseif event == "CHALLENGE_MODE_COMPLETED" then
+        local info = C_ChallengeMode.GetChallengeCompletionInfo()
+        if not info then return end
+        
+        CompletionTracker:TrackRun(
+            info.mapChallengeModeID,
+            info.onTime,
+            info.level
+        )
     end
 end)
