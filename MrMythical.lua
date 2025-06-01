@@ -2,7 +2,13 @@ local GRADIENTS = GradientsData.GRADIENTS
 local RewardsFunctions = RewardsFunctions
 local CompletionTracker = CompletionTracker
 
-local FONT = "|cffffffff"
+local FONT = "|cffffffff"  -- White
+local FONT_GOLD = "|cffffcc00"  -- Gold
+local FONT_GREEN = "|cff00ff00"  -- Green 
+local FONT_GRAY = "|cff808080"  -- Gray
+local FONT_BLUE = "|cff0088ff"  -- Light Blue
+local FONT_RED = "|cffff0000"   -- Red
+
 local currentPlayerRegion = "us" -- Default to us
 
 local AFFIX_STRINGS = {
@@ -364,25 +370,25 @@ local function ShowCompletionStats()
     local stats = CompletionTracker:GetStats()
     
     -- Header
-    print("|cffffcc00=== Mythic+ Completion Statistics ===|r")
+    print(FONT_GOLD .. "=== Mythic+ Completion Statistics ===" .. "|r")
     
     local seasonTotal = stats.seasonal.completed + stats.seasonal.failed
-    print("\n|cff00ff00Season Overview:|r")
-    print(string.format("Total Runs: %d", seasonTotal))
-    print(string.format("Completed: %d (%d%%)", 
+    print("\n" .. FONT_GREEN .. "Season Overview:|r")
+    print(FONT .. string.format("Total Runs: %d", seasonTotal))
+    print(FONT .. string.format("Completed: %d (%d%%)", 
         stats.seasonal.completed,
         stats.seasonal.rate))
-    print(string.format("Failed: %d (%d%%)", 
+    print(FONT_RED .. string.format("Failed: %d (%d%%)", 
         stats.seasonal.failed,
         100 - stats.seasonal.rate))
     
     local weeklyTotal = stats.weekly.completed + stats.weekly.failed
-    print("\n|cff00ff00This Week:|r")
-    print(string.format("Total Runs: %d", weeklyTotal))
-    print(string.format("Completed: %d (%d%%)", 
+    print("\n" .. FONT_GREEN .. "This Week:|r")
+    print(FONT .. string.format("Total Runs: %d", weeklyTotal))
+    print(FONT .. string.format("Completed: %d (%d%%)", 
         stats.weekly.completed,
         stats.weekly.rate))
-    print(string.format("Failed: %d (%d%%)", 
+    print(FONT_RED .. string.format("Failed: %d (%d%%)", 
         stats.weekly.failed,
         100 - stats.weekly.rate))
     
@@ -407,7 +413,7 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     for word in string.gmatch(msg, "%S+") do
         table.insert(args, word)
     end
-
+    
     local mode = args[1] and args[1]:lower() or "help"
 
     if mode == "rewards" then
@@ -476,11 +482,11 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
             print("Usage: /mrm reset [all|weekly|seasonal]")
         end
     else
-        print("|cffffcc00Usage:|r")
-        print("  /mrm rewards - Show keystone rewards")
-        print("  /mrm score <keystone level> - Show keystone score calculations")
-        print("  /mrm stats - Show completion statistics")
-        print("  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
+        print(FONT_GOLD .. "Usage:|r")
+        print(FONT .. "  /mrm rewards - Show keystone rewards")
+        print(FONT .. "  /mrm score <keystone level> - Show keystone score calculations")
+        print(FONT .. "  /mrm stats - Show completion statistics")
+        print(FONT .. "  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
     end
 end
 
