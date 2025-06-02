@@ -490,8 +490,6 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
     end
 end
 
-local activeRun = nil
-
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
