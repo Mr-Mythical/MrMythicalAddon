@@ -208,17 +208,19 @@ local function RemoveSpecificTooltipText(tooltip)
             end
             
             if levelDisplay == "TITLE" then
-                local keyLevel
+                local keyLevel, resilientLevel
                 for i = 2, tooltip:NumLines() do
                     local line = _G["GameTooltipTextLeft"..i]:GetText() or ""
                     local level = line:match("Mythic Level (%d+)")
-                    if level then
-                        keyLevel = level
-                        break
-                    end
+                    local resilient = line:match("Resilient Level (%d+)")
+                    if level then keyLevel = level end
+                    if resilient then resilientLevel = resilient end
                 end
                 if keyLevel then
                     text = text .. " +" .. keyLevel
+                    if resilientLevel then
+                        text = text .. " (R" .. resilientLevel .. ")"
+                    end
                 end
             end
             
@@ -240,13 +242,31 @@ local function RemoveSpecificTooltipText(tooltip)
             local lineText = leftLine:GetText() or ""
             local r, g, b = leftLine:GetTextColor()
             
-            if levelDisplay == "TITLE" and lineText:match("Mythic Level") then
+            if levelDisplay == "TITLE" and (lineText:match("Mythic Level") or lineText:match("Resilient Level")) then
                 -- Skip this iteration
             else
                 if levelDisplay == "COMPACT" then
+                    -- Scan ahead for resilient level
+                    local resilientLevel
+                    for j = i, tooltip:NumLines() do
+                        local nextLine = _G["GameTooltipTextLeft"..j]:GetText() or ""
+                        local resilient = nextLine:match("Resilient Level (%d+)")
+                        if resilient then
+                            resilientLevel = resilient
+                            break
+                        end
+                    end
+
                     local level = lineText:match("Mythic Level (%d+)")
                     if level then
-                        lineText = string.format("|cff%02x%02x%02x+%s|r", r * 255, g * 255, b * 255, level)
+                        local levelText = "+" .. level
+                        if resilientLevel then
+                            levelText = levelText .. " (R" .. resilientLevel .. ")"
+                        end
+                        lineText = string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, levelText)
+                    elseif lineText:match("Resilient Level") then
+                        -- Skip resilient level lines since we handle them with mythic level
+                        lineText = nil
                     end
                 end
                 
