@@ -196,9 +196,11 @@ local function IsUnwantedText(text)
 end
 
 local function RemoveSpecificTooltipText(tooltip)
+    local isShiftKeyDown = IsShiftKeyDown()
     local validLines = {}
     local firstLine = _G["GameTooltipTextLeft1"]
     local levelDisplay = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
+    local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     
     if firstLine then
         local text = firstLine:GetText()
@@ -216,9 +218,11 @@ local function RemoveSpecificTooltipText(tooltip)
                     if level then keyLevel = level end
                     if resilient then resilientLevel = resilient end
                 end
-                if keyLevel then
+                if keyLevel and (shiftMode ~= "SHOW_BOTH" or isShiftKeyDown) then
                     text = text .. " +" .. keyLevel
-                    if resilientLevel then
+                    if resilientLevel and (shiftMode == "NONE" or 
+                       (shiftMode == "SHOW_RESILIENT" and isShiftKeyDown) or 
+                       (shiftMode == "SHOW_BOTH" and isShiftKeyDown)) then
                         text = text .. " (R" .. resilientLevel .. ")"
                     end
                 end
@@ -242,41 +246,58 @@ local function RemoveSpecificTooltipText(tooltip)
             local lineText = leftLine:GetText() or ""
             local r, g, b = leftLine:GetTextColor()
             
-            if levelDisplay == "TITLE" and (lineText:match("Mythic Level") or lineText:match("Resilient Level")) then
-                -- Skip this iteration
-            else
-                if levelDisplay == "COMPACT" then
-                    -- Scan ahead for resilient level
-                    local resilientLevel
-                    for j = i, tooltip:NumLines() do
+            if levelDisplay == "COMPACT" then
+                local level = lineText:match("Mythic Level (%d+)")
+                local resilient = nil
+                
+                if level then
+                    for j = i + 1, tooltip:NumLines() do
                         local nextLine = _G["GameTooltipTextLeft"..j]:GetText() or ""
-                        local resilient = nextLine:match("Resilient Level (%d+)")
-                        if resilient then
-                            resilientLevel = resilient
-                            break
-                        end
+                        resilient = nextLine:match("Resilient Level (%d+)")
+                        if resilient then break end
                     end
-
-                    local level = lineText:match("Mythic Level (%d+)")
-                    if level then
+                    
+                    if shiftMode == "SHOW_BOTH" and not isShiftKeyDown then
+                        lineText = nil
+                    else
                         local levelText = "+" .. level
-                        if resilientLevel then
-                            levelText = levelText .. " (R" .. resilientLevel .. ")"
+                        if resilient and (shiftMode == "NONE" or 
+                           (shiftMode == "SHOW_RESILIENT" and isShiftKeyDown) or 
+                           (shiftMode == "SHOW_BOTH" and isShiftKeyDown)) then
+                            levelText = levelText .. " (R" .. resilient .. ")"
                         end
                         lineText = string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, levelText)
-                    elseif lineText:match("Resilient Level") then
-                        -- Skip resilient level lines since we handle them with mythic level
+                    end
+                elseif lineText:match("Resilient Level") then
+                    lineText = nil
+                end
+            elseif levelDisplay == "TITLE" then
+                if lineText:match("Mythic Level") or lineText:match("Resilient Level") then
+                    lineText = nil
+                end
+            elseif levelDisplay == "OFF" then
+                local isMythicLevel = lineText:match("Mythic Level")
+                local isResilientLevel = lineText:match("Resilient Level")
+                
+                if isMythicLevel then
+                    if shiftMode == "SHOW_BOTH" and not isShiftKeyDown then
+                        lineText = nil
+                    end
+                elseif isResilientLevel then
+                    if shiftMode == "SHOW_BOTH" and not isShiftKeyDown then
+                        lineText = nil
+                    elseif shiftMode == "SHOW_RESILIENT" and not isShiftKeyDown then
                         lineText = nil
                     end
                 end
-                
-                if not IsUnwantedText(lineText) then
-                    table.insert(validLines, {
-                        left = lineText,
-                        right = rightLine and rightLine:GetText(),
-                        color = {r, g, b}
-                    })
-                end
+            end
+            
+            if lineText and not IsUnwantedText(lineText) then
+                table.insert(validLines, {
+                    left = lineText,
+                    right = rightLine and rightLine:GetText(),
+                    color = {r, g, b}
+                })
             end
         end
     end
@@ -370,10 +391,10 @@ local function OnTooltipSetItem(tooltip, ...)
     end
 end
 
-
 local function SetHyperlink_Hook(self, hyperlink, text, button)
     local itemString = GetItemString(hyperlink)
     if not itemString or itemString == "" then return end
+
     if strsplit(":", itemString) == "keystone" then
         local keyLevel = GetKeyLevel(hyperlink)
         local mapID = GetMapID(hyperlink) 

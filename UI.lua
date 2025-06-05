@@ -41,6 +41,7 @@ local function InitializeSettings()
         SHOW_TIMING = true,
         PLAIN_SCORE_COLORS = false,
         LEVEL_DISPLAY = "OFF",
+        LEVEL_SHIFT_MODE = "NORMAL",
         SHORT_TITLE = false
     }
     
@@ -115,6 +116,33 @@ local function InitializeSettings()
         "|cffffffffCompact:|r Show level as +X (e.g. '+15')\n\n" ..
         "|cffffffffIn Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
         levelDisplayOptions
+    )
+
+    local levelShiftOptions = {
+        { 
+            text = "None",
+            value = "NONE",
+        },
+        { 
+            text = "Show Resilient",
+            value = "SHOW_RESILIENT",
+        },
+        { 
+            text = "Show Both",
+            value = "SHOW_BOTH",
+        }
+    }
+    
+    CreateDropdownSetting(
+        category,
+        "Shift Modifier Behavior for Levels",
+        "LEVEL_SHIFT_MODE",
+        "NONE",
+        "Choose how holding Shift affects level display (Mythic & Resilient):\n\n" ..
+        "|cffffffffNone:|r Show both levels always\n\n" ..
+        "|cffffffffShow Resilient:|r Show only Mythic level, hold Shift for Resilient\n\n" ..
+        "|cffffffffShow Both:|r Hide levels, hold Shift shows both",
+        levelShiftOptions
     )
 
     CreateSetting(
