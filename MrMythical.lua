@@ -2,12 +2,14 @@ local GRADIENTS = GradientsData.GRADIENTS
 local RewardsFunctions = RewardsFunctions
 local CompletionTracker = CompletionTracker
 
-local FONT = "|cffffffff"  -- White
-local FONT_GOLD = "|cffffcc00"  -- Gold
-local FONT_GREEN = "|cff00ff00"  -- Green 
-local FONT_GRAY = "|cff808080"  -- Gray
-local FONT_BLUE = "|cff0088ff"  -- Light Blue
-local FONT_RED = "|cffff0000"   -- Red
+local Colors = {
+    WHITE = "|cffffffff",
+    GOLD = "|cffffcc00",
+    GREEN = "|cff00ff00",
+    GRAY = "|cff808080",
+    BLUE = "|cff0088ff",
+    RED = "|cffff0000",
+}
 
 local currentPlayerRegion = "us" -- Default to us
 
@@ -69,7 +71,7 @@ end
 
 local function GetGradientColor(value, domainMin, domainMax, stops)
     if MRM_SavedVars.PLAIN_SCORE_COLORS then
-        return FONT
+        return Colors.WHITE
     end
     
     local ratio = (value - domainMin) / (domainMax - domainMin)
@@ -343,16 +345,16 @@ local function AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
     local crest = RewardsFunctions.GetCrestReward(keyLevel)
 
     tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
-        FONT, rewards.dungeonTrack, rewards.dungeonItem,
+        Colors.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
         rewards.vaultTrack, rewards.vaultItem))
-    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", FONT, crest.crestType, tostring(crest.crestAmount))) 
+    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", Colors.WHITE, crest.crestType, tostring(crest.crestAmount))) 
 
     local scoreLine = ""
     local gainStr = ""
 
     if MRM_SavedVars.SHOW_TIMING then
         local maxScore = potentialScore + 15
-        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", FONT, baseColor, potentialScore, baseColor, maxScore) 
+        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", Colors.WHITE, baseColor, potentialScore, baseColor, maxScore) 
 
         local minGain = selfBaseGain
         local maxGain = math.max(maxScore - currentScore, 0)
@@ -360,7 +362,7 @@ local function AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
             gainStr = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
         end
     else
-        scoreLine = string.format("%sScore: %s%d|r", FONT, baseColor, potentialScore) 
+        scoreLine = string.format("%sScore: %s%d|r", Colors.WHITE, baseColor, potentialScore) 
 
         local minGain = selfBaseGain
         if minGain > 0 then
@@ -371,7 +373,7 @@ local function AddTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
     tooltip:AddLine(scoreLine .. gainStr)
 
     if IsInGroup() and GetNumGroupMembers() > 1 then
-        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", FONT, groupColor, avgGain))
+        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", Colors.WHITE, groupColor, avgGain))
     end
 end
 
@@ -411,25 +413,25 @@ local function ShowCompletionStats()
     local stats = CompletionTracker:GetStats()
     
     -- Header
-    print(FONT_GOLD .. "=== Mythic+ Completion Statistics ===" .. "|r")
+    print(Colors.GOLD .. "=== Mythic+ Completion Statistics ===" .. "|r")
     
     local seasonTotal = stats.seasonal.completed + stats.seasonal.failed
-    print("\n" .. FONT_GREEN .. "Season Overview:|r")
-    print(FONT .. string.format("Total Runs: %d", seasonTotal))
-    print(FONT .. string.format("Completed: %d (%d%%)", 
+    print("\n" .. Colors.GREEN .. "Season Overview:|r")
+    print(Colors.WHITE .. string.format("Total Runs: %d", seasonTotal))
+    print(Colors.WHITE .. string.format("Completed: %d (%d%%)", 
         stats.seasonal.completed,
         stats.seasonal.rate))
-    print(FONT_RED .. string.format("Failed: %d (%d%%)", 
+    print(Colors.RED .. string.format("Failed: %d (%d%%)", 
         stats.seasonal.failed,
         100 - stats.seasonal.rate))
     
     local weeklyTotal = stats.weekly.completed + stats.weekly.failed
-    print("\n" .. FONT_GREEN .. "This Week:|r")
-    print(FONT .. string.format("Total Runs: %d", weeklyTotal))
-    print(FONT .. string.format("Completed: %d (%d%%)", 
+    print("\n" .. Colors.GREEN .. "This Week:|r")
+    print(Colors.WHITE .. string.format("Total Runs: %d", weeklyTotal))
+    print(Colors.WHITE .. string.format("Completed: %d (%d%%)", 
         stats.weekly.completed,
         stats.weekly.rate))
-    print(FONT_RED .. string.format("Failed: %d (%d%%)", 
+    print(Colors.RED .. string.format("Failed: %d (%d%%)", 
         stats.weekly.failed,
         100 - stats.weekly.rate))
     
@@ -523,11 +525,11 @@ SlashCmdList["MYTHICALREWARDS"] = function(msg)
             print("Usage: /mrm reset [all|weekly|seasonal]")
         end
     else
-        print(FONT_GOLD .. "Usage:|r")
-        print(FONT .. "  /mrm rewards - Show keystone rewards")
-        print(FONT .. "  /mrm score <keystone level> - Show keystone score calculations")
-        print(FONT .. "  /mrm stats - Show completion statistics")
-        print(FONT .. "  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
+        print(Colors.GOLD .. "Usage:|r")
+        print(Colors.WHITE .. "  /mrm rewards - Show keystone rewards")
+        print(Colors.WHITE .. "  /mrm score <keystone level> - Show keystone score calculations")
+        print(Colors.WHITE .. "  /mrm stats - Show completion statistics")
+        print(Colors.WHITE .. "  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
     end
 end
 
