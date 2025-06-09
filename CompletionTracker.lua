@@ -1,5 +1,6 @@
 CompletionTracker = {}
 local CompletionTracker = CompletionTracker
+local Constants = MythicalConstants
 
 local C_ChallengeMode = _G.C_ChallengeMode
 
@@ -17,14 +18,8 @@ local completionData = {
     }
 }
 
-local MYTHIC_MAPS = nil
-
 local function InitializeDungeonStats(container)
-    if not MYTHIC_MAPS then
-        error("MYTHIC_MAPS not initialized")
-        return
-    end
-    for _, mapInfo in ipairs(MYTHIC_MAPS) do
+    for _, mapInfo in ipairs(Constants.MYTHIC_MAPS) do
         container[mapInfo.id] = {
             completed = 0,
             failed = 0,
@@ -139,10 +134,6 @@ function CompletionTracker:Initialize()
     end
 
     CheckWeeklyReset()
-end
-
-function CompletionTracker:SetMythicMaps(maps)
-    MYTHIC_MAPS = maps
 end
 
 function CompletionTracker:ResetStats(scope)

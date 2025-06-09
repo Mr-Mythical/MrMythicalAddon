@@ -1,3 +1,5 @@
+local Constants = MythicalConstants
+
 local function CreateSetting(category, name, key, defaultValue, tooltip)
     local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "boolean", name, defaultValue)
     setting:SetValueChangedCallback(function(_, value)
@@ -112,9 +114,9 @@ local function InitializeSettings()
         "LEVEL_DISPLAY",
         "OFF",
         "Choose how the mythic keystone level is displayed:\n\n" ..
-        "|cffffffffDefault:|r Show level in its own line (e.g. 'Mythic Level 15')\n\n" ..
-        "|cffffffffCompact:|r Show level as +X (e.g. '+15')\n\n" ..
-        "|cffffffffIn Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
+        Constants.Colors.WHITE .. "Default:|r Show level in its own line (e.g. 'Mythic Level 15')\n\n" ..
+        Constants.Colors.WHITE .. "Compact:|r Show level as +X (e.g. '+15')\n\n" ..
+        Constants.Colors.WHITE .. "In Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
         levelDisplayOptions
     )
 
@@ -139,9 +141,9 @@ local function InitializeSettings()
         "LEVEL_SHIFT_MODE",
         "NONE",
         "Choose how holding Shift affects level display (Mythic & Resilient):\n\n" ..
-        "|cffffffffNone:|r Show both levels always\n\n" ..
-        "|cffffffffShow Resilient:|r Show only Mythic level, hold Shift for Resilient\n\n" ..
-        "|cffffffffShow Both:|r Hide levels, hold Shift shows both",
+        Constants.Colors.WHITE .. "None:|r Show both levels always\n\n" ..
+        Constants.Colors.WHITE .. "Show Resilient:|r Show only Mythic level, hold Shift for Resilient\n\n" ..
+        Constants.Colors.WHITE .. "Show Both:|r Hide levels, hold Shift shows both",
         levelShiftOptions
     )
 
