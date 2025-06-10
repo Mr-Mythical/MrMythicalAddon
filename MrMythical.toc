@@ -14,4 +14,4 @@ Data/RewardsData.lua
 CompletionTracker.lua
 RewardsFunctions.lua
 UI.lua
-MrMythical.lua
+Core.lua
