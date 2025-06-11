@@ -355,9 +355,9 @@ local function SetHyperlink_Hook(self, hyperlink, text, button)
     if strsplit(":", itemString) == "keystone" then
         local keyLevel = GetKeyLevel(hyperlink)
         local mapID = GetMapID(hyperlink) 
+        ItemRefTooltip:AddLine(" ") -- Add empty line for spacing
         AddTooltipRewardInfo(ItemRefTooltip, itemString, keyLevel, mapID)
         ItemRefTooltip:Show()
-        RemoveSpecificTooltipText(ItemRefTooltip)
     end
 end
 
