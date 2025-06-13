@@ -181,6 +181,6 @@ local function InitializeSettings()
     Settings.RegisterAddOnCategory(category)
 end
 
-MrMythicalUI = {
+MrMythicalOptions = {
     InitializeSettings = InitializeSettings
 }

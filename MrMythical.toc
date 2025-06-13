@@ -13,5 +13,5 @@ Data/GradientsData.lua
 Data/RewardsData.lua
 CompletionTracker.lua
 RewardsFunctions.lua
-UI.lua
+Options.lua
 Core.lua

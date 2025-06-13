@@ -2,6 +2,7 @@ local GRADIENTS = GradientsData.GRADIENTS
 local RewardsFunctions = RewardsFunctions
 local CompletionTracker = CompletionTracker
 local Constants = MythicalConstants
+local Options = MythicalOptions
 
 local currentPlayerRegion = "us" -- Default to us
 
@@ -495,7 +496,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
         if addonName == "MrMythical" then
-            MrMythicalUI.InitializeSettings()
+            Options.InitializeSettings()
             CompletionTracker:Initialize()
             if GetCurrentRegion then
                 local regNum = GetCurrentRegion()
