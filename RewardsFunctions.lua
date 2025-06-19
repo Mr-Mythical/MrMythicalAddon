@@ -1,45 +1,45 @@
-RewardsFunctions = {}
-local RewardsData = RewardsData
+local MrMythical = MrMythical or {}
+local RewardsData = MrMythical.RewardsData
 
-function RewardsFunctions.GetRewardsForKeyLevel(keyLevel)
-    local rewards = {}
+local RewardsFunctions = {}
+
+function RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     if not keyLevel or keyLevel < 2 then
-        rewards.dungeonItem = "Unknown"
-        rewards.dungeonTrack = "Unknown"
-        rewards.vaultItem = "Unknown"
-        rewards.vaultTrack = "Unknown"
-        return rewards
+        return {
+            dungeonItem = "Unknown",
+            dungeonTrack = "Unknown",
+            vaultItem = "Unknown",
+            vaultTrack = "Unknown"
+        }
     end
 
     local dungeonIndex = math.min(keyLevel - 1, #RewardsData.DUNGEON_GEAR)
     local dungeonReward = RewardsData.DUNGEON_GEAR[dungeonIndex] or {}
-    rewards.dungeonItem = tostring(dungeonReward.itemLevel or "Unknown")
-    rewards.dungeonTrack = dungeonReward.upgradeTrack or "Unknown"
-
     local vaultIndex = math.min(keyLevel - 1, #RewardsData.VAULT_GEAR)
     local vaultReward = RewardsData.VAULT_GEAR[vaultIndex] or {}
-    rewards.vaultItem = tostring(vaultReward.itemLevel or "Unknown")
-    rewards.vaultTrack = vaultReward.upgradeTrack or "Unknown"
 
-    return rewards
+    return {
+        dungeonItem = tostring(dungeonReward.itemLevel or "Unknown"),
+        dungeonTrack = dungeonReward.upgradeTrack or "Unknown",
+        vaultItem = tostring(vaultReward.itemLevel or "Unknown"),
+        vaultTrack = vaultReward.upgradeTrack or "Unknown"
+    }
 end
 
-function RewardsFunctions.GetCrestReward(keyLevel)
-    local crest = {}
+function RewardsFunctions.getCrestReward(keyLevel)
     if not keyLevel or keyLevel < 2 then
-        crest.crestType = "Unknown"
-        crest.crestAmount = "Unknown"
-        return crest
+        return { crestType = "Unknown", crestAmount = "Unknown" }
     end
 
     local crestIndex = math.min(keyLevel - 1, #RewardsData.CRESTS)
     local crestReward = RewardsData.CRESTS[crestIndex] or {}
-    crest.crestType = crestReward.crestType or "Unknown"
-    crest.crestAmount = crestReward.amount or "Unknown"
-    return crest
+    return {
+        crestType = crestReward.crestType or "Unknown",
+        crestAmount = crestReward.amount or "Unknown"
+    }
 end
 
-function RewardsFunctions.ScoreFormula(keyLevel)
+function RewardsFunctions.scoreFormula(keyLevel)
     if keyLevel < 2 then return 0 end
     local affixBreakpoints = { [4] = 15, [7] = 15, [10] = 15, [12] = 15 }
     local parScore = 155
@@ -53,4 +53,5 @@ function RewardsFunctions.ScoreFormula(keyLevel)
     return parScore
 end
 
-return RewardsFunctions
+MrMythical.RewardsFunctions = RewardsFunctions
+_G.MrMythical = MrMythical

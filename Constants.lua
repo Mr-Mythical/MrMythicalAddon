@@ -1,5 +1,7 @@
-MythicalConstants = {
-    Colors = {
+local MrMythical = MrMythical or {}
+
+MrMythical.Constants = {
+    COLORS = {
         WHITE = "|cffffffff",
         GOLD = "|cffffcc00",
         GREEN = "|cff00ff00",
@@ -44,3 +46,5 @@ MythicalConstants = {
         { id = 382, name = "Theater of Pain" }
     }
 }
+
+_G.MrMythical = MrMythical

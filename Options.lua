@@ -1,24 +1,27 @@
-local Constants = MythicalConstants
+local MrMythical = MrMythical or {}
+local Constants = MrMythical.Constants
 
-local function CreateSetting(category, name, key, defaultValue, tooltip)
+local Options = {}
+
+local function createSetting(category, name, key, defaultValue, tooltip)
     local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "boolean", name, defaultValue)
     setting:SetValueChangedCallback(function(_, value)
         MRM_SavedVars[key] = value
     end)
-    
+
     local initializer = Settings.CreateCheckbox(category, setting, tooltip)
     initializer:SetSetting(setting)
-    
-    return {setting = setting, checkbox = initializer}
+
+    return { setting = setting, checkbox = initializer }
 end
 
-local function CreateDropdownSetting(category, name, key, defaultValue, tooltip, options)
+local function createDropdownSetting(category, name, key, defaultValue, tooltip, options)
     local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "string", name, defaultValue)
     setting:SetValueChangedCallback(function(_, value)
         MRM_SavedVars[key] = value
     end)
-    
-    local function GetOptions()
+
+    local function getOptions()
         local dropdownOptions = {}
         for _, option in ipairs(options) do
             table.insert(dropdownOptions, {
@@ -30,12 +33,12 @@ local function CreateDropdownSetting(category, name, key, defaultValue, tooltip,
         return dropdownOptions
     end
 
-    local initializer = Settings.CreateDropdown(category, setting, GetOptions, tooltip)
-    
-    return {setting = setting, dropdown = initializer}
+    local initializer = Settings.CreateDropdown(category, setting, getOptions, tooltip)
+
+    return { setting = setting, dropdown = initializer }
 end
 
-local function InitializeSettings()
+function Options.initializeSettings()
     local defaults = {
         HIDE_UNWANTED_TEXT = true,
         HIDE_AFFIX_TEXT = false,
@@ -46,7 +49,7 @@ local function InitializeSettings()
         LEVEL_SHIFT_MODE = "NORMAL",
         SHORT_TITLE = false
     }
-    
+
     MRM_SavedVars = MRM_SavedVars or {}
     for key, default in pairs(defaults) do
         if MRM_SavedVars[key] == nil then
@@ -69,7 +72,7 @@ local function InitializeSettings()
     local layout = SettingsPanel:GetLayout(category)
     layout:AddInitializer(headerInitializer)
 
-    CreateSetting(
+    createSetting(
         category,
         "Hide Common Text",
         "HIDE_UNWANTED_TEXT",
@@ -77,7 +80,7 @@ local function InitializeSettings()
         "Hide common item text like 'Soulbound' and 'Unique' from keystone tooltips."
     )
 
-    CreateSetting(
+    createSetting(
         category,
         "Hide Affix Text",
         "HIDE_AFFIX_TEXT",
@@ -85,69 +88,51 @@ local function InitializeSettings()
         "Hide the lines listing the current dungeon affixes."
     )
 
-    CreateSetting(
+    createSetting(
         category,
-        "Hide Duration Text", 
+        "Hide Duration Text",
         "HIDE_DURATION",
         false,
         "Hide the duration line from keystone tooltips."
     )
 
     local levelDisplayOptions = {
-        { 
-            text = "Default",
-            value = "OFF"
-        },
-        { 
-            text = "Compact (+X)",
-            value = "COMPACT"
-        },
-        { 
-            text = "In Title",
-            value = "TITLE"
-        }
+        { text = "Default", value = "OFF" },
+        { text = "Compact (+X)", value = "COMPACT" },
+        { text = "In Title", value = "TITLE" }
     }
-    
-    CreateDropdownSetting(
+
+    createDropdownSetting(
         category,
         "Level Display Style",
         "LEVEL_DISPLAY",
         "OFF",
         "Choose how the mythic keystone level is displayed:\n\n" ..
-        Constants.Colors.WHITE .. "Default:|r Show level in its own line (e.g. 'Mythic Level 15')\n\n" ..
-        Constants.Colors.WHITE .. "Compact:|r Show level as +X (e.g. '+15')\n\n" ..
-        Constants.Colors.WHITE .. "In Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
+        Constants.COLORS.WHITE .. "Default:|r Show level in its own line (e.g. 'Mythic Level 15')\n\n" ..
+        Constants.COLORS.WHITE .. "Compact:|r Show level as +X (e.g. '+15')\n\n" ..
+        Constants.COLORS.WHITE .. "In Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
         levelDisplayOptions
     )
 
     local levelShiftOptions = {
-        { 
-            text = "None",
-            value = "NONE",
-        },
-        { 
-            text = "Show Resilient",
-            value = "SHOW_RESILIENT",
-        },
-        { 
-            text = "Show Both",
-            value = "SHOW_BOTH",
-        }
+        { text = "None", value = "NONE" },
+        { text = "Show Resilient", value = "SHOW_RESILIENT" },
+        { text = "Show Both", value = "SHOW_BOTH" }
     }
-    
-    CreateDropdownSetting(
+
+    createDropdownSetting(
         category,
         "Shift Modifier Behavior for Levels",
         "LEVEL_SHIFT_MODE",
         "NONE",
         "Choose how holding Shift affects level display (Mythic & Resilient):\n\n" ..
-        Constants.Colors.WHITE .. "None:|r Show both levels always\n\n" ..
-        Constants.Colors.WHITE .. "Show Resilient:|r Show only Mythic level, hold Shift for Resilient\n\n" ..
-        Constants.Colors.WHITE .. "Show Both:|r Hide levels, hold Shift shows both",
+        Constants.COLORS.WHITE .. "None:|r Show both levels always\n\n" ..
+        Constants.COLORS.WHITE .. "Show Resilient:|r Show only Mythic level, hold Shift for Resilient\n\n" ..
+        Constants.COLORS.WHITE .. "Show Both:|r Hide levels, hold Shift shows both",
         levelShiftOptions
     )
 
-    CreateSetting(
+    createSetting(
         category,
         "Short Keystone Title",
         "SHORT_TITLE",
@@ -162,7 +147,7 @@ local function InitializeSettings()
     local displayHeaderInitializer = Settings.CreateElementInitializer("SettingsListSectionHeaderTemplate", displayHeaderData)
     layout:AddInitializer(displayHeaderInitializer)
 
-    CreateSetting(
+    createSetting(
         category,
         "Show Score Timing Bonus",
         "SHOW_TIMING",
@@ -170,7 +155,7 @@ local function InitializeSettings()
         "Show the potential timing bonus (0-15)."
     )
 
-    CreateSetting(
+    createSetting(
         category,
         "Remove Score Colors",
         "PLAIN_SCORE_COLORS",
@@ -181,6 +166,5 @@ local function InitializeSettings()
     Settings.RegisterAddOnCategory(category)
 end
 
-MythicalOptions = {
-    InitializeSettings = InitializeSettings
-}
+MrMythical.Options = Options
+_G.MrMythical = MrMythical
