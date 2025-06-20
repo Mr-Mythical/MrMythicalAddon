@@ -339,6 +339,8 @@ end
 
 --- Tooltip hook: adds reward info and cleans up lines for keystone items.
 local function onTooltipSetItem(tooltip)
+    -- Only proceed if the tooltip supports GetItem (e.g., GameTooltip, not ShoppingTooltip1)
+    if not tooltip.GetItem then return end
     local name, link = tooltip:GetItem()
     if not link then return end
     for itemLink in link:gmatch("|Hkeystone:.-|h.-|h|r") do
