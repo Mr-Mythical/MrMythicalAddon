@@ -3,7 +3,9 @@ local MrMythical = MrMythical or {}
 local GradientsData = MrMythical.GradientsData
 local RewardsFunctions = MrMythical.RewardsFunctions
 local CompletionTracker = MrMythical.CompletionTracker
-local Constants = MrMythical.Constants
+local ConfigData = MrMythical.ConfigData
+local DungeonData = MrMythical.DungeonData
+local ParsingData = MrMythical.ParsingData
 local Options = MrMythical.Options
 
 local GRADIENTS = GradientsData.GRADIENTS
@@ -38,7 +40,7 @@ end
 -- @return string WoW color code
 local function getGradientColor(value, domainMin, domainMax, stops)
     if MRM_SavedVars.PLAIN_SCORE_COLORS then
-        return Constants.COLORS.WHITE
+        return ConfigData.COLORS.WHITE
     end
     local ratio = (value - domainMin) / (domainMax - domainMin)
     ratio = 1 - ratio
@@ -148,17 +150,17 @@ end
 -- @return boolean
 local function isUnwantedText(text)
     if not text then return false end
-    for _, duration in ipairs(Constants.DURATION_STRINGS) do
+    for _, duration in ipairs(ParsingData.DURATION_STRINGS) do
         if text:find(duration, 1, true) then
             return MRM_SavedVars.HIDE_DURATION
         end
     end
-    for _, affix in ipairs(Constants.AFFIX_STRINGS) do
+    for _, affix in ipairs(ParsingData.AFFIX_STRINGS) do
         if text:find(affix, 1, true) then
             return MRM_SavedVars.HIDE_AFFIX_TEXT
         end
     end
-    for _, unwanted in ipairs(Constants.UNWANTED_STRINGS) do
+    for _, unwanted in ipairs(ParsingData.UNWANTED_STRINGS) do
         if text:find(unwanted, 1, true) then
             return MRM_SavedVars.HIDE_UNWANTED_TEXT
         end
@@ -309,22 +311,22 @@ local function addTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
     local crest = RewardsFunctions.getCrestReward(keyLevel)
 
     tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
-        Constants.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
+        ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
         rewards.vaultTrack, rewards.vaultItem))
-    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", Constants.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
+    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", ConfigData.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
 
     local scoreLine = ""
     local gainStr = ""
     if MRM_SavedVars.SHOW_TIMING then
         local maxScore = potentialScore + 15
-        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", Constants.COLORS.WHITE, baseColor, potentialScore, baseColor, maxScore)
+        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", ConfigData.COLORS.WHITE, baseColor, potentialScore, baseColor, maxScore)
         local minGain = selfBaseGain
         local maxGain = math.max(maxScore - currentScore, 0)
         if maxGain > 0 then
             gainStr = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
         end
     else
-        scoreLine = string.format("%sScore: %s%d|r", Constants.COLORS.WHITE, baseColor, potentialScore)
+        scoreLine = string.format("%sScore: %s%d|r", ConfigData.COLORS.WHITE, baseColor, potentialScore)
         local minGain = selfBaseGain
         if minGain > 0 then
             gainStr = string.format(" %s(+%d)|r", gainColor, minGain)
@@ -333,7 +335,7 @@ local function addTooltipRewardInfo(tooltip, itemString, keyLevel, mapID)
     tooltip:AddLine(scoreLine .. gainStr)
 
     if IsInGroup() and GetNumGroupMembers() > 1 then
-        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", Constants.COLORS.WHITE, groupColor, avgGain))
+        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", ConfigData.COLORS.WHITE, groupColor, avgGain))
     end
 end
 
@@ -371,18 +373,18 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, onTooltipSetI
 
 --- Prints completion statistics to the chat window.
 local function showCompletionStats()
-    print(Constants.COLORS.GOLD .. "=== Mythic+ Completion Statistics ===" .. "|r")
+    print(ConfigData.COLORS.GOLD .. "=== Mythic+ Completion Statistics ===" .. "|r")
     local stats = CompletionTracker:getStats()
     local seasonTotal = stats.seasonal.completed + stats.seasonal.failed
-    print("\n" .. Constants.COLORS.GREEN .. "Season Overview:|r")
-    print(Constants.COLORS.WHITE .. string.format("Total Runs: %d", seasonTotal))
-    print(Constants.COLORS.WHITE .. string.format("Completed: %d (%d%%)", stats.seasonal.completed, stats.seasonal.rate))
-    print(Constants.COLORS.RED .. string.format("Failed: %d (%d%%)", stats.seasonal.failed, 100 - stats.seasonal.rate))
+    print("\n" .. ConfigData.COLORS.GREEN .. "Season Overview:|r")
+    print(ConfigData.COLORS.WHITE .. string.format("Total Runs: %d", seasonTotal))
+    print(ConfigData.COLORS.WHITE .. string.format("Completed: %d (%d%%)", stats.seasonal.completed, stats.seasonal.rate))
+    print(ConfigData.COLORS.RED .. string.format("Failed: %d (%d%%)", stats.seasonal.failed, 100 - stats.seasonal.rate))
     local weeklyTotal = stats.weekly.completed + stats.weekly.failed
-    print("\n" .. Constants.COLORS.GREEN .. "This Week:|r")
-    print(Constants.COLORS.WHITE .. string.format("Total Runs: %d", weeklyTotal))
-    print(Constants.COLORS.WHITE .. string.format("Completed: %d (%d%%)", stats.weekly.completed, stats.weekly.rate))
-    print(Constants.COLORS.RED .. string.format("Failed: %d (%d%%)", stats.weekly.failed, 100 - stats.weekly.rate))
+    print("\n" .. ConfigData.COLORS.GREEN .. "This Week:|r")
+    print(ConfigData.COLORS.WHITE .. string.format("Total Runs: %d", weeklyTotal))
+    print(ConfigData.COLORS.WHITE .. string.format("Completed: %d (%d%%)", stats.weekly.completed, stats.weekly.rate))
+    print(ConfigData.COLORS.RED .. string.format("Failed: %d (%d%%)", stats.weekly.failed, 100 - stats.weekly.rate))
     if weeklyTotal > 0 then
         print("\n|cff00ff00Weekly Dungeon Breakdown:|r")
         for _, dungeon in pairs(stats.weekly.dungeons) do
@@ -430,7 +432,7 @@ SlashCmdList["MRMYTHICAL"] = function(msg)
             local potentialScore = RewardsFunctions.scoreFormula(level)
             print(string.format("Potential Mythic+ Score for keystone level %d is %d", level, potentialScore))
             local gains = {}
-            for _, mapInfo in ipairs(Constants.MYTHIC_MAPS) do
+            for _, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
                 local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapInfo.id)
                 local currentScore = 0
                 if intimeInfo and intimeInfo.dungeonScore then
@@ -462,11 +464,11 @@ SlashCmdList["MRMYTHICAL"] = function(msg)
             print("Usage: /mrm reset [all|weekly|seasonal]")
         end
     else
-        print(Constants.COLORS.GOLD .. "Usage:|r")
-        print(Constants.COLORS.WHITE .. "  /mrm rewards - Show keystone rewards")
-        print(Constants.COLORS.WHITE .. "  /mrm score <keystone level> - Show keystone score calculations")
-        print(Constants.COLORS.WHITE .. "  /mrm stats - Show completion statistics")
-        print(Constants.COLORS.WHITE .. "  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
+        print(ConfigData.COLORS.GOLD .. "Usage:|r")
+        print(ConfigData.COLORS.WHITE .. "  /mrm rewards - Show keystone rewards")
+        print(ConfigData.COLORS.WHITE .. "  /mrm score <keystone level> - Show keystone score calculations")
+        print(ConfigData.COLORS.WHITE .. "  /mrm stats - Show completion statistics")
+        print(ConfigData.COLORS.WHITE .. "  /mrm reset [all|weekly|seasonal] - Reset completion statistics")
     end
 end
 
@@ -481,7 +483,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
             CompletionTracker:initialize()
             if GetCurrentRegion then
                 local regNum = GetCurrentRegion()
-                currentPlayerRegion = Constants.REGION_MAP[regNum]
+                currentPlayerRegion = ConfigData.REGION_MAP[regNum]
             end
         end
     elseif event == "CHALLENGE_MODE_COMPLETED" then

@@ -1,5 +1,5 @@
 local MrMythical = MrMythical or {}
-local Constants = MrMythical.Constants
+local DungeonData = MrMythical.DungeonData
 
 local CompletionTracker = {}
 
@@ -18,7 +18,7 @@ local completionData = {
 }
 
 local function initializeDungeonStats(container)
-    for _, mapInfo in ipairs(Constants.MYTHIC_MAPS) do
+    for _, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
         container[mapInfo.id] = {
             completed = 0,
             failed = 0,

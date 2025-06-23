@@ -8,7 +8,10 @@
 ## X-Wago-ID: kNMdrZGz
 ## SavedVariables: MRM_SavedVars, MRM_CompletionData
 
-Constants.lua
+
+Data/ConfigData.lua
+Data/DungeonData.lua
+Data/ParsingData.lua
 Data/GradientsData.lua
 Data/RewardsData.lua
 CompletionTracker.lua
