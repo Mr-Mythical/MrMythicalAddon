@@ -14,7 +14,11 @@ Data/DungeonData.lua
 Data/ParsingData.lua
 Data/GradientsData.lua
 Data/RewardsData.lua
-CompletionTracker.lua
-RewardsFunctions.lua
+Utils/ColorUtils.lua
+Utils/KeystoneUtils.lua
+Utils/TooltipUtils.lua
+Utils/CommandHandlers.lua
+Utils/CompletionTracker.lua
+Utils/RewardsFunctions.lua
 Options.lua
 Core.lua
