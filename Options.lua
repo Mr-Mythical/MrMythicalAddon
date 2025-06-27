@@ -1,3 +1,20 @@
+--[[
+Mr. Mythical - Keystone Tooltips Options Panel
+
+This addon implements the global registry pattern for coordinating settings panels
+across multiple Mr. Mythical addons. As a sibling addon, it:
+
+1. Creates the shared "Mr. Mythical" parent category (or uses existing one)
+2. Creates a "Keystone Tooltips" subcategory under the parent
+3. Stores references in _G.MrMythicalSettingsRegistry for other addons to use
+4. Provides utility functions for integration status checking and debugging
+
+Other Mr. Mythical addons should create their own subcategories under the shared parent.
+See SETTINGS_INTEGRATION_GUIDE.md for detailed integration guide.
+
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 local ConfigData = MrMythical.ConfigData
 
@@ -58,11 +75,94 @@ function Options.initializeSettings()
     end
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
-        print("MrMythical: Settings API not found. Options unavailable via Interface menu.")
         return
     end
 
-    local category = Settings.RegisterVerticalLayoutCategory("Mr. Mythical", "MrMythical")
+    local success = pcall(Options.createSettingsStructure)
+    if not success then
+        C_Timer.After(0.1, function()
+            pcall(Options.createSettingsStructure)
+        end)
+    end
+end
+
+function Options.createSettingsStructure()
+
+    -- Initialize the global registry if it doesn't exist
+    if not _G.MrMythicalSettingsRegistry then
+        _G.MrMythicalSettingsRegistry = {}
+    end
+    
+    local registry = _G.MrMythicalSettingsRegistry
+    local parentCategory = nil
+    
+    -- Check if another addon already created the parent category
+    if registry.parentCategory then
+        parentCategory = registry.parentCategory
+    else
+        -- We need to create the parent category
+        local success, result = pcall(function()
+            return Settings.RegisterVerticalLayoutCategory("Mr. Mythical")
+        end)
+        
+        if success and result then
+            parentCategory = result
+            registry.parentCategory = parentCategory
+            registry.createdBy = "MrMythical"
+            
+            Settings.RegisterAddOnCategory(parentCategory)
+        else
+            -- Fallback to standalone category
+            local fallbackSuccess, fallbackResult = pcall(function()
+                return Settings.RegisterVerticalLayoutCategory("Mr. Mythical: Keystone Tooltips")
+            end)
+            if fallbackSuccess and fallbackResult then
+                parentCategory = fallbackResult
+                Settings.RegisterAddOnCategory(parentCategory)
+                local category = parentCategory
+                Options.createSettingsInCategory(category)
+                return
+            else
+                return
+            end
+        end
+    end
+    
+    -- Create our subcategory under the parent (using WoW-native subcategory method)
+    local category
+    
+    -- Try the native subcategory registration method first
+    local subcategorySuccess, subcategoryResult = pcall(function()
+        return Settings.RegisterVerticalLayoutSubcategory(parentCategory, "Keystone Tooltips")
+    end)
+    
+    if subcategorySuccess and subcategoryResult then
+        category = subcategoryResult
+        
+        registry.subCategories = registry.subCategories or {}
+        registry.subCategories["KeystoneTooltips"] = category
+    else
+        -- Fallback to the manual SetParentCategory method
+        local altSuccess, altResult = pcall(function()
+            local subCat = Settings.RegisterVerticalLayoutCategory("Keystone Tooltips")
+            subCat:SetParentCategory(parentCategory)
+            return subCat
+        end)
+        
+        if altSuccess and altResult then
+            category = altResult
+            registry.subCategories = registry.subCategories or {}
+            registry.subCategories["KeystoneTooltips"] = category
+        else
+            category = parentCategory
+        end
+    end
+
+    Options.createSettingsInCategory(category)
+end
+
+-- Create all the settings in the specified category
+function Options.createSettingsInCategory(category)
 
     local headerData = {
         name = "Compact Mode Options",
@@ -162,8 +262,26 @@ function Options.initializeSettings()
         false,
         "Display score and score gains in white instead of gradient colors."
     )
+end
 
-    Settings.RegisterAddOnCategory(category)
+-- Integration utility functions for other addons
+function Options.getIntegrationInfo()
+    local registry = _G.MrMythicalSettingsRegistry
+    if not registry then
+        return {
+            integrated = false,
+            parentExists = false,
+            createdBy = nil,
+            parentName = nil
+        }
+    end
+    
+    return {
+        integrated = registry.parentCategory ~= nil,
+        parentExists = registry.parentCategory ~= nil,
+        createdBy = registry.createdBy,
+        parentName = registry.parentCategory and "Mr. Mythical" or nil
+    }
 end
 
 MrMythical.Options = Options

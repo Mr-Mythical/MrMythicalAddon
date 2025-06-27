@@ -1,3 +1,11 @@
+--[[
+DungeonData.lua - Mythic+ Dungeon Map Data
+
+Purpose: Contains mapping data for all current season Mythic+ dungeons
+Dependencies: None
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 
 MrMythical.DungeonData = {

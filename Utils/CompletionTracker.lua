@@ -1,3 +1,11 @@
+--[[
+CompletionTracker.lua - Mythic+ Run Completion Tracking
+
+Purpose: Tracks and analyzes Mythic+ dungeon completion statistics
+Dependencies: DungeonData
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 local DungeonData = MrMythical.DungeonData
 

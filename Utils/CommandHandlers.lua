@@ -1,3 +1,11 @@
+--[[
+CommandHandlers.lua - Slash Command Processing
+
+Purpose: Handles all slash command functionality for Mr. Mythical addon
+Dependencies: RewardsFunctions, CompletionTracker, ConfigData, DungeonData
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 MrMythical.CommandHandlers = {}
 

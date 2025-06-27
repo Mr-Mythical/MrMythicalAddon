@@ -1,3 +1,11 @@
+--[[
+KeystoneUtils.lua - Keystone Data Processing Utilities
+
+Purpose: Parses and processes Mythic+ keystone data and links
+Dependencies: None
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 MrMythical.KeystoneUtils = {}
 

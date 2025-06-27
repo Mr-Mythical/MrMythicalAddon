@@ -1,3 +1,11 @@
+--[[
+RewardsFunctions.lua - Mythic+ Reward Calculation Functions
+
+Purpose: Calculates rewards, scores, and crest amounts for Mythic+ keystones
+Dependencies: RewardsData
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 local RewardsData = MrMythical.RewardsData
 

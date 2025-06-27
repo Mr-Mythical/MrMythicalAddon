@@ -1,3 +1,11 @@
+--[[
+ParsingData.lua - Text Parsing Constants
+
+Purpose: Contains strings and patterns used for tooltip text parsing and filtering
+Dependencies: None
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 
 MrMythical.ParsingData = {

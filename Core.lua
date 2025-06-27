@@ -1,11 +1,17 @@
+--[[
+Core.lua - Mr. Mythical Main Addon Core Logic
+
+Purpose: Main functionality for Mythic+ keystone tooltips and scoring
+Dependencies: All Data and Utils modules
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 
--- Import data modules
 local GradientsData = MrMythical.GradientsData
 local ConfigData = MrMythical.ConfigData
 local DungeonData = MrMythical.DungeonData
 
--- Import utility modules
 local ColorUtils = MrMythical.ColorUtils
 local KeystoneUtils = MrMythical.KeystoneUtils
 local TooltipUtils = MrMythical.TooltipUtils
@@ -13,7 +19,6 @@ local CommandHandlers = MrMythical.CommandHandlers
 local CompletionTracker = MrMythical.CompletionTracker
 local RewardsFunctions = MrMythical.RewardsFunctions
 
--- Import service modules
 local Options = MrMythical.Options
 
 local GRADIENTS = GradientsData.GRADIENTS

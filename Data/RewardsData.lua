@@ -1,3 +1,11 @@
+--[[
+RewardsData.lua - Mythic+ Reward Tables
+
+Purpose: Contains gear, vault, and crest reward data for all keystone levels
+Dependencies: None
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 
 MrMythical.RewardsData = {

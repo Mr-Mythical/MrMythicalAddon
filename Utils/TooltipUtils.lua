@@ -1,3 +1,11 @@
+--[[
+TooltipUtils.lua - Tooltip Processing and Enhancement Utilities
+
+Purpose: Processes and enhances tooltip display with filtering and formatting
+Dependencies: ParsingData
+Author: Braunerr
+--]]
+
 local MrMythical = MrMythical or {}
 MrMythical.TooltipUtils = {}
 
