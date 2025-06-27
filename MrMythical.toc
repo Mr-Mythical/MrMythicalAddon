@@ -1,7 +1,7 @@
 ## Interface: 110107
 ## Title: Mr. Mythical: Mythic+ Rewards and Score Tooltips
 ## Notes: Enhanced & customizable Mythic+ keystone tooltips, with detailed reward info, score insights, and dungeon completion rates, directly in your tooltips and chat!
-## Version: 2.0.0
+## Version: @project-version@
 ## Author: Braunerr
 ## IconTexture: Interface\AddOns\MrMythical\Logo.tga
 ## X-Curse-Project-ID: 1200437
