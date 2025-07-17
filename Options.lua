@@ -61,6 +61,7 @@ function Options.initializeSettings()
         HIDE_AFFIX_TEXT = false,
         HIDE_DURATION = false,
         SHOW_TIMING = true,
+        SHOW_PAR_TIME = false,
         PLAIN_SCORE_COLORS = false,
         LEVEL_DISPLAY = "OFF",
         LEVEL_SHIFT_MODE = "NORMAL",
@@ -253,6 +254,14 @@ function Options.createSettingsInCategory(category)
         "SHOW_TIMING",
         true,
         "Show the potential timing bonus (0-15)."
+    )
+
+    createSetting(
+        category,
+        "Show Dungeon Timer",
+        "SHOW_PAR_TIME",
+        false,
+        "Display the dungeon timer in the keystone tooltip."
     )
 
     createSetting(

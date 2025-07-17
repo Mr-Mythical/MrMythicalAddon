@@ -206,6 +206,16 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     local crest = RewardsFunctions.getCrestReward(keyLevel)
 
+    -- Add dungeon timer if enabled (at the top)
+    if MRM_SavedVars.SHOW_PAR_TIME then
+        local parTime = DungeonData.getParTime(mapID)
+        if parTime then
+            local formattedTime = DungeonData.formatTime(parTime)
+            tooltip:AddLine(string.format("%sDungeon Timer: %s|r", 
+                ConfigData.COLORS.WHITE, formattedTime))
+        end
+    end
+
     -- Add gear and crest information
     tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
         ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,

@@ -139,8 +139,22 @@ function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.WHITE .. "  /mrm rewards [level] - Show keystone rewards for specific level or all levels")
     print(ConfigData.COLORS.WHITE .. "  /mrm score <level> - Show score calculations and potential gains for a key level")
     print(ConfigData.COLORS.WHITE .. "  /mrm stats - Show completion statistics for season and week")
+    print(ConfigData.COLORS.WHITE .. "  /mrm times - Show dungeon timers for all dungeons")
     print(ConfigData.COLORS.WHITE .. "  /mrm reset [scope] - Reset completion statistics (all/weekly/seasonal)")
     print(ConfigData.COLORS.WHITE .. "  /mrm help - Show this help message")
+end
+
+--- Displays dungeon timers for all dungeons
+function CommandHandlers.handleTimesCommand()
+    print(ConfigData.COLORS.GOLD .. "=== Mythic+ Dungeon Timers ===" .. "|r")
+    print("")
+    
+    for _, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
+        local formattedTime = DungeonData.formatTime(mapInfo.parTime)
+        print(string.format("%s%s|r: %s%s|r", 
+            ConfigData.COLORS.WHITE, mapInfo.name, 
+            ConfigData.COLORS.WHITE, formattedTime))
+    end
 end
 
 --- Main command parser and dispatcher
@@ -161,6 +175,8 @@ function CommandHandlers.processSlashCommand(commandString)
         CommandHandlers.handleScoreCommand(level)
     elseif command == "stats" then
         CommandHandlers.handleStatsCommand()
+    elseif command == "times" then
+        CommandHandlers.handleTimesCommand()
     elseif command == "reset" then
         local scope = args[2]
         CommandHandlers.handleResetCommand(scope)
