@@ -247,10 +247,43 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     
     tooltip:AddLine(scoreLine .. gainString)
 
-    -- Add group information if in a group
-    if IsInGroup() and GetNumGroupMembers() > 1 then
-        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r", 
-            ConfigData.COLORS.WHITE, groupColor, averageGroupGain))
+    -- Add group information if in a group (but not raid)
+    if IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid() then
+        local isShiftPressed = IsShiftKeyDown()
+        
+        if isShiftPressed then
+            -- Show detailed individual player scores when shift is held
+            tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
+            
+            -- Sort players by gain (highest first) for better readability
+            local sortedPlayers = {}
+            for playerName, playerScore in pairs(groupScoreData) do
+                local individualGain = math.max(potentialScore - playerScore, 0)
+                local individualGainColor = ColorUtils.calculateGradientColor(individualGain, 0, 200, GRADIENTS)
+                table.insert(sortedPlayers, {
+                    name = playerName,
+                    score = playerScore,
+                    gain = individualGain,
+                    gainColor = individualGainColor
+                })
+            end
+            
+            table.sort(sortedPlayers, function(a, b) return a.gain > b.gain end)
+            
+            for _, player in ipairs(sortedPlayers) do
+                if player.gain > 0 then
+                    tooltip:AddLine(string.format("  %s: %s+%d|r", 
+                        player.name, player.gainColor, player.gain))
+                else
+                    tooltip:AddLine(string.format("  %s: %sNo gain|r", 
+                        player.name, ConfigData.COLORS.GRAY))
+                end
+            end
+        else
+            -- Show group average gain when shift is not held
+            tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r %s(Hold Shift for details)|r", 
+                ConfigData.COLORS.WHITE, groupColor, averageGroupGain, ConfigData.COLORS.GRAY))
+        end
     end
 end
 
