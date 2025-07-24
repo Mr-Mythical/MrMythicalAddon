@@ -17,8 +17,8 @@ Data/RewardsData.lua
 Utils/ColorUtils.lua
 Utils/KeystoneUtils.lua
 Utils/TooltipUtils.lua
-Utils/CommandHandlers.lua
-Utils/CompletionTracker.lua
 Utils/RewardsFunctions.lua
+Utils/CompletionTracker.lua
+Utils/CommandHandlers.lua
 Options.lua
 Core.lua
