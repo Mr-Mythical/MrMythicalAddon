@@ -18,14 +18,9 @@ local DungeonData = MrMythical.DungeonData
 --- Displays mythic keystone rewards for a specific level or all levels
 --- @param keyLevel number|nil Specific key level to show, or nil for all levels
 function CommandHandlers.handleRewardsCommand(keyLevel)
-    if keyLevel then
-        local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
-        local crest = RewardsFunctions.getCrestReward(keyLevel)
-        local rewardLine = string.format("Key Level %d: %s (%s) / %s (%s) | %s (%s)",
-            keyLevel, rewards.dungeonTrack, rewards.dungeonItem,
-            rewards.vaultTrack, rewards.vaultItem,
-            crest.crestType, crest.crestAmount)
-        print(rewardLine)
+    if not keyLevel then
+        MrMythical:ToggleRewardsUI()
+        return
     else
         print("Mythic Keystone Rewards by Key Level:")
         for level = 2, 12 do

@@ -21,4 +21,5 @@ Utils/RewardsFunctions.lua
 Utils/CompletionTracker.lua
 Utils/CommandHandlers.lua
 Options.lua
+RewardsUI.lua
 Core.lua
