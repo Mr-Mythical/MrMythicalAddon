@@ -22,4 +22,5 @@ Utils/CompletionTracker.lua
 Utils/CommandHandlers.lua
 Options.lua
 RewardsUI.lua
+ScoresUI.lua
 Core.lua

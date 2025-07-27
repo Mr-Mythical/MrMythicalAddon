@@ -39,7 +39,7 @@ end
 --- @param keyLevel number The keystone level to calculate scores for
 function CommandHandlers.handleScoreCommand(keyLevel)
     if not keyLevel then
-        print("Usage: /mrm score <keystone level>")
+        MrMythical:ToggleScoresUI()
         return
     end
     
