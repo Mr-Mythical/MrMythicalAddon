@@ -114,7 +114,7 @@ end
 
 local function CurrentKeyLevel_Initialize(self, level)
     local info = UIDropDownMenu_CreateInfo()
-    for i = 2, 20 do
+    for i = 2, 30 do
         info.text = i
         info.value = i
         info.func = CurrentKeyLevel_OnClick
