@@ -266,7 +266,7 @@ local function UpdateScores(timerPercentage)
     end
 end
 
-for level = 2, 20 do
+for level = 2, 30 do
     local yOffset = startY - ((level - 2) * rowHeight)
     
     -- Alternate row colors
