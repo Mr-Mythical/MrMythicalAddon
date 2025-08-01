@@ -166,7 +166,7 @@ local rowHeight = 25
 -- Update function for timer bonus changes (defined early so it can be used in OnEnter scripts)
 local function UpdateScores(timerPercentage)
     -- Update score table
-    for level = 2, 20 do
+    for level = 2, 30 do
         local row = scoreRows[level]
         if row then
             local baseScore = RewardsFunctions.scoreFormula(level)
