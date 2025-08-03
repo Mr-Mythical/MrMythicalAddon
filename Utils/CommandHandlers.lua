@@ -80,52 +80,7 @@ end
 
 --- Displays completion statistics for the current season and week
 function CommandHandlers.handleStatsCommand()
-    print(ConfigData.COLORS.GOLD .. "=== Mythic+ Completion Statistics ===" .. "|r")
-    
-    local stats = CompletionTracker:getStats()
-    local seasonTotal = stats.seasonal.completed + stats.seasonal.failed
-    
-    -- Season overview
-    print("\n" .. ConfigData.COLORS.GREEN .. "Season Overview:|r")
-    print(ConfigData.COLORS.WHITE .. string.format("Total Runs: %d", seasonTotal))
-    print(ConfigData.COLORS.WHITE .. string.format("Completed: %d (%d%%)", 
-        stats.seasonal.completed, stats.seasonal.rate))
-    print(ConfigData.COLORS.RED .. string.format("Failed: %d (%d%%)", 
-        stats.seasonal.failed, 100 - stats.seasonal.rate))
-    
-    -- Weekly overview
-    local weeklyTotal = stats.weekly.completed + stats.weekly.failed
-    print("\n" .. ConfigData.COLORS.GREEN .. "This Week:|r")
-    print(ConfigData.COLORS.WHITE .. string.format("Total Runs: %d", weeklyTotal))
-    print(ConfigData.COLORS.WHITE .. string.format("Completed: %d (%d%%)", 
-        stats.weekly.completed, stats.weekly.rate))
-    print(ConfigData.COLORS.RED .. string.format("Failed: %d (%d%%)", 
-        stats.weekly.failed, 100 - stats.weekly.rate))
-    
-    -- Weekly dungeon breakdown
-    if weeklyTotal > 0 then
-        print("\n|cff00ff00Weekly Dungeon Breakdown:|r")
-        for _, dungeon in pairs(stats.weekly.dungeons) do
-            local dungeonTotal = dungeon.completed + dungeon.failed
-            if dungeonTotal > 0 then
-                print(string.format("|cffffffff%s|r", dungeon.name))
-                print(string.format("  Completed: %d, Failed: %d (Success Rate: %d%%)", 
-                    dungeon.completed, dungeon.failed, dungeon.rate))
-            end
-        end
-    end
-end
-
---- Handles the reset command for completion statistics
---- @param scope string The scope to reset: "all", "weekly", or "seasonal"
-function CommandHandlers.handleResetCommand(scope)
-    scope = scope and scope:lower() or "all"
-    
-    if scope == "all" or scope == "weekly" or scope == "seasonal" then
-        CompletionTracker:resetStats(scope)
-    else
-        print("Usage: /mrm reset [all|weekly|seasonal]")
-    end
+    MrMythical:ToggleStatsUI()
 end
 
 --- Displays help information for all available commands
@@ -133,9 +88,8 @@ function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.GOLD .. "MrMythical Commands:|r")
     print(ConfigData.COLORS.WHITE .. "  /mrm rewards [level] - Show keystone rewards for specific level or all levels")
     print(ConfigData.COLORS.WHITE .. "  /mrm score <level> - Show score calculations and potential gains for a key level")
-    print(ConfigData.COLORS.WHITE .. "  /mrm stats - Show completion statistics for season and week")
+    print(ConfigData.COLORS.WHITE .. "  /mrm stats - Show completion statistics dashboard")
     print(ConfigData.COLORS.WHITE .. "  /mrm times - Show dungeon timer calculator with chest thresholds")
-    print(ConfigData.COLORS.WHITE .. "  /mrm reset [scope] - Reset completion statistics (all/weekly/seasonal)")
     print(ConfigData.COLORS.WHITE .. "  /mrm help - Show this help message")
 end
 
@@ -164,9 +118,6 @@ function CommandHandlers.processSlashCommand(commandString)
         CommandHandlers.handleStatsCommand()
     elseif command == "times" then
         CommandHandlers.handleTimesCommand()
-    elseif command == "reset" then
-        local scope = args[2]
-        CommandHandlers.handleResetCommand(scope)
     else
         CommandHandlers.handleHelpCommand()
     end

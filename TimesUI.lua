@@ -13,6 +13,8 @@ local DungeonData = MrMythical.DungeonData
 local TimesFrame = CreateFrame("Frame", "MrMythicalTimesFrame", UIParent, "BackdropTemplate")
 TimesFrame:SetSize(700, 500)
 TimesFrame:SetPoint("CENTER")
+TimesFrame:SetFrameStrata("DIALOG")
+TimesFrame:SetFrameLevel(100)
 TimesFrame:SetBackdrop({
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",

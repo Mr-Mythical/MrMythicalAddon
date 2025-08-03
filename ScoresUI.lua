@@ -14,6 +14,8 @@ local DungeonData = MrMythical.DungeonData
 local ScoresFrame = CreateFrame("Frame", "MrMythicalScoresFrame", UIParent, "BackdropTemplate")
 ScoresFrame:SetSize(800, 500)
 ScoresFrame:SetPoint("CENTER")
+ScoresFrame:SetFrameStrata("DIALOG")
+ScoresFrame:SetFrameLevel(100)
 ScoresFrame:SetBackdrop({
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",

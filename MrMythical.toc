@@ -23,5 +23,6 @@ Utils/CommandHandlers.lua
 Options.lua
 RewardsUI.lua
 ScoresUI.lua
+StatsUI.lua
 TimesUI.lua
 Core.lua

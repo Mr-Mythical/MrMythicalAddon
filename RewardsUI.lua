@@ -13,6 +13,8 @@ local RewardsFunctions = MrMythical.RewardsFunctions
 local RewardsFrame = CreateFrame("Frame", "MrMythicalRewardsFrame", UIParent, "BackdropTemplate")
 RewardsFrame:SetSize(600, 400)
 RewardsFrame:SetPoint("CENTER")
+RewardsFrame:SetFrameStrata("DIALOG")
+RewardsFrame:SetFrameLevel(100)
 RewardsFrame:SetBackdrop({
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
