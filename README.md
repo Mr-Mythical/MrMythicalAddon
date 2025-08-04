@@ -21,13 +21,17 @@ Configure tooltip appearance to your preference:
 - **Element filtering**: Hide duration text, affix descriptions, or other elements
 - **Title formatting**: Remove "Keystone:" prefix for cleaner display
 
+### **Unified Interface**
+Access all addon features through a single, seamless interface
+
 ### **Command Interface**
 Access information and statistics via chat commands:
-- `/mrm` - Display all available commands
-- `/mrm rewards [level]` - Show reward information for keystone levels
-- `/mrm score <level>` - Calculate score potential for specific levels
-- `/mrm stats` - View completion statistics
-- `/mrm reset [scope]` - Reset statistical data (all/weekly/seasonal)
+- `/mrm` - Open main dashboard with access to all features
+- `/mrm rewards` - Open keystone rewards UI
+- `/mrm score` - Open score calculations UI
+- `/mrm stats` - Open completion statistics dashboard
+- `/mrm times` - Open dungeon timer calculator with chest thresholds
+- `/mrm help` - Display all available commands
 
 ## Download
 
