@@ -807,6 +807,15 @@ UnifiedFrame:EnableMouse(true)
 UnifiedFrame:RegisterForDrag("LeftButton")
 UnifiedFrame:SetScript("OnDragStart", UnifiedFrame.StartMoving)
 UnifiedFrame:SetScript("OnDragStop", UnifiedFrame.StopMovingOrSizing)
+
+-- Enable escape key to close the frame
+UnifiedFrame:EnableKeyboard(true)
+UnifiedFrame:SetScript("OnKeyDown", function(self, key)
+    if key == "ESCAPE" then
+        UnifiedFrame:Hide()
+    end
+end)
+
 UnifiedFrame:Hide()
 
 -- Create navigation panel (150px wide)
@@ -942,11 +951,6 @@ end
 function MrMythical:ToggleUnifiedUI(contentType)
     UnifiedUI:Toggle(contentType or "dashboard")
 end
-
--- Initialize with dashboard content on load
-UnifiedFrame:SetScript("OnShow", function()
-    showContent("dashboard")
-end)
 
 -- Initialize with dashboard content immediately
 showContent("dashboard")
