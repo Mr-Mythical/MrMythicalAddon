@@ -810,10 +810,15 @@ UnifiedFrame:SetScript("OnDragStop", UnifiedFrame.StopMovingOrSizing)
 
 -- Enable escape key to close the frame
 UnifiedFrame:EnableKeyboard(true)
+UnifiedFrame:SetPropagateKeyboardInput(true)
 UnifiedFrame:SetScript("OnKeyDown", function(self, key)
     if key == "ESCAPE" then
         UnifiedFrame:Hide()
+        self:SetPropagateKeyboardInput(false)
+        return
     end
+    -- Propagate all other keys to the game
+    self:SetPropagateKeyboardInput(true)
 end)
 
 UnifiedFrame:Hide()
