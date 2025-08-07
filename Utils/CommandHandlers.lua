@@ -59,6 +59,7 @@ function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.WHITE .. "  /mrm score - Open score calculations UI")
     print(ConfigData.COLORS.WHITE .. "  /mrm stats - Open completion statistics dashboard")
     print(ConfigData.COLORS.WHITE .. "  /mrm times - Open dungeon timers with chest thresholds")
+    print(ConfigData.COLORS.WHITE .. "  /mrm settings - Open addon settings panel")
     print(ConfigData.COLORS.WHITE .. "  /mrm help - Show this help message")
 end
 
@@ -68,6 +69,15 @@ function CommandHandlers.handleTimesCommand()
         MrMythical.UnifiedUI:Show("times")
     else
         print("Times UI not available")
+    end
+end
+
+--- Opens the addon settings panel
+function CommandHandlers.handleSettingsCommand()
+    if MrMythical.Options then
+        MrMythical.Options.openSettings()
+    else
+        print("Settings not available")
     end
 end
 
@@ -89,6 +99,8 @@ function CommandHandlers.processSlashCommand(commandString)
         CommandHandlers.handleStatsCommand()
     elseif command == "times" then
         CommandHandlers.handleTimesCommand()
+    elseif command == "settings" or command == "config" or command == "options" then
+        CommandHandlers.handleSettingsCommand()
     elseif command == "help" then
         CommandHandlers.handleHelpCommand()
     else

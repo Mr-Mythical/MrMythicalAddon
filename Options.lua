@@ -293,5 +293,15 @@ function Options.getIntegrationInfo()
     }
 end
 
+-- Function to open the addon settings panel
+function Options.openSettings()
+    local registry = _G.MrMythicalSettingsRegistry
+    if registry and registry.parentCategory then
+        Settings.OpenToCategory(registry.parentCategory:GetID())
+    else
+        SettingsPanel:Open()
+    end
+end
+
 MrMythical.Options = Options
 _G.MrMythical = MrMythical

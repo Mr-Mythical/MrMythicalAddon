@@ -808,7 +808,6 @@ UnifiedFrame:RegisterForDrag("LeftButton")
 UnifiedFrame:SetScript("OnDragStart", UnifiedFrame.StartMoving)
 UnifiedFrame:SetScript("OnDragStop", UnifiedFrame.StopMovingOrSizing)
 
--- Enable escape key to close the frame
 UnifiedFrame:EnableKeyboard(true)
 UnifiedFrame:SetPropagateKeyboardInput(true)
 UnifiedFrame:SetScript("OnKeyDown", function(self, key)
@@ -823,7 +822,6 @@ end)
 
 UnifiedFrame:Hide()
 
--- Create navigation panel (150px wide)
 local navPanel = CreateFrame("Frame", nil, UnifiedFrame, "BackdropTemplate")
 navPanel:SetPoint("TOPLEFT", 10, -10)
 navPanel:SetSize(140, 480)
@@ -842,15 +840,14 @@ local buttonData = {
     {id = "rewards", text = "Rewards", y = -60},
     {id = "scores", text = "Scores", y = -100},
     {id = "stats", text = "Statistics", y = -140},
-    {id = "times", text = "Times", y = -180}
+    {id = "times", text = "Times", y = -180},
+    {id = "settings", text = "Settings", y = -220}
 }
 
--- Content frame (680px wide)
 local contentFrame = CreateFrame("Frame", nil, UnifiedFrame)
 contentFrame:SetPoint("TOPLEFT", 160, -10)
 contentFrame:SetSize(680, 480)
 
--- Current content state
 local currentContent = "dashboard"
 local activeButton = nil
 
@@ -901,6 +898,23 @@ for _, buttonInfo in ipairs(buttonData) do
     button:SetText(buttonInfo.text)
     
     button:SetScript("OnClick", function()
+        if buttonInfo.id == "settings" then
+            UnifiedUI:Hide()
+            
+            local registry = _G.MrMythicalSettingsRegistry
+            if registry and registry.parentCategory and registry.parentCategory.GetID then
+                Settings.OpenToCategory(registry.parentCategory:GetID())
+            elseif MrMythical.Options and MrMythical.Options.openSettings then
+                -- Fallback to the Options module
+                MrMythical.Options.openSettings()
+            else
+                -- Last resort: open general settings
+                SettingsPanel:Open()
+                print("Mr. Mythical: Settings category not found. Please access via Game Menu > Options > AddOns.")
+            end
+            return
+        end
+        
         -- Reset all buttons to normal state
         for _, otherButton in pairs(navButtons) do
             if otherButton ~= button then
@@ -922,7 +936,6 @@ for _, buttonInfo in ipairs(buttonData) do
     end
 end
 
--- Close button
 local closeButton = CreateFrame("Button", nil, UnifiedFrame, "UIPanelCloseButton")
 closeButton:SetPoint("TOPRIGHT", -5, -5)
 
@@ -957,5 +970,4 @@ function MrMythical:ToggleUnifiedUI(contentType)
     UnifiedUI:Toggle(contentType or "dashboard")
 end
 
--- Initialize with dashboard content immediately
 showContent("dashboard")
