@@ -9,17 +9,38 @@ Author: Braunerr
 local MrMythical = MrMythical or {}
 
 MrMythical.DungeonData = {
-    MYTHIC_MAPS = {
-        { id = 506, name = "Cinderbrew Meadery", parTime = 1980 },
-        { id = 504, name = "Darkflame Cleft", parTime = 1860 },
-        { id = 370, name = "Mechagon Workshop", parTime = 1920 },
-        { id = 525, name = "Operation: Floodgate", parTime = 1980 },
-        { id = 499, name = "Priory of the Sacred Flame", parTime = 1950 },
-        { id = 247, name = "The MOTHERLODE!!", parTime = 1980 },
-        { id = 500, name = "The Rookery", parTime = 1740 },
-        { id = 382, name = "Theater of Pain", parTime = 2040 }
-    }
+    MYTHIC_MAPS = {}
 }
+
+--- Refresh the MYTHIC_MAPS list from the live API (id, name, parTime if available)
+function MrMythical.DungeonData.refreshFromAPI()
+    local maps = {}
+    local mapIDs = C_ChallengeMode and C_ChallengeMode.GetMapTable and C_ChallengeMode.GetMapTable() or nil
+    if type(mapIDs) ~= "table" or #mapIDs == 0 then
+        -- Nothing to do; keep current table (possibly empty)
+        return
+    end
+
+    local missingTimers = {}
+    local withTimers = 0
+
+    for _, id in ipairs(mapIDs) do
+        local name = nil
+        if C_ChallengeMode and C_ChallengeMode.GetMapUIInfo then
+            local n, _, timeLimit = C_ChallengeMode.GetMapUIInfo(id)
+            if type(n) == "string" then name = n end
+            local parTime = (type(timeLimit) == "number" and timeLimit > 0) and math.floor(timeLimit) or nil
+            if parTime then withTimers = withTimers + 1 else table.insert(missingTimers, string.format("%s(%d)", name or "?", id)) end
+            table.insert(maps, { id = id, name = name or ("Map "..tostring(id)), parTime = parTime })
+        else
+            table.insert(maps, { id = id, name = name or ("Map "..tostring(id)), parTime = nil })
+        end
+    end
+
+    MrMythical.DungeonData.MYTHIC_MAPS = maps
+
+    -- Debug output removed
+end
 
 --- Gets the par time for a specific dungeon map ID
 --- @param mapID number The dungeon map ID

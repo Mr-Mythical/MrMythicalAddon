@@ -10,27 +10,27 @@ local MrMythical = MrMythical or {}
 
 MrMythical.RewardsData = {
     DUNGEON_GEAR = {
-        { itemLevel = 639, upgradeTrack = "Champion 2" },  -- Key Level 2
-        { itemLevel = 639, upgradeTrack = "Champion 2" },  -- Key Level 3
-        { itemLevel = 642, upgradeTrack = "Champion 3" },  -- Key Level 4
-        { itemLevel = 645, upgradeTrack = "Champion 4" },  -- Key Level 5
-        { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 6
-        { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 7
-        { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 8
-        { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 9
-        { itemLevel = 655, upgradeTrack = "Hero 3" }       -- Key Level 10+
+        { itemLevel = 684, upgradeTrack = "Champion 2" },  -- Key Level 2
+        { itemLevel = 684, upgradeTrack = "Champion 2" },  -- Key Level 3
+        { itemLevel = 688, upgradeTrack = "Champion 3" },  -- Key Level 4
+        { itemLevel = 691, upgradeTrack = "Champion 4" },  -- Key Level 5
+        { itemLevel = 694, upgradeTrack = "Hero 1" },      -- Key Level 6
+        { itemLevel = 694, upgradeTrack = "Hero 1" },      -- Key Level 7
+        { itemLevel = 697, upgradeTrack = "Hero 2" },      -- Key Level 8
+        { itemLevel = 697, upgradeTrack = "Hero 2" },      -- Key Level 9
+        { itemLevel = 701, upgradeTrack = "Hero 3" }       -- Key Level 10+
     },
 
     VAULT_GEAR = {
-        { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 2
-        { itemLevel = 649, upgradeTrack = "Hero 1" },      -- Key Level 3
-        { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 4
-        { itemLevel = 652, upgradeTrack = "Hero 2" },      -- Key Level 5
-        { itemLevel = 655, upgradeTrack = "Hero 3" },      -- Key Level 6
-        { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 7
-        { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 8
-        { itemLevel = 658, upgradeTrack = "Hero 4" },      -- Key Level 9
-        { itemLevel = 662, upgradeTrack = "Myth 1" }       -- Key Level 10+
+        { itemLevel = 694, upgradeTrack = "Hero 1" },      -- Key Level 2
+        { itemLevel = 694, upgradeTrack = "Hero 1" },      -- Key Level 3
+        { itemLevel = 697, upgradeTrack = "Hero 2" },      -- Key Level 4
+        { itemLevel = 697, upgradeTrack = "Hero 2" },      -- Key Level 5
+        { itemLevel = 701, upgradeTrack = "Hero 3" },      -- Key Level 6
+        { itemLevel = 704, upgradeTrack = "Hero 4" },      -- Key Level 7
+        { itemLevel = 704, upgradeTrack = "Hero 4" },      -- Key Level 8
+        { itemLevel = 704, upgradeTrack = "Hero 4" },      -- Key Level 9
+        { itemLevel = 707, upgradeTrack = "Myth 1" }       -- Key Level 10+
     },
 
     CRESTS = {
