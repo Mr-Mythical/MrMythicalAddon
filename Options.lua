@@ -64,7 +64,7 @@ function Options.initializeSettings()
         SHOW_PAR_TIME = false,
         PLAIN_SCORE_COLORS = false,
         LEVEL_DISPLAY = "OFF",
-        LEVEL_SHIFT_MODE = "NORMAL",
+        LEVEL_SHIFT_MODE = "NONE",
         SHORT_TITLE = false
     }
 
