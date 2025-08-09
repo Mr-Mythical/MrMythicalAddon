@@ -65,7 +65,11 @@ function Options.initializeSettings()
         PLAIN_SCORE_COLORS = false,
         LEVEL_DISPLAY = "OFF",
         LEVEL_SHIFT_MODE = "NONE",
-        SHORT_TITLE = false
+        SHORT_TITLE = false,
+        UNIFIED_FRAME_POINT = "CENTER",
+        UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
+        UNIFIED_FRAME_X = 0,
+        UNIFIED_FRAME_Y = 0
     }
 
     MRM_SavedVars = MRM_SavedVars or {}

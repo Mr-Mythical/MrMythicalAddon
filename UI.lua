@@ -820,7 +820,18 @@ local MainFrameManager = {}
 function MainFrameManager.createUnifiedFrame()
     local frame = CreateFrame("Frame", "MrMythicalUnifiedFrame", UIParent, "BackdropTemplate")
     frame:SetSize(CONSTANTS.FRAME_WIDTH, CONSTANTS.FRAME_HEIGHT)
-    frame:SetPoint("CENTER")
+    -- Attempt to restore saved position
+    if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
+        frame:SetPoint(
+            MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER",
+            UIParent,
+            MRM_SavedVars.UNIFIED_FRAME_RELATIVE_POINT or (MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER"),
+            MRM_SavedVars.UNIFIED_FRAME_X or 0,
+            MRM_SavedVars.UNIFIED_FRAME_Y or 0
+        )
+    else
+        frame:SetPoint("CENTER")
+    end
     frame:SetFrameStrata("DIALOG")
     frame:SetFrameLevel(100)
     frame:SetBackdrop({
@@ -842,7 +853,17 @@ function MainFrameManager.setupFrameBehavior(frame)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+    frame:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        if not MRM_SavedVars then return end
+        local point, _, relativePoint, xOfs, yOfs = self:GetPoint(1)
+        if point then
+            MRM_SavedVars.UNIFIED_FRAME_POINT = point
+            MRM_SavedVars.UNIFIED_FRAME_RELATIVE_POINT = relativePoint or point
+            MRM_SavedVars.UNIFIED_FRAME_X = xOfs or 0
+            MRM_SavedVars.UNIFIED_FRAME_Y = yOfs or 0
+        end
+    end)
     
     frame:EnableKeyboard(true)
     frame:SetPropagateKeyboardInput(true)
@@ -992,6 +1013,17 @@ closeButton:SetPoint("TOPRIGHT", -5, -5)
 
 -- Public API functions
 function UnifiedUI:Show(contentType)
+    -- Re-anchor before showing to avoid drift after resolution/UI scale changes
+    if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
+        UnifiedFrame:ClearAllPoints()
+        UnifiedFrame:SetPoint(
+            MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER",
+            UIParent,
+            MRM_SavedVars.UNIFIED_FRAME_RELATIVE_POINT or (MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER"),
+            MRM_SavedVars.UNIFIED_FRAME_X or 0,
+            MRM_SavedVars.UNIFIED_FRAME_Y or 0
+        )
+    end
     UnifiedFrame:Show()
     if contentType and contentType ~= "dashboard" then
         NavigationManager.showContent(contentType, contentFrame)
