@@ -23,16 +23,21 @@ local DungeonData = MrMythical.DungeonData
 local CompletionTracker = MrMythical.CompletionTracker
 
 -- Constants
-local CONSTANTS = {
-    FRAME_WIDTH = 850,
-    FRAME_HEIGHT = 500,
-    NAV_PANEL_WIDTH = 140,
-    CONTENT_FRAME_WIDTH = 680,
-    ROW_HEIGHT = 25,
-    LARGE_ROW_HEIGHT = 30,
-    BUTTON_HEIGHT = 30,
-    PADDING = 10,
-    LARGE_PADDING = 20,
+local UI_CONSTANTS = {
+    FRAME = {
+        WIDTH = 850,
+        HEIGHT = 500,
+        NAV_PANEL_WIDTH = 140,
+        CONTENT_WIDTH = 680,
+    },
+    
+    LAYOUT = {
+        ROW_HEIGHT = 25,
+        LARGE_ROW_HEIGHT = 30,
+        BUTTON_HEIGHT = 30,
+        PADDING = 10,
+        LARGE_PADDING = 20,
+    },
     
     COLORS = {
         EVEN_ROW = {r = 0.1, g = 0.1, b = 0.1, a = 0.3},
@@ -43,6 +48,15 @@ local CONSTANTS = {
         DISABLED = {r = 0.5, g = 0.5, b = 0.5},
         INFO_TEXT = {r = 0.8, g = 0.8, b = 0.8},
         NAV_BACKGROUND = {r = 0.1, g = 0.1, b = 0.1, a = 0.8}
+    },
+    
+    CONTENT_TYPES = {
+        DASHBOARD = "dashboard",
+        REWARDS = "rewards",
+        SCORES = "scores",
+        STATS = "stats",
+        TIMES = "times",
+        SETTINGS = "settings"
     }
 }
 
@@ -70,9 +84,9 @@ end
 function UIHelpers.createRowBackground(parent, yOffset, width, isEven)
     local bg = parent:CreateTexture(nil, "BACKGROUND")
     bg:SetPoint("TOPLEFT", 0, yOffset)
-    bg:SetSize(width, CONSTANTS.ROW_HEIGHT)
+    bg:SetSize(width, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
     
-    local color = isEven and CONSTANTS.COLORS.EVEN_ROW or CONSTANTS.COLORS.ODD_ROW
+    local color = isEven and UI_CONSTANTS.COLORS.EVEN_ROW or UI_CONSTANTS.COLORS.ODD_ROW
     bg:SetColorTexture(color.r, color.g, color.b, color.a)
     return bg
 end
@@ -99,7 +113,7 @@ function UIHelpers.formatTime(timeInSeconds)
 end
 
 function UIHelpers.setTextColor(fontString, colorName)
-    local color = CONSTANTS.COLORS[colorName]
+    local color = UI_CONSTANTS.COLORS[colorName]
     if color then
         fontString:SetTextColor(color.r, color.g, color.b, color.a)
     end
@@ -114,7 +128,7 @@ local NavigationManager = {}
 --- Creates the dashboard content
 function UIContentCreators.dashboard(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge", 
-        "Mr. Mythical Dashboard", "TOP", 0, -CONSTANTS.LARGE_PADDING)
+        "Mr. Mythical Dashboard", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     
     local subtitle = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontHighlight",
         "Mythic+ Tools & Information", "TOP", 0, -5)
@@ -127,23 +141,23 @@ function UIContentCreators.dashboard(parentFrame)
     welcome:SetJustifyH("CENTER")
     
     local version = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontDisableSmall",
-        "Mr. Mythical by Braunerr", "BOTTOM", 0, CONSTANTS.LARGE_PADDING)
+        "Mr. Mythical by Braunerr", "BOTTOM", 0, UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     UIHelpers.setTextColor(version, "DISABLED")
 end
 
 --- Creates the rewards content with comprehensive reward information
 function UIContentCreators.rewards(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Mythic+ Rewards", "TOP", 0, -CONSTANTS.LARGE_PADDING)
+        "Mythic+ Rewards", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     
     local rewardsTableFrame = CreateFrame("Frame", nil, parentFrame)
-    rewardsTableFrame:SetPoint("TOPLEFT", CONSTANTS.LARGE_PADDING, -60)
+    rewardsTableFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -60)
     rewardsTableFrame:SetSize(530, 380)
     
-    UIContentCreators._createRewardsTable(rewardsTableFrame)
+    UIContentCreators.createRewardsTable(rewardsTableFrame)
 end
 
-function UIContentCreators._createRewardsTable(parentFrame)
+function UIContentCreators.createRewardsTable(parentFrame)
     -- Create table headers
     UIHelpers.createHeader(parentFrame, "Key Level", 0, 80)
     UIHelpers.createHeader(parentFrame, "End of Dungeon", 80, 150)
@@ -153,12 +167,12 @@ function UIContentCreators._createRewardsTable(parentFrame)
     -- Populate table with reward data
     local startY = -25
     for level = 2, 12 do
-        UIContentCreators._createRewardRow(parentFrame, level, startY, level - 2)
+        UIContentCreators.createRewardRow(parentFrame, level, startY, level - 2)
     end
 end
 
-function UIContentCreators._createRewardRow(parentFrame, level, startY, index)
-    local yOffset = startY - (index * CONSTANTS.ROW_HEIGHT)
+function UIContentCreators.createRewardRow(parentFrame, level, startY, index)
+    local yOffset = startY - (index * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
     local isEven = level % 2 == 0
     
     -- Create alternating row background
@@ -192,7 +206,7 @@ end
 --- Creates the scores content with interactive score calculator
 function UIContentCreators.scores(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Mythic+ Score Calculator", "TOP", 0, -CONSTANTS.LARGE_PADDING)
+        "Mythic+ Score Calculator", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     
     local descText = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalSmall",
         "Hover over key levels in the left table to see potential score gains for your dungeons on the right",
@@ -202,16 +216,16 @@ function UIContentCreators.scores(parentFrame)
     descText:SetJustifyH("CENTER")
     UIHelpers.setTextColor(descText, "INFO_TEXT")
     
-    local timerSlider = UIContentCreators._createTimerSlider(parentFrame)
-    local currentKeyLevel = UIContentCreators._createKeyLevelDropdown(parentFrame)
-    local scoreRows, gainRows = UIContentCreators._createScoreTables(parentFrame)
+    local timerSlider = UIContentCreators.createTimerSlider(parentFrame)
+    local currentKeyLevel = UIContentCreators.createKeyLevelDropdown(parentFrame)
+    local scoreRows, gainRows = UIContentCreators.createScoreTables(parentFrame)
     
-    UIContentCreators._setupScoreCalculator(timerSlider, currentKeyLevel, scoreRows, gainRows)
+    UIContentCreators.setupScoreCalculator(timerSlider, currentKeyLevel, scoreRows, gainRows)
 end
 
-function UIContentCreators._createTimerSlider(parentFrame)
+function UIContentCreators.createTimerSlider(parentFrame)
     local timerLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "Timer Bonus:", "TOPLEFT", CONSTANTS.LARGE_PADDING, -80)
+        "Timer Bonus:", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -80)
     
     local timerSlider = CreateFrame("Slider", "MrMythicalUnifiedTimerSlider", parentFrame, "OptionsSliderTemplate")
     timerSlider:SetPoint("TOPLEFT", 120, -75)
@@ -228,7 +242,8 @@ function UIContentCreators._createTimerSlider(parentFrame)
     
     return timerSlider
 end
-function UIContentCreators._createKeyLevelDropdown(parentFrame)
+
+function UIContentCreators.createKeyLevelDropdown(parentFrame)
     local currentKeyLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
         "Using Key Level:", "TOPLEFT", 350, -110)
     
@@ -240,10 +255,10 @@ function UIContentCreators._createKeyLevelDropdown(parentFrame)
     return currentKeyLevel
 end
 
-function UIContentCreators._createScoreTables(parentFrame)
+function UIContentCreators.createScoreTables(parentFrame)
     -- Create score calculation table
     local scoreScrollFrame = CreateFrame("ScrollFrame", nil, parentFrame, "UIPanelScrollFrameTemplate")
-    scoreScrollFrame:SetPoint("TOPLEFT", CONSTANTS.LARGE_PADDING, -110)
+    scoreScrollFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -110)
     scoreScrollFrame:SetSize(320, 320)
     
     local scoreContentFrame = CreateFrame("Frame", nil, scoreScrollFrame)
@@ -270,15 +285,15 @@ function UIContentCreators._createScoreTables(parentFrame)
     UIHelpers.createHeader(gainsTableFrame, "Score", 190, 60)
     UIHelpers.createHeader(gainsTableFrame, "Gain", 250, 60)
     
-    return UIContentCreators._createScoreRows(scoreContentFrame), UIContentCreators._createGainRows(gainsTableFrame)
+    return UIContentCreators.createScoreRows(scoreContentFrame), UIContentCreators.createGainRows(gainsTableFrame)
 end
 
-function UIContentCreators._createScoreRows(scoreContentFrame)
+function UIContentCreators.createScoreRows(scoreContentFrame)
     local scoreRows = {}
     local startY = -25
     
     for level = 2, 30 do
-        local yOffset = startY - ((level - 2) * CONSTANTS.ROW_HEIGHT)
+        local yOffset = startY - ((level - 2) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
         local isEven = level % 2 == 0
         
         UIHelpers.createRowBackground(scoreContentFrame, yOffset, 320, isEven)
@@ -296,7 +311,7 @@ function UIContentCreators._createScoreRows(scoreContentFrame)
             -- Make the row interactive for hovering
             local rowFrame = CreateFrame("Button", nil, scoreContentFrame)
             rowFrame:SetPoint("TOPLEFT", 0, yOffset)
-            rowFrame:SetSize(320, CONSTANTS.ROW_HEIGHT)
+            rowFrame:SetSize(320, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
             rowFrame:EnableMouse(true)
             rowFrame.level = level
             scoreRows[level].frame = rowFrame
@@ -306,7 +321,7 @@ function UIContentCreators._createScoreRows(scoreContentFrame)
     return scoreRows
 end
 
-function UIContentCreators._createGainRows(gainsTableFrame)
+function UIContentCreators.createGainRows(gainsTableFrame)
     local gainRows = {}
     
     if not DungeonData or not DungeonData.MYTHIC_MAPS then
@@ -314,11 +329,11 @@ function UIContentCreators._createGainRows(gainsTableFrame)
     end
     
     -- Create initial dungeon data
-    local dungeonData = UIContentCreators._getDungeonData()
+    local dungeonData = UIContentCreators.getDungeonData()
     local startY = -25
     
     for i, data in ipairs(dungeonData) do
-        local yOffset = startY - ((i - 1) * CONSTANTS.ROW_HEIGHT)
+        local yOffset = startY - ((i - 1) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
         local isEven = i % 2 == 0
         
         UIHelpers.createRowBackground(gainsTableFrame, yOffset, 310, isEven)
@@ -336,7 +351,7 @@ function UIContentCreators._createGainRows(gainsTableFrame)
     return gainRows
 end
 
-function UIContentCreators._getDungeonData()
+function UIContentCreators.getDungeonData()
     local dungeonData = {}
     
     for i, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
@@ -371,10 +386,10 @@ function UIContentCreators._getDungeonData()
     return dungeonData
 end
 
-function UIContentCreators._setupScoreCalculator(timerSlider, currentKeyLevel, scoreRows, gainRows)
+function UIContentCreators.setupScoreCalculator(timerSlider, currentKeyLevel, scoreRows, gainRows)
     local function updateScores(timerPercentage)
-        UIContentCreators._updateScoreTable(scoreRows, timerPercentage)
-        UIContentCreators._updateDungeonGains(gainRows, currentKeyLevel, timerPercentage)
+        UIContentCreators.updateScoreTable(scoreRows, timerPercentage)
+        UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPercentage)
     end
     
     -- Setup dropdown
@@ -415,7 +430,7 @@ function UIContentCreators._setupScoreCalculator(timerSlider, currentKeyLevel, s
     updateScores(0)
 end
 
-function UIContentCreators._updateScoreTable(scoreRows, timerPercentage)
+function UIContentCreators.updateScoreTable(scoreRows, timerPercentage)
     if not RewardsFunctions or not RewardsFunctions.scoreFormula then
         return
     end
@@ -434,7 +449,7 @@ function UIContentCreators._updateScoreTable(scoreRows, timerPercentage)
     end
 end
 
-function UIContentCreators._updateDungeonGains(gainRows, currentKeyLevel, timerPercentage)
+function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPercentage)
     local selectedLevel = tonumber(UIDropDownMenu_GetText(currentKeyLevel))
     if not selectedLevel or not RewardsFunctions or not RewardsFunctions.scoreFormula then
         return
@@ -443,7 +458,7 @@ function UIContentCreators._updateDungeonGains(gainRows, currentKeyLevel, timerP
     local finalScore = RewardsFunctions.scoreFormula(selectedLevel)
     finalScore = finalScore + math.floor(15 * (timerPercentage / 40))
     
-    local dungeonData = UIContentCreators._getDungeonData()
+    local dungeonData = UIContentCreators.getDungeonData()
     
     for i, data in ipairs(dungeonData) do
         if gainRows[i] then
@@ -463,45 +478,45 @@ end
 --- Creates the stats content with completion tracking and analysis
 function UIContentCreators.stats(parentFrame)
     local scrollFrame = CreateFrame("ScrollFrame", nil, parentFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", CONSTANTS.LARGE_PADDING, -CONSTANTS.LARGE_PADDING)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -CONSTANTS.LARGE_PADDING - 15, CONSTANTS.LARGE_PADDING)
+    scrollFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -UI_CONSTANTS.LAYOUT.LARGE_PADDING - 15, UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     
     local scrollChild = CreateFrame("Frame", nil, scrollFrame)
     scrollChild:SetSize(600, 450)
     scrollFrame:SetScrollChild(scrollChild)
     
     -- Create overview panels
-    local seasonStats, weeklyStats = UIContentCreators._createStatsOverview(scrollChild)
+    local seasonStats, weeklyStats = UIContentCreators.createStatsOverview(scrollChild)
     
     -- Create dungeon breakdown section
-    local dungeonBreakdown = UIContentCreators._createDungeonBreakdown(scrollChild)
+    local dungeonBreakdown = UIContentCreators.createDungeonBreakdown(scrollChild)
     
     -- Create info panel
-    UIContentCreators._createStatsInfoPanel(scrollChild)
+    UIContentCreators.createStatsInfoPanel(scrollChild)
     
     -- Initial data update
-    UIContentCreators._updateStats(seasonStats, weeklyStats, dungeonBreakdown)
+    UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
     
     -- Update when frame becomes visible or data changes
     parentFrame:SetScript("OnShow", function()
         if seasonStats and weeklyStats and dungeonBreakdown then
             C_Timer.After(0.1, function()
                 if parentFrame:IsVisible() then
-                    UIContentCreators._updateStats(seasonStats, weeklyStats, dungeonBreakdown)
+                    UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
                 end
             end)
         end
     end)
 end
 
-function UIContentCreators._createStatsOverview(parentFrame)
+function UIContentCreators.createStatsOverview(parentFrame)
     -- Season overview section
     local seasonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Season Overview", "TOPLEFT", CONSTANTS.LARGE_PADDING, -50)
+        "Season Overview", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -50)
     UIHelpers.setTextColor(seasonLabel, "SUCCESS_HIGH")
     
     local seasonStats = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "", "TOPLEFT", CONSTANTS.LARGE_PADDING, -75)
+        "", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -75)
     seasonStats:SetWidth(320)
     seasonStats:SetJustifyH("LEFT")
     
@@ -518,13 +533,13 @@ function UIContentCreators._createStatsOverview(parentFrame)
     return seasonStats, weeklyStats
 end
 
-function UIContentCreators._createDungeonBreakdown(parentFrame)
+function UIContentCreators.createDungeonBreakdown(parentFrame)
     local dungeonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Dungeon Breakdown", "TOPLEFT", CONSTANTS.LARGE_PADDING, -150)
+        "Dungeon Breakdown", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -150)
     UIHelpers.setTextColor(dungeonLabel, "SUCCESS_HIGH")
     
-    local seasonalTab, weeklyTab = UIContentCreators._createStatsTabs(parentFrame)
-    local dungeonTableFrame = UIContentCreators._createDungeonTable(parentFrame)
+    local seasonalTab, weeklyTab = UIContentCreators.createStatsTabs(parentFrame)
+    local dungeonTableFrame = UIContentCreators.createDungeonTable(parentFrame)
     
     local dungeonRows = {}
     local currentStatsView = {value = "weekly"}  -- Use table for reference passing
@@ -532,14 +547,14 @@ function UIContentCreators._createDungeonBreakdown(parentFrame)
     -- Setup tab functionality
     seasonalTab:SetScript("OnClick", function()
         currentStatsView.value = "seasonal"
-        UIContentCreators._updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
+        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
         seasonalTab:Disable()
         weeklyTab:Enable()
     end)
     
     weeklyTab:SetScript("OnClick", function()
         currentStatsView.value = "weekly"
-        UIContentCreators._updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
+        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
         weeklyTab:Disable()
         seasonalTab:Enable()
     end)
@@ -555,27 +570,27 @@ function UIContentCreators._createDungeonBreakdown(parentFrame)
     }
 end
 
-function UIContentCreators._createStatsTabs(parentFrame)
+function UIContentCreators.createStatsTabs(parentFrame)
     local tabFrame = CreateFrame("Frame", nil, parentFrame)
-    tabFrame:SetPoint("TOPLEFT", CONSTANTS.LARGE_PADDING, -175)
+    tabFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -175)
     tabFrame:SetSize(620, 30)
     
     local seasonalTab = CreateFrame("Button", nil, tabFrame, "UIPanelButtonTemplate")
     seasonalTab:SetPoint("TOPLEFT", 0, 0)
-    seasonalTab:SetSize(100, CONSTANTS.ROW_HEIGHT)
+    seasonalTab:SetSize(100, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
     seasonalTab:SetText("Seasonal")
     
     local weeklyTab = CreateFrame("Button", nil, tabFrame, "UIPanelButtonTemplate")
     weeklyTab:SetPoint("TOPLEFT", 105, 0)
-    weeklyTab:SetSize(100, CONSTANTS.ROW_HEIGHT)
+    weeklyTab:SetSize(100, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
     weeklyTab:SetText("Weekly")
     
     return seasonalTab, weeklyTab
 end
 
-function UIContentCreators._createDungeonTable(parentFrame)
+function UIContentCreators.createDungeonTable(parentFrame)
     local dungeonTableFrame = CreateFrame("Frame", nil, parentFrame)
-    dungeonTableFrame:SetPoint("TOPLEFT", CONSTANTS.LARGE_PADDING, -205)
+    dungeonTableFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -205)
     dungeonTableFrame:SetSize(620, 220)
     
     -- Create table headers
@@ -588,7 +603,7 @@ function UIContentCreators._createDungeonTable(parentFrame)
     return dungeonTableFrame
 end
 
-function UIContentCreators._updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView)
+function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView)
     if not CompletionTracker or not dungeonTableFrame or not dungeonRows then
         return
     end
@@ -634,7 +649,7 @@ function UIContentCreators._updateDungeonBreakdown(dungeonTableFrame, dungeonRow
     -- Create new rows
     local startY = -25
     for i, data in ipairs(dungeonData) do
-        local yOffset = startY - ((i - 1) * CONSTANTS.ROW_HEIGHT)
+        local yOffset = startY - ((i - 1) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
         local isEven = i % 2 == 0
         
         UIHelpers.createRowBackground(dungeonTableFrame, yOffset, 620, isEven)
@@ -648,17 +663,17 @@ function UIContentCreators._updateDungeonBreakdown(dungeonTableFrame, dungeonRow
         }
         
         -- Color code the success rate
-        local colorName = UIContentCreators._getSuccessRateColor(data.rate)
+        local colorName = UIContentCreators.getSuccessRateColor(data.rate)
         UIHelpers.setTextColor(dungeonRows[i].rate, colorName)
     end
     
     -- Show no data message if needed
     if #dungeonData == 0 then
-        UIContentCreators._showNoDungeonDataMessage(dungeonTableFrame, dungeonRows, currentStatsView, startY)
+        UIContentCreators.showNoDungeonDataMessage(dungeonTableFrame, dungeonRows, currentStatsView, startY)
     end
 end
 
-function UIContentCreators._getSuccessRateColor(rate)
+function UIContentCreators.getSuccessRateColor(rate)
     if rate >= 80 then
         return "SUCCESS_HIGH"
     elseif rate >= 60 then
@@ -668,7 +683,7 @@ function UIContentCreators._getSuccessRateColor(rate)
     end
 end
 
-function UIContentCreators._showNoDungeonDataMessage(dungeonTableFrame, dungeonRows, currentStatsView, startY)
+function UIContentCreators.showNoDungeonDataMessage(dungeonTableFrame, dungeonRows, currentStatsView, startY)
     dungeonRows[1] = {
         name = UIHelpers.createRowText(dungeonTableFrame, 
             string.format("No %s dungeon data available", currentStatsView), 0, startY, 620)
@@ -676,7 +691,7 @@ function UIContentCreators._showNoDungeonDataMessage(dungeonTableFrame, dungeonR
     dungeonRows[1].name:SetTextColor(0.7, 0.7, 0.7)
 end
 
-function UIContentCreators._updateStats(seasonStats, weeklyStats, dungeonBreakdown)
+function UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
     if not CompletionTracker then
         seasonStats:SetText("CompletionTracker not available\n\nPlease run some Mythic+ dungeons to see statistics here.")
         weeklyStats:SetText("Statistics will appear here once you complete some dungeons this week.")
@@ -709,10 +724,10 @@ function UIContentCreators._updateStats(seasonStats, weeklyStats, dungeonBreakdo
     weeklyStats:SetText(weeklyText)
     
     -- Update dungeon breakdown
-    UIContentCreators._updateDungeonBreakdown(dungeonBreakdown.tableFrame, dungeonBreakdown.rows, dungeonBreakdown.currentStatsView.value)
+    UIContentCreators.updateDungeonBreakdown(dungeonBreakdown.tableFrame, dungeonBreakdown.rows, dungeonBreakdown.currentStatsView.value)
 end
 
-function UIContentCreators._createStatsInfoPanel(parentFrame)
+function UIContentCreators.createStatsInfoPanel(parentFrame)
     local infoText = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalSmall",
         "Statistics are tracked automatically when you complete Mythic+ dungeons. Use tabs to switch between seasonal and weekly data.",
         "BOTTOM", 0, 25)
@@ -721,49 +736,20 @@ function UIContentCreators._createStatsInfoPanel(parentFrame)
     UIHelpers.setTextColor(infoText, "INFO_TEXT")
 end
 
-function UIContentCreators._initializeStats(seasonStats, weeklyStats, dungeonBreakdown)
-    -- Initial attempt to load stats
-    UIContentCreators._updateStats(seasonStats, weeklyStats, dungeonBreakdown)
-    
-    -- If CompletionTracker isn't available yet, set up a retry timer
-    if not CompletionTracker then
-        local retryFrame = CreateFrame("Frame")
-        local retryCount = 0
-        local maxRetries = 5
-        
-        retryFrame:SetScript("OnUpdate", function(self, elapsed)
-            self.elapsed = (self.elapsed or 0) + elapsed
-            if self.elapsed >= 1 then -- Check every second
-                self.elapsed = 0
-                retryCount = retryCount + 1
-                
-                if CompletionTracker then
-                    -- Successfully found CompletionTracker, update stats and stop retrying
-                    UIContentCreators._updateStats(seasonStats, weeklyStats, dungeonBreakdown)
-                    self:SetScript("OnUpdate", nil)
-                elseif retryCount >= maxRetries then
-                    -- Give up after max retries
-                    self:SetScript("OnUpdate", nil)
-                end
-            end
-        end)
-    end
-end
-
 --- Creates the times content with dungeon timer information
 function UIContentCreators.times(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Mythic+ Timer Thresholds", "TOP", 0, -CONSTANTS.LARGE_PADDING)
+        "Mythic+ Timer Thresholds", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     
     local timesTableFrame = CreateFrame("Frame", nil, parentFrame)
-    timesTableFrame:SetPoint("TOPLEFT", CONSTANTS.LARGE_PADDING, -60)
+    timesTableFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -60)
     timesTableFrame:SetSize(620, 380)
     
-    UIContentCreators._createTimesTable(timesTableFrame)
-    UIContentCreators._createTimesInfoPanel(parentFrame)
+    UIContentCreators.createTimesTable(timesTableFrame)
+    UIContentCreators.createTimesInfoPanel(parentFrame)
 end
 
-function UIContentCreators._createTimesTable(parentFrame)
+function UIContentCreators.createTimesTable(parentFrame)
     -- Create table headers
     UIHelpers.createHeader(parentFrame, "Dungeon", 0, 200)
     UIHelpers.createHeader(parentFrame, "1 Chest (0%)", 200, 140)
@@ -774,15 +760,15 @@ function UIContentCreators._createTimesTable(parentFrame)
     if DungeonData and DungeonData.MYTHIC_MAPS then
         local startY = -25
         for i, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
-            UIContentCreators._createTimeRow(parentFrame, mapInfo, i, startY)
+            UIContentCreators.createTimeRow(parentFrame, mapInfo, i, startY)
         end
     end
 end
 
-function UIContentCreators._createTimeRow(parentFrame, mapInfo, index, startY)
-    local yOffset = startY - ((index - 1) * CONSTANTS.LARGE_ROW_HEIGHT)
+function UIContentCreators.createTimeRow(parentFrame, mapInfo, index, startY)
+    local yOffset = startY - ((index - 1) * UI_CONSTANTS.LAYOUT.LARGE_ROW_HEIGHT)
     local isEven = index % 2 == 0
-    local timers = UIContentCreators._calculateTimers(mapInfo.parTime)
+    local timers = UIContentCreators.calculateTimers(mapInfo.parTime)
     
     UIHelpers.createRowBackground(parentFrame, yOffset, 620, isEven)
     
@@ -793,7 +779,7 @@ function UIContentCreators._createTimeRow(parentFrame, mapInfo, index, startY)
     UIHelpers.createRowText(parentFrame, UIHelpers.formatTime(timers.threeChest), 480, yOffset, 140)
 end
 
-function UIContentCreators._calculateTimers(parTime)
+function UIContentCreators.calculateTimers(parTime)
     if not parTime or parTime <= 0 then
         return {oneChest = 0, twoChest = 0, threeChest = 0}
     end
@@ -805,7 +791,7 @@ function UIContentCreators._calculateTimers(parTime)
     }
 end
 
-function UIContentCreators._createTimesInfoPanel(parentFrame)
+function UIContentCreators.createTimesInfoPanel(parentFrame)
     local infoText = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalSmall",
         "1 Chest: Complete within par time | 2 Chests: 20% faster | 3 Chests: 40% faster",
         "BOTTOM", 0, 25)
@@ -819,7 +805,7 @@ local MainFrameManager = {}
 
 function MainFrameManager.createUnifiedFrame()
     local frame = CreateFrame("Frame", "MrMythicalUnifiedFrame", UIParent, "BackdropTemplate")
-    frame:SetSize(CONSTANTS.FRAME_WIDTH, CONSTANTS.FRAME_HEIGHT)
+    frame:SetSize(UI_CONSTANTS.FRAME.WIDTH, UI_CONSTANTS.FRAME.HEIGHT)
     -- Attempt to restore saved position
     if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
         frame:SetPoint(
@@ -879,8 +865,8 @@ end
 
 function MainFrameManager.createNavigationPanel(parentFrame)
     local navPanel = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
-    navPanel:SetPoint("TOPLEFT", CONSTANTS.PADDING, -CONSTANTS.PADDING)
-    navPanel:SetSize(CONSTANTS.NAV_PANEL_WIDTH, CONSTANTS.FRAME_HEIGHT - (CONSTANTS.PADDING * 2))
+    navPanel:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.PADDING, -UI_CONSTANTS.LAYOUT.PADDING)
+    navPanel:SetSize(UI_CONSTANTS.FRAME.NAV_PANEL_WIDTH, UI_CONSTANTS.FRAME.HEIGHT - (UI_CONSTANTS.LAYOUT.PADDING * 2))
     navPanel:SetBackdrop({
         bgFile = "Interface/Tooltips/UI-Tooltip-Background",
         edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -888,7 +874,7 @@ function MainFrameManager.createNavigationPanel(parentFrame)
         insets = { left = 2, right = 2, top = 2, bottom = 2 }
     })
     
-    local color = CONSTANTS.COLORS.NAV_BACKGROUND
+    local color = UI_CONSTANTS.COLORS.NAV_BACKGROUND
     navPanel:SetBackdropColor(color.r, color.g, color.b, color.a)
     
     return navPanel
@@ -896,8 +882,8 @@ end
 
 function MainFrameManager.createContentFrame(parentFrame)
     local contentFrame = CreateFrame("Frame", nil, parentFrame)
-    contentFrame:SetPoint("TOPLEFT", CONSTANTS.NAV_PANEL_WIDTH + CONSTANTS.PADDING * 2, -CONSTANTS.PADDING)
-    contentFrame:SetSize(CONSTANTS.CONTENT_FRAME_WIDTH, CONSTANTS.FRAME_HEIGHT - (CONSTANTS.PADDING * 2))
+    contentFrame:SetPoint("TOPLEFT", UI_CONSTANTS.FRAME.NAV_PANEL_WIDTH + UI_CONSTANTS.LAYOUT.PADDING * 2, -UI_CONSTANTS.LAYOUT.PADDING)
+    contentFrame:SetSize(UI_CONSTANTS.FRAME.CONTENT_WIDTH, UI_CONSTANTS.FRAME.HEIGHT - (UI_CONSTANTS.LAYOUT.PADDING * 2))
     return contentFrame
 end
 
@@ -905,35 +891,33 @@ end
 -- NavigationManager already declared earlier
 
 NavigationManager.BUTTON_DATA = {
-    {id = "dashboard", text = "Dashboard", y = -CONSTANTS.LARGE_PADDING},
-    {id = "rewards", text = "Rewards", y = -60},
-    {id = "scores", text = "Scores", y = -100},
-    {id = "stats", text = "Statistics", y = -140},
-    {id = "times", text = "Times", y = -180},
-    {id = "settings", text = "Settings", y = -220}
+    {id = UI_CONSTANTS.CONTENT_TYPES.DASHBOARD, text = "Dashboard", y = -UI_CONSTANTS.LAYOUT.LARGE_PADDING},
+    {id = UI_CONSTANTS.CONTENT_TYPES.REWARDS, text = "Rewards", y = -60},
+    {id = UI_CONSTANTS.CONTENT_TYPES.SCORES, text = "Scores", y = -100},
+    {id = UI_CONSTANTS.CONTENT_TYPES.STATS, text = "Statistics", y = -140},
+    {id = UI_CONSTANTS.CONTENT_TYPES.TIMES, text = "Times", y = -180},
+    {id = UI_CONSTANTS.CONTENT_TYPES.SETTINGS, text = "Settings", y = -220}
 }
 
 function NavigationManager.createButtons(navPanel, contentFrame)
     local navButtons = {}
-    local activeButton = nil
     
     for _, buttonInfo in ipairs(NavigationManager.BUTTON_DATA) do
         local button = NavigationManager.createNavigationButton(navPanel, buttonInfo, contentFrame, navButtons)
         navButtons[buttonInfo.id] = button
         
-        if buttonInfo.id == "dashboard" then
-            activeButton = button
+        if buttonInfo.id == UI_CONSTANTS.CONTENT_TYPES.DASHBOARD then
             button:SetNormalFontObject("GameFontHighlight")
         end
     end
     
-    return navButtons, activeButton
+    return navButtons
 end
 
 function NavigationManager.createNavigationButton(navPanel, buttonInfo, contentFrame, navButtons)
     local button = CreateFrame("Button", nil, navPanel, "UIPanelButtonTemplate")
-    button:SetPoint("TOPLEFT", CONSTANTS.PADDING, buttonInfo.y)
-    button:SetSize(120, CONSTANTS.BUTTON_HEIGHT)
+    button:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.PADDING, buttonInfo.y)
+    button:SetSize(120, UI_CONSTANTS.LAYOUT.BUTTON_HEIGHT)
     button:SetText(buttonInfo.text)
     
     button:SetScript("OnClick", function()
@@ -944,7 +928,7 @@ function NavigationManager.createNavigationButton(navPanel, buttonInfo, contentF
 end
 
 function NavigationManager.handleButtonClick(buttonInfo, button, navButtons, contentFrame)
-    if buttonInfo.id == "settings" then
+    if buttonInfo.id == UI_CONSTANTS.CONTENT_TYPES.SETTINGS then
         NavigationManager.openSettings()
         return
     end
@@ -997,26 +981,26 @@ function NavigationManager.showContent(contentType, contentFrame)
 end
 
 function NavigationManager.showFallbackContent(contentFrame, contentType)
-    local fallbackText = UIHelpers.createFontString(contentFrame, "OVERLAY", "GameFontNormal",
+    UIHelpers.createFontString(contentFrame, "OVERLAY", "GameFontNormal",
         "Content not available: " .. contentType, "CENTER", 0, 0)
 end
 
 -- Initialize the main UI
-local UnifiedFrame = MainFrameManager.createUnifiedFrame()
-local navPanel = MainFrameManager.createNavigationPanel(UnifiedFrame)
-local contentFrame = MainFrameManager.createContentFrame(UnifiedFrame)
-local navButtons, activeButton = NavigationManager.createButtons(navPanel, contentFrame)
+local unifiedFrame = MainFrameManager.createUnifiedFrame()
+local navPanel = MainFrameManager.createNavigationPanel(unifiedFrame)
+local contentFrame = MainFrameManager.createContentFrame(unifiedFrame)
+local navButtons = NavigationManager.createButtons(navPanel, contentFrame)
 
 -- Add close button
-local closeButton = CreateFrame("Button", nil, UnifiedFrame, "UIPanelCloseButton")
+local closeButton = CreateFrame("Button", nil, unifiedFrame, "UIPanelCloseButton")
 closeButton:SetPoint("TOPRIGHT", -5, -5)
 
 -- Public API functions
 function UnifiedUI:Show(contentType)
     -- Re-anchor before showing to avoid drift after resolution/UI scale changes
     if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
-        UnifiedFrame:ClearAllPoints()
-        UnifiedFrame:SetPoint(
+        unifiedFrame:ClearAllPoints()
+        unifiedFrame:SetPoint(
             MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER",
             UIParent,
             MRM_SavedVars.UNIFIED_FRAME_RELATIVE_POINT or (MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER"),
@@ -1024,23 +1008,25 @@ function UnifiedUI:Show(contentType)
             MRM_SavedVars.UNIFIED_FRAME_Y or 0
         )
     end
-    UnifiedFrame:Show()
-    if contentType and contentType ~= "dashboard" then
+    unifiedFrame:Show()
+    
+    local targetContent = contentType or UI_CONSTANTS.CONTENT_TYPES.DASHBOARD
+    if contentType and contentType ~= UI_CONSTANTS.CONTENT_TYPES.DASHBOARD then
         NavigationManager.showContent(contentType, contentFrame)
         if navButtons[contentType] then
             NavigationManager.updateButtonStates(navButtons[contentType], navButtons)
         end
     else
-        NavigationManager.showContent("dashboard", contentFrame)
+        NavigationManager.showContent(UI_CONSTANTS.CONTENT_TYPES.DASHBOARD, contentFrame)
     end
 end
 
 function UnifiedUI:Hide()
-    UnifiedFrame:Hide()
+    unifiedFrame:Hide()
 end
 
 function UnifiedUI:Toggle(contentType)
-    if UnifiedFrame:IsShown() then
+    if unifiedFrame:IsShown() then
         self:Hide()
     else
         self:Show(contentType)
@@ -1048,13 +1034,13 @@ function UnifiedUI:Toggle(contentType)
 end
 
 function UnifiedUI:IsShown()
-    return UnifiedFrame:IsShown()
+    return unifiedFrame:IsShown()
 end
 
 -- Global toggle function for slash command
 function MrMythical:ToggleUnifiedUI(contentType)
-    UnifiedUI:Toggle(contentType or "dashboard")
+    UnifiedUI:Toggle(contentType or UI_CONSTANTS.CONTENT_TYPES.DASHBOARD)
 end
 
 -- Initialize with dashboard content
-NavigationManager.showContent("dashboard", contentFrame)
+NavigationManager.showContent(UI_CONSTANTS.CONTENT_TYPES.DASHBOARD, contentFrame)
