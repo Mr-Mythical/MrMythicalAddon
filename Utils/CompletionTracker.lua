@@ -254,21 +254,5 @@ function CompletionTracker:initialize()
     checkWeeklyReset()
 end
 
-function CompletionTracker:resetStats(scope)
-    if not completionData then return end
-
-    if scope == "all" or scope == "seasonal" then
-        completionData.seasonal.completed = 0
-        completionData.seasonal.failed = 0
-        initializeDungeonStats(completionData.seasonal.dungeons)
-    end
-
-    if scope == "all" or scope == "weekly" then
-        completionData.weekly.completed = 0
-        completionData.weekly.failed = 0
-        initializeDungeonStats(completionData.weekly.dungeons)
-    end
-end
-
 MrMythical.CompletionTracker = CompletionTracker
 _G.MrMythical = MrMythical
