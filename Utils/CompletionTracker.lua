@@ -27,8 +27,6 @@ local completionData = {
     }
 }
 
--- Debug logging removed
-
 -- Fetch the current Mythic+ map pool using the game API; fallback to static data if needed
 local function fetchCurrentMythicPool()
     local pool = {}
@@ -75,24 +73,20 @@ local function syncDungeonStats(container)
         if not container[mapInfo.id] then
             container[mapInfo.id] = { completed = 0, failed = 0, name = mapInfo.name }
         else
-            -- Ensure name stays updated
+            -- Ensure name stays updated, but preserve existing stats
             container[mapInfo.id].name = mapInfo.name
             container[mapInfo.id].completed = container[mapInfo.id].completed or 0
             container[mapInfo.id].failed = container[mapInfo.id].failed or 0
         end
     end
-
-    -- Prune maps no longer in the pool
-    for mapID, _ in pairs(container) do
-        if not poolSet[mapID] then
-            container[mapID] = nil
-        end
-    end
 end
 
 local function initializeDungeonStats(container)
-    -- wipe and initialize based on current pool
-    for k in pairs(container) do container[k] = nil end
+    -- Only initialize if container is completely empty - don't wipe existing data
+    if not container or next(container) ~= nil then
+        return -- Container already has data, don't wipe it
+    end
+    
     local pool = fetchCurrentMythicPool()
     for _, mapInfo in ipairs(pool) do
         container[mapInfo.id] = { completed = 0, failed = 0, name = mapInfo.name }
@@ -121,11 +115,24 @@ end
 function CompletionTracker:trackRun(mapID, success, level)
     if not completionData then return end
     if not mapID then return end
-    -- Re-check seasonal or pool changes proactively (ensures dungeon tables are synced)
-    if self._checkSeasonalChange then self:_checkSeasonalChange() end
-    if not completionData.seasonal.dungeons[mapID] or not completionData.weekly.dungeons[mapID] then return end
-
+    
+    -- Don't do season checks during tracking - just track the run
+    -- Season checks will happen when viewing stats
+    
     checkWeeklyReset()
+    
+    -- Ensure the mapID exists in our tracking tables, if not, add it
+    if not completionData.seasonal.dungeons[mapID] then
+        -- Try to get the name from the API
+        local name = C_ChallengeMode.GetMapUIInfo and C_ChallengeMode.GetMapUIInfo(mapID) or ("Dungeon " .. tostring(mapID))
+        completionData.seasonal.dungeons[mapID] = { completed = 0, failed = 0, name = name }
+    end
+    
+    if not completionData.weekly.dungeons[mapID] then
+        -- Try to get the name from the API
+        local name = C_ChallengeMode.GetMapUIInfo and C_ChallengeMode.GetMapUIInfo(mapID) or ("Dungeon " .. tostring(mapID))
+        completionData.weekly.dungeons[mapID] = { completed = 0, failed = 0, name = name }
+    end
 
     if success then
         completionData.seasonal.completed = completionData.seasonal.completed + 1
@@ -141,8 +148,12 @@ function CompletionTracker:trackRun(mapID, success, level)
 end
 
 function CompletionTracker:getStats()
-    -- Ensure season/pool and weekly windows are valid before reporting
-    if self._checkSeasonalChange then self:_checkSeasonalChange() end
+    -- Perform season/pool check when stats are actually requested (APIs should be ready by now)
+    if self._checkSeasonalChange then 
+        self:_checkSeasonalChange() 
+    end
+    
+    -- Ensure weekly reset is current
     checkWeeklyReset()
 
     local stats = {
@@ -202,25 +213,47 @@ function CompletionTracker:initialize()
 
     completionData = MRM_CompletionData
 
-    if not completionData.seasonal.dungeons or next(completionData.seasonal.dungeons) == nil then
-        initializeDungeonStats(completionData.seasonal.dungeons)
+    -- Only initialize if the dungeons tables are completely empty
+    if not completionData.seasonal.dungeons then
+        completionData.seasonal.dungeons = {}
     end
-    if not completionData.weekly.dungeons or next(completionData.weekly.dungeons) == nil then
-        initializeDungeonStats(completionData.weekly.dungeons)
+    if not completionData.weekly.dungeons then
+        completionData.weekly.dungeons = {}
+    end
+    
+    -- Only call initializeDungeonStats if tables are truly empty
+    initializeDungeonStats(completionData.seasonal.dungeons)
+    initializeDungeonStats(completionData.weekly.dungeons)
+
+    -- Separate function to just sync dungeon pools without season checking
+    function self:_syncDungeonPools()
+        -- Populate DungeonData for UI consumers (names and par times) FIRST
+        if MrMythical and MrMythical.DungeonData and MrMythical.DungeonData.refreshFromAPI then
+            MrMythical.DungeonData.refreshFromAPI()
+        end
+        
+        -- Just sync the current dungeon pool for UI purposes, no season validation
+        syncDungeonStats(completionData.seasonal.dungeons)
+        syncDungeonStats(completionData.weekly.dungeons)
     end
 
     -- Attach helper for seasonal/pool change detection
     function self:_checkSeasonalChange()
         local currentSeasonID = (C_MythicPlus and C_MythicPlus.GetCurrentSeason and C_MythicPlus.GetCurrentSeason()) or nil
+        
+        -- Don't do season checks if the API isn't ready yet (returns -1 or nil during loading)
+        if not currentSeasonID or currentSeasonID <= 0 then
+            return
+        end
+        
         -- Populate DungeonData for UI consumers (names and par times)
         if MrMythical and MrMythical.DungeonData and MrMythical.DungeonData.refreshFromAPI then
             MrMythical.DungeonData.refreshFromAPI()
         end
         local currentSig = getMapPoolSignature()
-        local poolNow = fetchCurrentMythicPool()
 
         -- First-time seed
-        if completionData.seasonal.seasonID == nil then
+        if completionData.seasonal.seasonID == nil or completionData.seasonal.seasonID <= 0 then
             completionData.seasonal.seasonID = currentSeasonID
         end
         if completionData.seasonal.mapPoolSig == nil then
@@ -230,17 +263,26 @@ function CompletionTracker:initialize()
         local seasonChanged = currentSeasonID and completionData.seasonal.seasonID and currentSeasonID ~= completionData.seasonal.seasonID
         local poolChanged = currentSig ~= completionData.seasonal.mapPoolSig
 
-        if seasonChanged or poolChanged then
-            -- Reset seasonal counters and align dungeon stats to the new pool
+        if seasonChanged then
+            -- Only reset if the season actually changed (not just on every load)
             completionData.seasonal.completed = 0
             completionData.seasonal.failed = 0
-            initializeDungeonStats(completionData.seasonal.dungeons)
+            -- Clear the dungeons table but don't call initializeDungeonStats (let it populate naturally)
+            for k in pairs(completionData.seasonal.dungeons) do 
+                completionData.seasonal.dungeons[k].completed = 0
+                completionData.seasonal.dungeons[k].failed = 0
+            end
 
             -- Update markers
             completionData.seasonal.seasonID = currentSeasonID
             completionData.seasonal.mapPoolSig = currentSig
+        elseif poolChanged and currentSig and currentSig ~= "" then
+            -- Pool changed but not season - just sync the available dungeons
+            -- Only do this if we have a valid current signature
+            syncDungeonStats(completionData.seasonal.dungeons)
+            completionData.seasonal.mapPoolSig = currentSig
         else
-            -- Keep seasonal counts, but ensure dungeons stay in sync with pool changes within-season patches
+            -- No changes - just make sure current pool dungeons are available for tracking
             syncDungeonStats(completionData.seasonal.dungeons)
         end
 
@@ -248,8 +290,15 @@ function CompletionTracker:initialize()
         syncDungeonStats(completionData.weekly.dungeons)
     end
 
-    -- Perform an initial seasonal/pool check on load
-    self:_checkSeasonalChange()
+    -- Sync dungeon pools immediately for UI purposes (but don't do season validation)
+    self:_syncDungeonPools()
+    
+    -- Also try to refresh dungeon data after a short delay to ensure APIs are ready
+    C_Timer.After(2, function()
+        if MrMythical and MrMythical.DungeonData and MrMythical.DungeonData.refreshFromAPI then
+            MrMythical.DungeonData.refreshFromAPI()
+        end
+    end)
 
     checkWeeklyReset()
 end

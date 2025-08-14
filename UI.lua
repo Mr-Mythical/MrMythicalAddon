@@ -491,9 +491,6 @@ function UIContentCreators.stats(parentFrame)
     -- Create dungeon breakdown section
     local dungeonBreakdown = UIContentCreators.createDungeonBreakdown(scrollChild)
     
-    -- Create info panel
-    UIContentCreators.createStatsInfoPanel(scrollChild)
-    
     -- Initial data update
     UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
     
@@ -563,10 +560,17 @@ function UIContentCreators.createDungeonBreakdown(parentFrame)
     weeklyTab:Disable()
     seasonalTab:Enable()
     
+    -- Perform initial update to populate the dungeon breakdown table
+    C_Timer.After(0.1, function()
+        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
+    end)
+    
     return {
         rows = dungeonRows,
         tableFrame = dungeonTableFrame,
-        currentStatsView = currentStatsView
+        currentStatsView = currentStatsView,
+        seasonalTab = seasonalTab,
+        weeklyTab = weeklyTab
     }
 end
 
@@ -622,25 +626,31 @@ function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows
     
     for mapID, data in pairs(statsSource.dungeons) do
         local dungeonTotal = data.completed + data.failed
-        if dungeonTotal > 0 then
-            table.insert(dungeonData, {
-                name = data.name,
-                completed = data.completed,
-                failed = data.failed,
-                total = dungeonTotal,
-                rate = math.floor(data.rate)
-            })
-        end
+        -- Show dungeons even if they have no runs (to indicate they exist)
+        table.insert(dungeonData, {
+            name = data.name or ("Dungeon " .. tostring(mapID)),
+            completed = data.completed,
+            failed = data.failed,
+            total = dungeonTotal,
+            rate = dungeonTotal > 0 and math.floor(data.rate) or 0
+        })
     end
     
-    -- Sort by total runs (highest first)
-    table.sort(dungeonData, function(a, b) return a.total > b.total end)
+    -- Sort by total runs (highest first), then by name for consistency
+    table.sort(dungeonData, function(a, b) 
+        if a.total == b.total then
+            return a.name < b.name
+        end
+        return a.total > b.total 
+    end)
     
     -- Clear existing rows
     for i = 1, #dungeonRows do
         if dungeonRows[i] then
             for _, element in pairs(dungeonRows[i]) do
-                element:Hide()
+                if element and element.Hide then
+                    element:Hide()
+                end
             end
         end
     end
@@ -700,40 +710,35 @@ function UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdow
     
     local success, stats = pcall(function() return CompletionTracker:getStats() end)
     if not success or not stats then
-        seasonStats:SetText("Error loading statistics\n\nTry again in a moment.")
+        seasonStats:SetText("Error loading statistics: " .. tostring(stats) .. "\n\nTry again in a moment.")
         weeklyStats:SetText("Statistics temporarily unavailable.")
         return
     end
     
     -- Update season overview
-    local seasonTotal = stats.seasonal.completed + stats.seasonal.failed
+    local seasonTotal = (stats.seasonal.completed or 0) + (stats.seasonal.failed or 0)
+    local seasonRate = stats.seasonal.rate or 0
     local seasonText = string.format("Total Runs: %d\nCompleted: %d (%d%%)\nFailed: %d (%d%%)",
         seasonTotal,
-        stats.seasonal.completed, math.floor(stats.seasonal.rate),
-        stats.seasonal.failed, math.floor(100 - stats.seasonal.rate)
+        stats.seasonal.completed or 0, math.floor(seasonRate),
+        stats.seasonal.failed or 0, math.floor(100 - seasonRate)
     )
     seasonStats:SetText(seasonText)
     
     -- Update weekly overview
-    local weeklyTotal = stats.weekly.completed + stats.weekly.failed
+    local weeklyTotal = (stats.weekly.completed or 0) + (stats.weekly.failed or 0)
+    local weeklyRate = stats.weekly.rate or 0
     local weeklyText = string.format("Total Runs: %d\nCompleted: %d (%d%%)\nFailed: %d (%d%%)",
         weeklyTotal,
-        stats.weekly.completed, math.floor(stats.weekly.rate),
-        stats.weekly.failed, math.floor(100 - stats.weekly.rate)
+        stats.weekly.completed or 0, math.floor(weeklyRate),
+        stats.weekly.failed or 0, math.floor(100 - weeklyRate)
     )
     weeklyStats:SetText(weeklyText)
     
     -- Update dungeon breakdown
-    UIContentCreators.updateDungeonBreakdown(dungeonBreakdown.tableFrame, dungeonBreakdown.rows, dungeonBreakdown.currentStatsView.value)
-end
-
-function UIContentCreators.createStatsInfoPanel(parentFrame)
-    local infoText = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalSmall",
-        "Statistics are tracked automatically when you complete Mythic+ dungeons. Use tabs to switch between seasonal and weekly data.",
-        "BOTTOM", 0, 25)
-    infoText:SetWidth(620)
-    infoText:SetJustifyH("CENTER")
-    UIHelpers.setTextColor(infoText, "INFO_TEXT")
+    if dungeonBreakdown and dungeonBreakdown.tableFrame and dungeonBreakdown.rows and dungeonBreakdown.currentStatsView then
+        UIContentCreators.updateDungeonBreakdown(dungeonBreakdown.tableFrame, dungeonBreakdown.rows, dungeonBreakdown.currentStatsView.value)
+    end
 end
 
 --- Creates the times content with dungeon timer information
