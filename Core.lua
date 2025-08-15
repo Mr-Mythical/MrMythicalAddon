@@ -345,6 +345,10 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         if addonName == "MrMythical" then
             -- Initialize addon settings and completion tracker
             Options.initializeSettings()
+            
+            -- Refresh dungeon data from API
+            DungeonData.refreshFromAPI()
+            
             CompletionTracker:initialize()
             
             -- Determine player's region for RaiderIO integration

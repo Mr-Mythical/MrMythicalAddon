@@ -90,6 +90,24 @@ local function syncDungeonStats(container)
     end
 end
 
+-- Check and ensure dungeon pool is populated during initialization
+local function checkDungeonPoolOnLoad()
+    -- Always sync the current dungeon pool to ensure UI has data
+    syncDungeonStats(completionData.seasonal.dungeons)
+    syncDungeonStats(completionData.weekly.dungeons)
+    
+    -- Set basic season tracking if not already set (for UI purposes)
+    local currentSeasonID = (C_MythicPlus and C_MythicPlus.GetCurrentSeason and C_MythicPlus.GetCurrentSeason())
+    if currentSeasonID and currentSeasonID > 0 then
+        if not completionData.seasonal.seasonID or completionData.seasonal.seasonID <= 0 then
+            completionData.seasonal.seasonID = currentSeasonID
+        end
+        if not completionData.seasonal.mapPoolSig then
+            completionData.seasonal.mapPoolSig = getMapPoolSignature()
+        end
+    end
+end
+
 local function initializeDungeonStats(container)
     -- Only initialize if container is completely empty - don't wipe existing data
     if not container or next(container) then
@@ -219,6 +237,18 @@ end
 function CompletionTracker:getStats()
     -- Ensure weekly reset is current (this will also handle season changes)
     checkWeeklyReset()
+    
+    -- If dungeons are still empty, try to populate them again
+    -- This handles cases where APIs weren't available during initial load
+    local seasonalCount = 0
+    for _ in pairs(completionData.seasonal.dungeons) do seasonalCount = seasonalCount + 1 end
+    local weeklyCount = 0
+    for _ in pairs(completionData.weekly.dungeons) do weeklyCount = weeklyCount + 1 end
+    
+    if seasonalCount == 0 or weeklyCount == 0 then
+        syncDungeonStats(completionData.seasonal.dungeons)
+        syncDungeonStats(completionData.weekly.dungeons)
+    end
 
     return {
         seasonal = buildStatsContainer(completionData.seasonal),
@@ -271,9 +301,8 @@ function CompletionTracker:initialize()
     initializeDungeonStats(completionData.seasonal.dungeons)
     initializeDungeonStats(completionData.weekly.dungeons)
 
-    -- Sync dungeon pools immediately for UI purposes
-    syncDungeonStats(completionData.seasonal.dungeons)
-    syncDungeonStats(completionData.weekly.dungeons)
+    -- Check and populate dungeon pool for immediate UI availability
+    checkDungeonPoolOnLoad()
 
     checkWeeklyReset()
 end
