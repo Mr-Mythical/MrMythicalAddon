@@ -477,19 +477,11 @@ end
 
 --- Creates the stats content with completion tracking and analysis
 function UIContentCreators.stats(parentFrame)
-    local scrollFrame = CreateFrame("ScrollFrame", nil, parentFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -UI_CONSTANTS.LAYOUT.LARGE_PADDING - 15, UI_CONSTANTS.LAYOUT.LARGE_PADDING)
-    
-    local scrollChild = CreateFrame("Frame", nil, scrollFrame)
-    scrollChild:SetSize(600, 450)
-    scrollFrame:SetScrollChild(scrollChild)
-    
     -- Create overview panels
-    local seasonStats, weeklyStats = UIContentCreators.createStatsOverview(scrollChild)
+    local seasonStats, weeklyStats = UIContentCreators.createStatsOverview(parentFrame)
     
     -- Create dungeon breakdown section
-    local dungeonBreakdown = UIContentCreators.createDungeonBreakdown(scrollChild)
+    local dungeonBreakdown = UIContentCreators.createDungeonBreakdown(parentFrame)
     
     -- Initial data update
     UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
@@ -509,21 +501,21 @@ end
 function UIContentCreators.createStatsOverview(parentFrame)
     -- Season overview section
     local seasonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Season Overview", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -50)
+        "Season Overview", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     UIHelpers.setTextColor(seasonLabel, "SUCCESS_HIGH")
     
     local seasonStats = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -75)
+        "", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -60)
     seasonStats:SetWidth(320)
     seasonStats:SetJustifyH("LEFT")
     
     -- Weekly overview section
     local weeklyLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "This Week", "TOPLEFT", 350, -50)
+        "This Week", "TOPLEFT", 350, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
     UIHelpers.setTextColor(weeklyLabel, "SUCCESS_HIGH")
     
     local weeklyStats = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "", "TOPLEFT", 350, -75)
+        "", "TOPLEFT", 350, -60)
     weeklyStats:SetWidth(320)
     weeklyStats:SetJustifyH("LEFT")
     
@@ -532,7 +524,7 @@ end
 
 function UIContentCreators.createDungeonBreakdown(parentFrame)
     local dungeonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Dungeon Breakdown", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -150)
+        "Dungeon Breakdown", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -140)
     UIHelpers.setTextColor(dungeonLabel, "SUCCESS_HIGH")
     
     local seasonalTab, weeklyTab = UIContentCreators.createStatsTabs(parentFrame)
@@ -576,7 +568,7 @@ end
 
 function UIContentCreators.createStatsTabs(parentFrame)
     local tabFrame = CreateFrame("Frame", nil, parentFrame)
-    tabFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -175)
+    tabFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -165)
     tabFrame:SetSize(620, 30)
     
     local seasonalTab = CreateFrame("Button", nil, tabFrame, "UIPanelButtonTemplate")
@@ -594,7 +586,7 @@ end
 
 function UIContentCreators.createDungeonTable(parentFrame)
     local dungeonTableFrame = CreateFrame("Frame", nil, parentFrame)
-    dungeonTableFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -205)
+    dungeonTableFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -195)
     dungeonTableFrame:SetSize(620, 220)
     
     -- Create table headers
