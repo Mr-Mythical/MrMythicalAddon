@@ -2,6 +2,7 @@
 CompletionTracker.lua - Mythic+ Run Completion Tracking
 
 Purpose: Tracks and analyzes Mythic+ dungeon completion statistics
+Dependencies: WoW APIs (C_ChallengeMode, C_MythicPlus, C_DateAndTime)
 Author: Braunerr
 --]]
 
@@ -25,7 +26,8 @@ local completionData = {
     }
 }
 
--- Fetch the current Mythic+ map pool using the game API
+--- Fetches the current Mythic+ map pool using the game API
+--- @return table Array of map info tables with id and name fields
 local function fetchCurrentMythicPool()
     local pool = {}
     
@@ -43,7 +45,8 @@ local function fetchCurrentMythicPool()
     return pool
 end
 
--- Build a stable signature string for the current dungeon pool (order-independent)
+--- Builds a stable signature string for the current dungeon pool (order-independent)
+--- @return string A signature string representing the current map pool
 local function getMapPoolSignature()
     local ids = {}
     local pool = fetchCurrentMythicPool()
@@ -54,7 +57,9 @@ local function getMapPoolSignature()
     return table.concat(ids, ":")
 end
 
--- Helper function to get dungeon name from API or fallback
+--- Helper function to get dungeon name from API or fallback
+--- @param mapID number The dungeon map ID
+--- @return string The dungeon name or a fallback string
 local function getDungeonName(mapID)
     if C_ChallengeMode and C_ChallengeMode.GetMapUIInfo then
         local name = C_ChallengeMode.GetMapUIInfo(mapID)
@@ -65,7 +70,9 @@ local function getDungeonName(mapID)
     return "Dungeon " .. tostring(mapID)
 end
 
--- Helper function to ensure dungeon entry exists in container
+--- Helper function to ensure dungeon entry exists in container
+--- @param container table The stats container to ensure entry exists in
+--- @param mapID number The dungeon map ID to ensure entry for
 local function ensureDungeonEntry(container, mapID)
     if not container[mapID] then
         container[mapID] = { 
@@ -81,7 +88,8 @@ local function ensureDungeonEntry(container, mapID)
     end
 end
 
--- Ensure dungeon stats table matches the current pool; keep known entries, drop removed, add new
+--- Ensures dungeon stats table matches the current pool; keeps known entries, drops removed, adds new
+--- @param container table The stats container to synchronize
 local function syncDungeonStats(container)
     if not container then return end
 
@@ -90,7 +98,7 @@ local function syncDungeonStats(container)
     end
 end
 
--- Check and ensure dungeon pool is populated during initialization
+--- Checks and ensures dungeon pool is populated during initialization
 local function checkDungeonPoolOnLoad()
     -- Always sync the current dungeon pool to ensure UI has data
     syncDungeonStats(completionData.seasonal.dungeons)
@@ -108,6 +116,8 @@ local function checkDungeonPoolOnLoad()
     end
 end
 
+--- Initializes dungeon stats for a container if it's empty
+--- @param container table The stats container to initialize
 local function initializeDungeonStats(container)
     -- Only initialize if container is completely empty - don't wipe existing data
     if not container or next(container) then
@@ -124,12 +134,17 @@ local function initializeDungeonStats(container)
     end
 end
 
+--- Calculates completion rate percentage from completed and failed counts
+--- @param completed number Number of successful completions
+--- @param failed number Number of failed attempts
+--- @return number Completion rate as a percentage (0-100)
 local function calculateCompletionRate(completed, failed)
     local total = completed + failed
     if total == 0 then return 0 end
     return (completed / total) * 100
 end
 
+--- Checks for weekly reset and handles season/pool changes
 local function checkWeeklyReset()
     local currentTime = time()
     local secondsUntilReset = C_DateAndTime.GetSecondsUntilWeeklyReset()
@@ -184,7 +199,10 @@ local function checkWeeklyReset()
     end
 end
 
--- Helper function to update completion stats
+--- Helper function to update completion stats
+--- @param container table The stats container to update
+--- @param mapID number The dungeon map ID
+--- @param success boolean Whether the run was successful
 local function updateStats(container, mapID, success)
     if success then
         container.completed = container.completed + 1
@@ -195,6 +213,10 @@ local function updateStats(container, mapID, success)
     end
 end
 
+--- Tracks a completed Mythic+ run and updates statistics
+--- @param mapID number The dungeon map ID that was completed
+--- @param success boolean Whether the run was completed successfully (in time)
+--- @param level number The keystone level completed (currently unused but available for future features)
 function CompletionTracker:trackRun(mapID, success, level)
     if not completionData or not mapID then 
         return 
@@ -213,7 +235,9 @@ function CompletionTracker:trackRun(mapID, success, level)
     updateStats(completionData.weekly, mapID, success)
 end
 
--- Helper function to build stats for a container
+--- Helper function to build stats for a container
+--- @param container table The raw completion data container
+--- @return table Formatted stats with rates and dungeon breakdowns
 local function buildStatsContainer(container)
     local stats = {
         rate = calculateCompletionRate(container.completed, container.failed),
@@ -234,6 +258,8 @@ local function buildStatsContainer(container)
     return stats
 end
 
+--- Gets current completion statistics for both seasonal and weekly periods
+--- @return table Table containing seasonal and weekly stats with completion rates
 function CompletionTracker:getStats()
     -- Ensure weekly reset is current (this will also handle season changes)
     checkWeeklyReset()
@@ -273,7 +299,9 @@ local DEFAULT_COMPLETION_DATA = {
     }
 }
 
--- Helper function to deep copy a table
+--- Helper function to deep copy a table
+--- @param original table The table to copy
+--- @return table A deep copy of the original table
 local function deepCopy(original)
     if type(original) ~= "table" then return original end
     local copy = {}
@@ -283,6 +311,7 @@ local function deepCopy(original)
     return copy
 end
 
+--- Initializes the completion tracker with saved variables and default data
 function CompletionTracker:initialize()
     -- Initialize saved variables if they don't exist
     if not MRM_CompletionData then

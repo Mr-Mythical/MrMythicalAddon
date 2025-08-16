@@ -1,5 +1,9 @@
 --[[
-Mr. Mythical - Keystone Tooltips Options Panel
+Options.lua - Mr. Mythical Keystone Tooltips Options Panel
+
+Purpose: Manages settings panel and global registry for Mr. Mythical addons
+Dependencies: ConfigData
+Author: Braunerr
 
 This addon implements the global registry pattern for coordinating settings panels
 across multiple Mr. Mythical addons. As a sibling addon, it:
@@ -11,8 +15,6 @@ across multiple Mr. Mythical addons. As a sibling addon, it:
 
 Other Mr. Mythical addons should create their own subcategories under the shared parent.
 See SETTINGS_INTEGRATION_GUIDE.md for detailed integration guide.
-
-Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}
@@ -20,6 +22,13 @@ local ConfigData = MrMythical.ConfigData
 
 local Options = {}
 
+--- Creates a boolean checkbox setting for the addon
+--- @param category table The settings category to add to
+--- @param name string Display name for the setting
+--- @param key string Saved variable key name
+--- @param defaultValue boolean Default value for the setting
+--- @param tooltip string Tooltip text for the setting
+--- @return table Table containing setting and checkbox initializer
 local function createSetting(category, name, key, defaultValue, tooltip)
     local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "boolean", name, defaultValue)
     setting:SetValueChangedCallback(function(_, value)
@@ -32,6 +41,14 @@ local function createSetting(category, name, key, defaultValue, tooltip)
     return { setting = setting, checkbox = initializer }
 end
 
+--- Creates a dropdown setting for the addon
+--- @param category table The settings category to add to
+--- @param name string Display name for the setting
+--- @param key string Saved variable key name
+--- @param defaultValue string Default value for the setting
+--- @param tooltip string Tooltip text for the setting
+--- @param options table Array of option tables with text and value fields
+--- @return table Table containing setting and dropdown initializer
 local function createDropdownSetting(category, name, key, defaultValue, tooltip, options)
     local setting = Settings.RegisterAddOnSetting(category, name, key, MRM_SavedVars, "string", name, defaultValue)
     setting:SetValueChangedCallback(function(_, value)
@@ -55,6 +72,7 @@ local function createDropdownSetting(category, name, key, defaultValue, tooltip,
     return { setting = setting, dropdown = initializer }
 end
 
+--- Initializes saved variables with default values and sets up settings UI
 function Options.initializeSettings()
     local defaults = {
         HIDE_UNWANTED_TEXT = true,
@@ -91,6 +109,7 @@ function Options.initializeSettings()
     end
 end
 
+--- Creates the settings category structure and integrates with global registry
 function Options.createSettingsStructure()
 
     -- Initialize the global registry if it doesn't exist
@@ -166,7 +185,8 @@ function Options.createSettingsStructure()
     Options.createSettingsInCategory(category)
 end
 
--- Create all the settings in the specified category
+--- Creates all the settings in the specified category
+--- @param category table The settings category to add settings to
 function Options.createSettingsInCategory(category)
 
     local headerData = {
@@ -277,7 +297,8 @@ function Options.createSettingsInCategory(category)
     )
 end
 
--- Integration utility functions for other addons
+--- Integration utility functions for other addons
+--- @return table Information about the integration status and parent category
 function Options.getIntegrationInfo()
     local registry = _G.MrMythicalSettingsRegistry
     if not registry then
@@ -297,7 +318,7 @@ function Options.getIntegrationInfo()
     }
 end
 
--- Function to open the addon settings panel
+--- Opens the addon settings panel
 function Options.openSettings()
     local registry = _G.MrMythicalSettingsRegistry
     if registry and registry.parentCategory then

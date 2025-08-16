@@ -11,6 +11,9 @@ local RewardsData = MrMythical.RewardsData
 
 local RewardsFunctions = {}
 
+--- Calculates gear rewards for a specific keystone level
+--- @param keyLevel number The keystone level to get rewards for
+--- @return table Table containing dungeonItem, dungeonTrack, vaultItem, and vaultTrack
 function RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     if not keyLevel or keyLevel < 2 then
         return {
@@ -34,6 +37,9 @@ function RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     }
 end
 
+--- Gets crest reward information for a specific keystone level
+--- @param keyLevel number The keystone level to get crest rewards for
+--- @return table Table containing crestType and crestAmount
 function RewardsFunctions.getCrestReward(keyLevel)
     if not keyLevel or keyLevel < 2 then
         return { crestType = "Unknown", crestAmount = "Unknown" }
@@ -47,6 +53,10 @@ function RewardsFunctions.getCrestReward(keyLevel)
     }
 end
 
+--- Calculates the base Mythic+ score for a given keystone level
+--- Uses the current season's scoring formula with affix breakpoints
+--- @param keyLevel number The keystone level to calculate score for
+--- @return number The base score value (before timing bonuses)
 function RewardsFunctions.scoreFormula(keyLevel)
     if keyLevel < 2 then return 0 end
     local affixBreakpoints = { [4] = 15, [7] = 15, [10] = 15, [12] = 15 }
