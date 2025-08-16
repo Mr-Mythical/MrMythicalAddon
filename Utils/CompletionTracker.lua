@@ -31,7 +31,12 @@ local completionData = {
 local function fetchCurrentMythicPool()
     local pool = {}
     
-    local mapIDs = C_ChallengeMode and C_ChallengeMode.GetMapTable and C_ChallengeMode.GetMapTable()
+    -- Check if Challenge Mode APIs are available
+    if not C_ChallengeMode or not C_ChallengeMode.GetMapTable then
+        return pool -- Return empty pool if APIs not available
+    end
+    
+    local mapIDs = C_ChallengeMode.GetMapTable()
     if mapIDs and type(mapIDs) == "table" and #mapIDs > 0 then
         for _, id in ipairs(mapIDs) do
             local name = C_ChallengeMode.GetMapUIInfo and C_ChallengeMode.GetMapUIInfo(id)
@@ -114,6 +119,46 @@ local function checkDungeonPoolOnLoad()
             completionData.seasonal.mapPoolSig = getMapPoolSignature()
         end
     end
+    
+    -- If we still don't have any dungeons, APIs might not be ready yet
+    local hasSeasonalDungeons = next(completionData.seasonal.dungeons) ~= nil
+    local hasWeeklyDungeons = next(completionData.weekly.dungeons) ~= nil
+    
+    if not hasSeasonalDungeons or not hasWeeklyDungeons then
+        -- Schedule a retry after a short delay
+        C_Timer.After(1.0, function()
+            syncDungeonStats(completionData.seasonal.dungeons)
+            syncDungeonStats(completionData.weekly.dungeons)
+        end)
+    end
+end
+
+--- Forces a refresh of the dungeon pool data (useful when APIs become available)
+--- @return boolean True if dungeons were successfully loaded, false otherwise
+function CompletionTracker:refreshDungeonPool()
+    local poolBefore = {}
+    for mapID in pairs(completionData.seasonal.dungeons) do
+        poolBefore[mapID] = true
+    end
+    
+    syncDungeonStats(completionData.seasonal.dungeons)
+    syncDungeonStats(completionData.weekly.dungeons)
+    
+    local poolAfter = {}
+    for mapID in pairs(completionData.seasonal.dungeons) do
+        poolAfter[mapID] = true
+    end
+    
+    -- Check if we actually got some new dungeons
+    local newDungeonsFound = false
+    for mapID in pairs(poolAfter) do
+        if not poolBefore[mapID] then
+            newDungeonsFound = true
+            break
+        end
+    end
+    
+    return next(completionData.seasonal.dungeons) ~= nil
 end
 
 --- Initializes dungeon stats for a container if it's empty
@@ -274,6 +319,11 @@ function CompletionTracker:getStats()
     if seasonalCount == 0 or weeklyCount == 0 then
         syncDungeonStats(completionData.seasonal.dungeons)
         syncDungeonStats(completionData.weekly.dungeons)
+        
+        -- If still empty after sync, try explicit refresh
+        if next(completionData.seasonal.dungeons) == nil then
+            self:refreshDungeonPool()
+        end
     end
 
     return {

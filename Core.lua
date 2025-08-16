@@ -337,25 +337,45 @@ SlashCmdList["MRMYTHICAL"] = CommandHandlers.processSlashCommand
 --- Event handler for addon initialization and mythic+ completion tracking
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+eventFrame:RegisterEvent("CHALLENGE_MODE_MAPS_UPDATE")
+
+local addonInitialized = false
 
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
         if addonName == "MrMythical" then
-            -- Initialize addon settings and completion tracker
+            -- Initialize basic addon settings
             Options.initializeSettings()
-            
-            -- Refresh dungeon data from API
-            DungeonData.refreshFromAPI()
-            
-            CompletionTracker:initialize()
             
             -- Determine player's region for RaiderIO integration
             if GetCurrentRegion then
                 local regionNumber = GetCurrentRegion()
                 currentPlayerRegion = ConfigData.REGION_MAP[regionNumber]
             end
+            
+            addonInitialized = true
+        end
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        -- Only proceed if our addon has been loaded
+        if addonInitialized then
+            -- Refresh dungeon data from API (now that APIs are available)
+            DungeonData.refreshFromAPI()
+            
+            -- Initialize completion tracker (this will populate dungeon pool)
+            CompletionTracker:initialize()
+            
+            -- Unregister this event as we only need it once
+            eventFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+        end
+    elseif event == "CHALLENGE_MODE_MAPS_UPDATE" then
+        -- Mythic+ maps have been updated, refresh the dungeon pool
+        if addonInitialized and CompletionTracker and CompletionTracker.refreshDungeonPool then
+            C_Timer.After(0.5, function()
+                CompletionTracker:refreshDungeonPool()
+            end)
         end
     elseif event == "CHALLENGE_MODE_COMPLETED" then
         -- Track mythic+ completion when challenge mode finishes
