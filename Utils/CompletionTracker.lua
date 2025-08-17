@@ -2,7 +2,7 @@
 CompletionTracker.lua - Mythic+ Run Completion Tracking
 
 Purpose: Tracks and analyzes Mythic+ dungeon completion statistics
-Dependencies: WoW APIs (C_ChallengeMode, C_MythicPlus, C_DateAndTime)
+Dependencies: WoW APIs (C_ChallengeMode, C_MythicPlus, C_DateAndTime), MrMythical.DungeonData
 Author: Braunerr
 --]]
 
@@ -26,55 +26,6 @@ local completionData = {
     }
 }
 
---- Fetches the current Mythic+ map pool using the game API
---- @return table Array of map info tables with id and name fields
-local function fetchCurrentMythicPool()
-    local pool = {}
-    
-    -- Check if Challenge Mode APIs are available
-    if not C_ChallengeMode or not C_ChallengeMode.GetMapTable then
-        return pool -- Return empty pool if APIs not available
-    end
-    
-    local mapIDs = C_ChallengeMode.GetMapTable()
-    if mapIDs and type(mapIDs) == "table" and #mapIDs > 0 then
-        for _, id in ipairs(mapIDs) do
-            local name = C_ChallengeMode.GetMapUIInfo and C_ChallengeMode.GetMapUIInfo(id)
-            table.insert(pool, { 
-                id = id, 
-                name = name or ("Map " .. tostring(id)) 
-            })
-        end
-    end
-    
-    return pool
-end
-
---- Builds a stable signature string for the current dungeon pool (order-independent)
---- @return string A signature string representing the current map pool
-local function getMapPoolSignature()
-    local ids = {}
-    local pool = fetchCurrentMythicPool()
-    for _, mapInfo in ipairs(pool) do
-        table.insert(ids, tostring(mapInfo.id))
-    end
-    table.sort(ids)
-    return table.concat(ids, ":")
-end
-
---- Helper function to get dungeon name from API or fallback
---- @param mapID number The dungeon map ID
---- @return string The dungeon name or a fallback string
-local function getDungeonName(mapID)
-    if C_ChallengeMode and C_ChallengeMode.GetMapUIInfo then
-        local name = C_ChallengeMode.GetMapUIInfo(mapID)
-        if name then
-            return name
-        end
-    end
-    return "Dungeon " .. tostring(mapID)
-end
-
 --- Helper function to ensure dungeon entry exists in container
 --- @param container table The stats container to ensure entry exists in
 --- @param mapID number The dungeon map ID to ensure entry for
@@ -83,11 +34,11 @@ local function ensureDungeonEntry(container, mapID)
         container[mapID] = { 
             completed = 0, 
             failed = 0, 
-            name = getDungeonName(mapID) 
+            name = MrMythical.DungeonData.getDungeonName(mapID) 
         }
     else
         -- Update name in case it changed, but preserve stats
-        container[mapID].name = getDungeonName(mapID)
+        container[mapID].name = MrMythical.DungeonData.getDungeonName(mapID)
         container[mapID].completed = container[mapID].completed or 0
         container[mapID].failed = container[mapID].failed or 0
     end
@@ -98,25 +49,29 @@ end
 local function syncDungeonStats(container)
     if not container then return end
 
-    for _, mapInfo in ipairs(fetchCurrentMythicPool()) do
-        ensureDungeonEntry(container, mapInfo.id)
+    local mapIDs = MrMythical.DungeonData.getCurrentMapIDs()
+    for _, mapID in ipairs(mapIDs) do
+        ensureDungeonEntry(container, mapID)
     end
 end
 
 --- Checks and ensures dungeon pool is populated during initialization
 local function checkDungeonPoolOnLoad()
+    -- Ensure DungeonData is populated first
+    MrMythical.DungeonData.refreshFromAPI()
+    
     -- Always sync the current dungeon pool to ensure UI has data
     syncDungeonStats(completionData.seasonal.dungeons)
     syncDungeonStats(completionData.weekly.dungeons)
     
     -- Set basic season tracking if not already set (for UI purposes)
-    local currentSeasonID = (C_MythicPlus and C_MythicPlus.GetCurrentSeason and C_MythicPlus.GetCurrentSeason())
-    if currentSeasonID and currentSeasonID > 0 then
+    local changes = MrMythical.DungeonData.checkSeasonAndPoolChanges()
+    if changes.currentSeasonID and changes.currentSeasonID > 0 then
         if not completionData.seasonal.seasonID or completionData.seasonal.seasonID <= 0 then
-            completionData.seasonal.seasonID = currentSeasonID
+            completionData.seasonal.seasonID = changes.currentSeasonID
         end
         if not completionData.seasonal.mapPoolSig then
-            completionData.seasonal.mapPoolSig = getMapPoolSignature()
+            completionData.seasonal.mapPoolSig = changes.currentPoolSignature
         end
     end
     
@@ -127,6 +82,7 @@ local function checkDungeonPoolOnLoad()
     if not hasSeasonalDungeons or not hasWeeklyDungeons then
         -- Schedule a retry after a short delay
         C_Timer.After(1.0, function()
+            MrMythical.DungeonData.refreshFromAPI()
             syncDungeonStats(completionData.seasonal.dungeons)
             syncDungeonStats(completionData.weekly.dungeons)
         end)
@@ -141,8 +97,13 @@ function CompletionTracker:refreshDungeonPool()
         poolBefore[mapID] = true
     end
     
-    syncDungeonStats(completionData.seasonal.dungeons)
-    syncDungeonStats(completionData.weekly.dungeons)
+    -- Refresh DungeonData first
+    local success = MrMythical.DungeonData.refreshFromAPI()
+    
+    if success then
+        syncDungeonStats(completionData.seasonal.dungeons)
+        syncDungeonStats(completionData.weekly.dungeons)
+    end
     
     local poolAfter = {}
     for mapID in pairs(completionData.seasonal.dungeons) do
@@ -169,12 +130,12 @@ local function initializeDungeonStats(container)
         return -- Container already has data or is nil, don't wipe it
     end
     
-    local pool = fetchCurrentMythicPool()
-    for _, mapInfo in ipairs(pool) do
-        container[mapInfo.id] = { 
+    local mapIDs = MrMythical.DungeonData.getCurrentMapIDs()
+    for _, mapID in ipairs(mapIDs) do
+        container[mapID] = { 
             completed = 0, 
             failed = 0, 
-            name = mapInfo.name 
+            name = MrMythical.DungeonData.getDungeonName(mapID) 
         }
     end
 end
@@ -202,21 +163,19 @@ local function checkWeeklyReset()
         initializeDungeonStats(completionData.weekly.dungeons)
         completionData.weekly.resetTime = nextReset
         
-        -- Check for season/pool changes on weekly reset
-        local currentSeasonID = (C_MythicPlus and C_MythicPlus.GetCurrentSeason and C_MythicPlus.GetCurrentSeason())
-        if currentSeasonID and currentSeasonID > 0 then
-            local currentSig = getMapPoolSignature()
-            
+        -- Check for season/pool changes on weekly reset using DungeonData
+        local changes = MrMythical.DungeonData.checkSeasonAndPoolChanges()
+        if changes.currentSeasonID and changes.currentSeasonID > 0 then
             -- First-time initialization
             if not completionData.seasonal.seasonID or completionData.seasonal.seasonID <= 0 then
-                completionData.seasonal.seasonID = currentSeasonID
+                completionData.seasonal.seasonID = changes.currentSeasonID
             end
             if not completionData.seasonal.mapPoolSig then
-                completionData.seasonal.mapPoolSig = currentSig
+                completionData.seasonal.mapPoolSig = changes.currentPoolSignature
             end
 
-            local seasonChanged = currentSeasonID ~= completionData.seasonal.seasonID
-            local poolChanged = currentSig ~= completionData.seasonal.mapPoolSig
+            local seasonChanged = changes.currentSeasonID ~= completionData.seasonal.seasonID
+            local poolChanged = changes.currentPoolSignature ~= completionData.seasonal.mapPoolSig
 
             if seasonChanged then
                 -- Reset seasonal stats for new season
@@ -230,11 +189,11 @@ local function checkWeeklyReset()
                 end
 
                 -- Update markers
-                completionData.seasonal.seasonID = currentSeasonID
-                completionData.seasonal.mapPoolSig = currentSig
-            elseif poolChanged and currentSig and currentSig ~= "" then
+                completionData.seasonal.seasonID = changes.currentSeasonID
+                completionData.seasonal.mapPoolSig = changes.currentPoolSignature
+            elseif poolChanged and changes.currentPoolSignature and changes.currentPoolSignature ~= "" then
                 -- Pool changed but not season - just sync the available dungeons
-                completionData.seasonal.mapPoolSig = currentSig
+                completionData.seasonal.mapPoolSig = changes.currentPoolSignature
             end
             
             -- Sync dungeon pools for both seasonal and weekly after any changes
