@@ -332,40 +332,11 @@ function CompletionTracker:getStats()
     }
 end
 
--- Constants for default data structure
-local DEFAULT_COMPLETION_DATA = {
-    seasonal = {
-        completed = 0,
-        failed = 0,
-        dungeons = {},
-        seasonID = nil,
-        mapPoolSig = nil
-    },
-    weekly = {
-        completed = 0,
-        failed = 0,
-        dungeons = {},
-        resetTime = nil
-    }
-}
-
---- Helper function to deep copy a table
---- @param original table The table to copy
---- @return table A deep copy of the original table
-local function deepCopy(original)
-    if type(original) ~= "table" then return original end
-    local copy = {}
-    for key, value in pairs(original) do
-        copy[key] = deepCopy(value)
-    end
-    return copy
-end
-
 --- Initializes the completion tracker with saved variables and default data
 function CompletionTracker:initialize()
     -- Initialize saved variables if they don't exist
     if not MRM_CompletionData then
-        MRM_CompletionData = deepCopy(DEFAULT_COMPLETION_DATA)
+        MRM_CompletionData = completionData
     end
 
     completionData = MRM_CompletionData
