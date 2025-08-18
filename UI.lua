@@ -102,16 +102,6 @@ function UIHelpers.createRowText(parent, text, x, yOffset, width, color)
     return fontString
 end
 
-function UIHelpers.formatTime(timeInSeconds)
-    if not timeInSeconds or timeInSeconds <= 0 then
-        return "0:00"
-    end
-    
-    local minutes = math.floor(timeInSeconds / 60)
-    local seconds = timeInSeconds % 60
-    return string.format("%d:%02d", minutes, seconds)
-end
-
 function UIHelpers.setTextColor(fontString, colorName)
     local color = UI_CONSTANTS.COLORS[colorName]
     if color then
@@ -771,9 +761,9 @@ function UIContentCreators.createTimeRow(parentFrame, mapInfo, index, startY)
     
     -- Create row content
     UIHelpers.createRowText(parentFrame, mapInfo.name, 0, yOffset, 200)
-    UIHelpers.createRowText(parentFrame, UIHelpers.formatTime(timers.oneChest), 200, yOffset, 140)
-    UIHelpers.createRowText(parentFrame, UIHelpers.formatTime(timers.twoChest), 340, yOffset, 140)
-    UIHelpers.createRowText(parentFrame, UIHelpers.formatTime(timers.threeChest), 480, yOffset, 140)
+    UIHelpers.createRowText(parentFrame, DungeonData.formatTime(timers.oneChest), 200, yOffset, 140)
+    UIHelpers.createRowText(parentFrame, DungeonData.formatTime(timers.twoChest), 340, yOffset, 140)
+    UIHelpers.createRowText(parentFrame, DungeonData.formatTime(timers.threeChest), 480, yOffset, 140)
 end
 
 function UIContentCreators.calculateTimers(parTime)

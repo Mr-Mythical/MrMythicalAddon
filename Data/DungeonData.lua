@@ -145,8 +145,12 @@ end
 --- @param timeInSeconds number The time in seconds
 --- @return string The formatted time string
 function MrMythical.DungeonData.formatTime(timeInSeconds)
-    if not timeInSeconds then
+    if timeInSeconds == nil then
         return "Unknown"
+    end
+    
+    if timeInSeconds <= 0 then
+        return "0:00"
     end
     
     local minutes = math.floor(timeInSeconds / 60)
