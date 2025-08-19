@@ -349,13 +349,26 @@ function UIContentCreators.getDungeonData()
         local currentLevel = 0
         local currentScore = 0
         
-        if intimeInfo then
-            currentLevel = intimeInfo.level
-            currentScore = intimeInfo.dungeonScore or 0
-        elseif overtimeInfo then
-            currentLevel = overtimeInfo.level
-            currentScore = overtimeInfo.dungeonScore or 0
+        -- Check both timed and overtime runs to find the highest score
+        local bestScore = 0
+        local bestLevel = 0
+        
+        if intimeInfo and intimeInfo.dungeonScore then
+            if intimeInfo.dungeonScore > bestScore then
+                bestScore = intimeInfo.dungeonScore
+                bestLevel = intimeInfo.level
+            end
         end
+        
+        if overtimeInfo and overtimeInfo.dungeonScore then
+            if overtimeInfo.dungeonScore > bestScore then
+                bestScore = overtimeInfo.dungeonScore
+                bestLevel = overtimeInfo.level
+            end
+        end
+        
+        currentLevel = bestLevel
+        currentScore = bestScore
         
         table.insert(dungeonData, {
             index = i,
