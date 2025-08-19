@@ -444,7 +444,7 @@ function UIContentCreators.updateScoreTable(scoreRows, timerPercentage)
             local baseScore = RewardsFunctions.scoreFormula(level)
             local scoreBonus = math.floor(15 * (timerPercentage / 40))
             local finalScore = baseScore + scoreBonus
-            
+
             row.bonus:SetText(string.format("+%d", scoreBonus))
             row.final:SetText(string.format("%d", finalScore))
             UIHelpers.setTextColor(row.bonus, "SUCCESS_HIGH")

@@ -1,5 +1,5 @@
 <Bindings>
     <Binding name="Open Dashboard" category="Mr. Mythical">
-        MrMythical:ToggleUnifiedUI();
+        MrMythical.UnifiedUI:Toggle();
     </Binding>
 </Bindings>
