@@ -1033,14 +1033,5 @@ function UnifiedUI:Toggle(contentType)
     end
 end
 
-function UnifiedUI:IsShown()
-    return unifiedFrame:IsShown()
-end
-
--- Global toggle function for slash command
-function MrMythical:ToggleUnifiedUI(contentType)
-    UnifiedUI:Toggle(contentType or UI_CONSTANTS.CONTENT_TYPES.DASHBOARD)
-end
-
 -- Initialize with dashboard content
 NavigationManager.showContent(UI_CONSTANTS.CONTENT_TYPES.DASHBOARD, contentFrame)
