@@ -1,4 +1,4 @@
-## Interface: 110200
+## Interface: 110200, 110205
 ## Title: Mr. Mythical: Mythic+ Rewards and Score Tooltips
 ## Notes: Enhanced & customizable Mythic+ keystone tooltips, with detailed reward info, score insights, and dungeon completion rates, directly in your tooltips and chat!
 ## Version: @project-version@
