@@ -271,7 +271,7 @@ function UIContentCreators.createScoreTables(parentFrame)
     
     -- Gains table headers
     UIHelpers.createHeader(gainsTableFrame, "Dungeon", 0, 140)
-    UIHelpers.createHeader(gainsTableFrame, "Current", 140, 50)
+    UIHelpers.createHeader(gainsTableFrame, "Level", 140, 50)
     UIHelpers.createHeader(gainsTableFrame, "Score", 190, 60)
     UIHelpers.createHeader(gainsTableFrame, "Gain", 250, 60)
     
@@ -328,14 +328,30 @@ function UIContentCreators.createGainRows(gainsTableFrame)
         
         UIHelpers.createRowBackground(gainsTableFrame, yOffset, 310, isEven)
         
+        -- Format the level display without symbols
+        local levelText = "--"
+        if data.currentLevel > 0 then
+            levelText = tostring(data.currentLevel)
+        end
+        
         gainRows[i] = {
             name = UIHelpers.createRowText(gainsTableFrame, data.mapInfo.name, 0, yOffset, 140),
-            current = UIHelpers.createRowText(gainsTableFrame, 
-                data.currentLevel > 0 and tostring(data.currentLevel) or "--", 140, yOffset, 50),
+            current = UIHelpers.createRowText(gainsTableFrame, levelText, 140, yOffset, 50),
             timer = UIHelpers.createRowText(gainsTableFrame, 
                 data.currentScore > 0 and tostring(data.currentScore) or "--", 190, yOffset, 60),
             gain = UIHelpers.createRowText(gainsTableFrame, "--", 250, yOffset, 60)
         }
+        
+        -- Color code the level text based on timing status
+        if data.hasRun then
+            if data.isInTime then
+                UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")  -- Green for timed
+            else
+                UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_LOW")  -- Red for overtime
+            end
+        else
+            UIHelpers.setTextColor(gainRows[i].current, "DISABLED")  -- Gray for no run
+        end
     end
     
     return gainRows
@@ -348,33 +364,43 @@ function UIContentCreators.getDungeonData()
         local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapInfo.id)
         local currentLevel = 0
         local currentScore = 0
+        local isInTime = false
+        local hasRun = false
         
         -- Check both timed and overtime runs to find the highest score
         local bestScore = 0
         local bestLevel = 0
+        local bestIsInTime = false
         
         if intimeInfo and intimeInfo.dungeonScore then
             if intimeInfo.dungeonScore > bestScore then
                 bestScore = intimeInfo.dungeonScore
                 bestLevel = intimeInfo.level
+                bestIsInTime = true
             end
+            hasRun = true
         end
         
         if overtimeInfo and overtimeInfo.dungeonScore then
             if overtimeInfo.dungeonScore > bestScore then
                 bestScore = overtimeInfo.dungeonScore
                 bestLevel = overtimeInfo.level
+                bestIsInTime = false
             end
+            hasRun = true
         end
         
         currentLevel = bestLevel
         currentScore = bestScore
+        isInTime = bestIsInTime
         
         table.insert(dungeonData, {
             index = i,
             mapInfo = mapInfo,
             currentLevel = currentLevel,
-            currentScore = currentScore
+            currentScore = currentScore,
+            isInTime = isInTime,
+            hasRun = hasRun
         })
     end
     
@@ -465,6 +491,24 @@ function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPe
     
     for i, data in ipairs(dungeonData) do
         if gainRows[i] then
+            -- Update the level display without symbols
+            local levelText = "--"
+            if data.currentLevel > 0 then
+                levelText = tostring(data.currentLevel)
+            end
+            gainRows[i].current:SetText(levelText)
+            
+            -- Color code the level text based on timing status
+            if data.hasRun then
+                if data.isInTime then
+                    UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")  -- Green for timed
+                else
+                    UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_LOW")  -- Red for overtime
+                end
+            else
+                UIHelpers.setTextColor(gainRows[i].current, "DISABLED")  -- Gray for no run
+            end
+            
             local potentialGain = finalScore - data.currentScore
             
             if potentialGain > 0 then
