@@ -109,13 +109,9 @@ function UIHelpers.setTextColor(fontString, colorName)
     end
 end
 
--- Content creation functions
+
 local UIContentCreators = {}
-
--- Forward declare NavigationManager so UIContentCreators can be accessed
 local NavigationManager = {}
-
---- Creates the dashboard content
 function UIContentCreators.dashboard(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge", 
         "Mr. Mythical Dashboard", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
@@ -135,7 +131,6 @@ function UIContentCreators.dashboard(parentFrame)
     UIHelpers.setTextColor(version, "DISABLED")
 end
 
---- Creates the rewards content with comprehensive reward information
 function UIContentCreators.rewards(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
         "Mythic+ Rewards", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
@@ -148,13 +143,11 @@ function UIContentCreators.rewards(parentFrame)
 end
 
 function UIContentCreators.createRewardsTable(parentFrame)
-    -- Create table headers
     UIHelpers.createHeader(parentFrame, "Key Level", 0, 80)
     UIHelpers.createHeader(parentFrame, "End of Dungeon", 80, 150)
     UIHelpers.createHeader(parentFrame, "Great Vault", 230, 150)
     UIHelpers.createHeader(parentFrame, "Crest Rewards", 380, 150)
     
-    -- Populate table with reward data
     local startY = -25
     for level = 2, 12 do
         UIContentCreators.createRewardRow(parentFrame, level, startY, level - 2)
@@ -165,22 +158,11 @@ function UIContentCreators.createRewardRow(parentFrame, level, startY, index)
     local yOffset = startY - (index * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
     local isEven = level % 2 == 0
     
-    -- Create alternating row background
     UIHelpers.createRowBackground(parentFrame, yOffset, 530, isEven)
-    
-    -- Get rewards data
-    if not RewardsFunctions then
-        return
-    end
     
     local rewards = RewardsFunctions.getRewardsForKeyLevel(level)
     local crests = RewardsFunctions.getCrestReward(level)
     
-    if not rewards or not crests then
-        return
-    end
-    
-    -- Create row content
     UIHelpers.createRowText(parentFrame, tostring(level), 0, yOffset, 80)
     UIHelpers.createRowText(parentFrame, 
         string.format("%s\n%s", rewards.dungeonItem, rewards.dungeonTrack), 
@@ -695,7 +677,7 @@ function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows
     end
     for k in pairs(dungeonRows) do dungeonRows[k] = nil end
     
-    -- Create new rows
+
     local startY = -25
     for i, data in ipairs(dungeonData) do
         local yOffset = startY - ((i - 1) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
@@ -711,7 +693,6 @@ function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows
             rate = UIHelpers.createRowText(dungeonTableFrame, string.format("%d%%", data.rate), 500, yOffset, 120)
         }
         
-        -- Color code the success rate
         local colorName = UIContentCreators.getSuccessRateColor(data.rate)
         UIHelpers.setTextColor(dungeonRows[i].rate, colorName)
     end
@@ -930,9 +911,6 @@ function MainFrameManager.createContentFrame(parentFrame)
     contentFrame:SetSize(UI_CONSTANTS.FRAME.CONTENT_WIDTH, UI_CONSTANTS.FRAME.HEIGHT - (UI_CONSTANTS.LAYOUT.PADDING * 2))
     return contentFrame
 end
-
--- Navigation System
--- NavigationManager already declared earlier
 
 NavigationManager.BUTTON_DATA = {
     {id = UI_CONSTANTS.CONTENT_TYPES.DASHBOARD, text = "Dashboard", y = -UI_CONSTANTS.LAYOUT.LARGE_PADDING},
