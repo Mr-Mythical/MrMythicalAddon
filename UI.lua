@@ -473,14 +473,12 @@ function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPe
     
     for i, data in ipairs(dungeonData) do
         if gainRows[i] then
-            -- Update the level display without symbols
             local levelText = "--"
             if data.currentLevel > 0 then
                 levelText = tostring(data.currentLevel)
             end
             gainRows[i].current:SetText(levelText)
             
-            -- Color code the level text based on timing status
             if data.hasRun then
                 if data.isInTime then
                     UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")  -- Green for timed
@@ -696,10 +694,13 @@ function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows
         local colorName = UIContentCreators.getSuccessRateColor(data.rate)
         UIHelpers.setTextColor(dungeonRows[i].rate, colorName)
     end
-    
-    -- Show no data message if needed
+
     if #dungeonData == 0 then
-        UIContentCreators.showNoDungeonDataMessage(dungeonTableFrame, dungeonRows, currentStatsView, startY)
+        dungeonRows[1] = {
+            name = UIHelpers.createRowText(dungeonTableFrame, 
+                string.format("No %s dungeon data available", currentStatsView), 0, startY, 620)
+        }
+        dungeonRows[1].name:SetTextColor(0.7, 0.7, 0.7)
     end
 end
 
@@ -711,14 +712,6 @@ function UIContentCreators.getSuccessRateColor(rate)
     else
         return "SUCCESS_LOW"
     end
-end
-
-function UIContentCreators.showNoDungeonDataMessage(dungeonTableFrame, dungeonRows, currentStatsView, startY)
-    dungeonRows[1] = {
-        name = UIHelpers.createRowText(dungeonTableFrame, 
-            string.format("No %s dungeon data available", currentStatsView), 0, startY, 620)
-    }
-    dungeonRows[1].name:SetTextColor(0.7, 0.7, 0.7)
 end
 
 function UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
@@ -825,13 +818,11 @@ function UIContentCreators.createTimesInfoPanel(parentFrame)
     UIHelpers.setTextColor(infoText, "INFO_TEXT")
 end
 
--- Main UI Frame and Navigation System
 local MainFrameManager = {}
 
 function MainFrameManager.createUnifiedFrame()
     local frame = CreateFrame("Frame", "MrMythicalUnifiedFrame", UIParent, "BackdropTemplate")
     frame:SetSize(UI_CONSTANTS.FRAME.WIDTH, UI_CONSTANTS.FRAME.HEIGHT)
-    -- Attempt to restore saved position
     if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
         frame:SetPoint(
             MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER",
@@ -998,13 +989,9 @@ function NavigationManager.showContent(contentType, contentFrame)
     if UIContentCreators[contentType] then
         UIContentCreators[contentType](contentFrame)
     else
-        NavigationManager.showFallbackContent(contentFrame, contentType)
-    end
-end
-
-function NavigationManager.showFallbackContent(contentFrame, contentType)
-    UIHelpers.createFontString(contentFrame, "OVERLAY", "GameFontNormal",
+        UIHelpers.createFontString(contentFrame, "OVERLAY", "GameFontNormal",
         "Content not available: " .. contentType, "CENTER", 0, 0)
+    end
 end
 
 -- Initialize the main UI
@@ -1013,13 +1000,10 @@ local navPanel = MainFrameManager.createNavigationPanel(unifiedFrame)
 local contentFrame = MainFrameManager.createContentFrame(unifiedFrame)
 local navButtons = NavigationManager.createButtons(navPanel, contentFrame)
 
--- Add close button
 local closeButton = CreateFrame("Button", nil, unifiedFrame, "UIPanelCloseButton")
 closeButton:SetPoint("TOPRIGHT", -5, -5)
 
--- Public API functions
 function UnifiedUI:Show(contentType)
-    -- Re-anchor before showing to avoid drift after resolution/UI scale changes
     if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
         unifiedFrame:ClearAllPoints()
         unifiedFrame:SetPoint(
@@ -1055,5 +1039,4 @@ function UnifiedUI:Toggle(contentType)
     end
 end
 
--- Initialize with dashboard content
 NavigationManager.showContent(UI_CONSTANTS.CONTENT_TYPES.DASHBOARD, contentFrame)
