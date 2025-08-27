@@ -31,44 +31,60 @@ function MrMythical.DungeonData.refreshFromAPI()
     local withTimers = 0
 
     for _, id in ipairs(mapIDs) do
-        local name = nil
+        local name, parTime
+        
         if C_ChallengeMode and C_ChallengeMode.GetMapUIInfo then
             local n, _, timeLimit = C_ChallengeMode.GetMapUIInfo(id)
-            if type(n) == "string" then name = n end
-            local parTime = (type(timeLimit) == "number" and timeLimit > 0) and math.floor(timeLimit) or nil
-            if parTime then withTimers = withTimers + 1 else table.insert(missingTimers, string.format("%s(%d)", name or "?", id)) end
-            table.insert(maps, { id = id, name = name or ("Map "..tostring(id)), parTime = parTime })
-        else
-            table.insert(maps, { id = id, name = name or ("Map "..tostring(id)), parTime = nil })
+            name = type(n) == "string" and n or nil
+            parTime = (type(timeLimit) == "number" and timeLimit > 0) and math.floor(timeLimit) or nil
+            
+            if parTime then 
+                withTimers = withTimers + 1 
+            else 
+                table.insert(missingTimers, string.format("%s(%d)", name or "?", id)) 
+            end
         end
+        
+        table.insert(maps, { 
+            id = id, 
+            name = name or ("Map " .. tostring(id)), 
+            parTime = parTime 
+        })
     end
 
     MrMythical.DungeonData.MYTHIC_MAPS = maps
     return true
 end
 
+--- Helper function to find map info by ID
+--- @param mapID number The dungeon map ID
+--- @return table|nil The map info table or nil if not found
+local function findMapByID(mapID)
+    for _, mapInfo in ipairs(MrMythical.DungeonData.MYTHIC_MAPS) do
+        if mapInfo.id == mapID then
+            return mapInfo
+        end
+    end
+    return nil
+end
+
 --- Gets the par time for a specific dungeon map ID
 --- @param mapID number The dungeon map ID
 --- @return number|nil The par time in seconds, or nil if not found
 function MrMythical.DungeonData.getParTime(mapID)
-    for _, mapInfo in ipairs(MrMythical.DungeonData.MYTHIC_MAPS) do
-        if mapInfo.id == mapID then
-            return mapInfo.parTime
-        end
-    end
-    return nil
+    local mapInfo = findMapByID(mapID)
+    return mapInfo and mapInfo.parTime or nil
 end
 
 --- Gets the name for a specific dungeon map ID
 --- @param mapID number The dungeon map ID
 --- @return string The dungeon name or a fallback string
 function MrMythical.DungeonData.getDungeonName(mapID)
-    for _, mapInfo in ipairs(MrMythical.DungeonData.MYTHIC_MAPS) do
-        if mapInfo.id == mapID then
-            return mapInfo.name
-        end
+    local mapInfo = findMapByID(mapID)
+    if mapInfo then
+        return mapInfo.name
     end
-    
+
     -- Fallback to API if not in cache
     if C_ChallengeMode and C_ChallengeMode.GetMapUIInfo then
         local name = C_ChallengeMode.GetMapUIInfo(mapID)
@@ -76,7 +92,7 @@ function MrMythical.DungeonData.getDungeonName(mapID)
             return name
         end
     end
-    
+
     return "Dungeon " .. tostring(mapID)
 end
 
@@ -117,25 +133,28 @@ function MrMythical.DungeonData.checkSeasonAndPoolChanges()
     result.currentSeasonID = currentSeasonID
     result.currentPoolSignature = currentPoolSig
     
-    if currentSeasonID and currentSeasonID > 0 then
-        -- First-time initialization
-        if not MrMythical.DungeonData._seasonCache.seasonID or MrMythical.DungeonData._seasonCache.seasonID <= 0 then
-            MrMythical.DungeonData._seasonCache.seasonID = currentSeasonID
-        end
-        if not MrMythical.DungeonData._seasonCache.mapPoolSignature then
-            MrMythical.DungeonData._seasonCache.mapPoolSignature = currentPoolSig
-        end
-
-        result.seasonChanged = currentSeasonID ~= MrMythical.DungeonData._seasonCache.seasonID
-        result.poolChanged = currentPoolSig ~= MrMythical.DungeonData._seasonCache.mapPoolSignature
-
-        -- Update cache
-        if result.seasonChanged then
-            MrMythical.DungeonData._seasonCache.seasonID = currentSeasonID
-            MrMythical.DungeonData._seasonCache.mapPoolSignature = currentPoolSig
-        elseif result.poolChanged and currentPoolSig and currentPoolSig ~= "" then
-            MrMythical.DungeonData._seasonCache.mapPoolSignature = currentPoolSig
-        end
+    if not (currentSeasonID and currentSeasonID > 0) then
+        return result
+    end
+    
+    -- Initialize cache on first run
+    local cache = MrMythical.DungeonData._seasonCache
+    if not cache.seasonID or cache.seasonID <= 0 then
+        cache.seasonID = currentSeasonID
+        cache.mapPoolSignature = currentPoolSig
+        return result
+    end
+    
+    -- Check for changes
+    result.seasonChanged = currentSeasonID ~= cache.seasonID
+    result.poolChanged = currentPoolSig ~= cache.mapPoolSignature
+    
+    -- Update cache
+    if result.seasonChanged then
+        cache.seasonID = currentSeasonID
+        cache.mapPoolSignature = currentPoolSig
+    elseif result.poolChanged and currentPoolSig and currentPoolSig ~= "" then
+        cache.mapPoolSignature = currentPoolSig
     end
     
     return result
