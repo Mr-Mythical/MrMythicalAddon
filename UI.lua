@@ -252,10 +252,11 @@ function UIContentCreators.createScoreTables(parentFrame)
     gainsTableFrame:SetSize(310, 290)
     
     -- Gains table headers
-    UIHelpers.createHeader(gainsTableFrame, "Dungeon", 0, 140)
-    UIHelpers.createHeader(gainsTableFrame, "Level", 140, 50)
-    UIHelpers.createHeader(gainsTableFrame, "Score", 190, 60)
-    UIHelpers.createHeader(gainsTableFrame, "Gain", 250, 60)
+    UIHelpers.createHeader(gainsTableFrame, "Dungeon", 0, 110)
+    UIHelpers.createHeader(gainsTableFrame, "Level", 110, 40)
+    UIHelpers.createHeader(gainsTableFrame, "Score", 150, 50)
+    UIHelpers.createHeader(gainsTableFrame, "Time", 200, 60)
+    UIHelpers.createHeader(gainsTableFrame, "Gain", 260, 50)
     
     return UIContentCreators.createScoreRows(scoreContentFrame), UIContentCreators.createGainRows(gainsTableFrame)
 end
@@ -310,18 +311,21 @@ function UIContentCreators.createGainRows(gainsTableFrame)
         
         UIHelpers.createRowBackground(gainsTableFrame, yOffset, 310, isEven)
         
-        -- Format the level display without symbols
         local levelText = "--"
         if data.currentLevel > 0 then
             levelText = tostring(data.currentLevel)
         end
         
+        -- Format the run time using DungeonData.formatTime
+        local runTimeText = DungeonData.formatTime(data.runTime)
+        
         gainRows[i] = {
-            name = UIHelpers.createRowText(gainsTableFrame, data.mapInfo.name, 0, yOffset, 140),
-            current = UIHelpers.createRowText(gainsTableFrame, levelText, 140, yOffset, 50),
+            name = UIHelpers.createRowText(gainsTableFrame, data.mapInfo.name, 0, yOffset, 110),
+            current = UIHelpers.createRowText(gainsTableFrame, levelText, 110, yOffset, 40),
             timer = UIHelpers.createRowText(gainsTableFrame, 
-                data.currentScore > 0 and tostring(data.currentScore) or "--", 190, yOffset, 60),
-            gain = UIHelpers.createRowText(gainsTableFrame, "--", 250, yOffset, 60)
+                data.currentScore > 0 and tostring(data.currentScore) or "--", 150, yOffset, 50),
+            time = UIHelpers.createRowText(gainsTableFrame, runTimeText, 200, yOffset, 60),
+            gain = UIHelpers.createRowText(gainsTableFrame, "--", 260, yOffset, 50)
         }
         
         -- Color code the level text based on timing status
@@ -348,17 +352,20 @@ function UIContentCreators.getDungeonData()
         local currentScore = 0
         local isInTime = false
         local hasRun = false
+        local runTime = 0
         
         -- Check both timed and overtime runs to find the highest score
         local bestScore = 0
         local bestLevel = 0
         local bestIsInTime = false
+        local bestRunTime = 0
         
         if intimeInfo and intimeInfo.dungeonScore then
             if intimeInfo.dungeonScore > bestScore then
                 bestScore = intimeInfo.dungeonScore
                 bestLevel = intimeInfo.level
                 bestIsInTime = true
+                bestRunTime = intimeInfo.durationSec or 0
             end
             hasRun = true
         end
@@ -368,6 +375,7 @@ function UIContentCreators.getDungeonData()
                 bestScore = overtimeInfo.dungeonScore
                 bestLevel = overtimeInfo.level
                 bestIsInTime = false
+                bestRunTime = overtimeInfo.durationSec or 0
             end
             hasRun = true
         end
@@ -375,6 +383,7 @@ function UIContentCreators.getDungeonData()
         currentLevel = bestLevel
         currentScore = bestScore
         isInTime = bestIsInTime
+        runTime = bestRunTime
         
         table.insert(dungeonData, {
             index = i,
@@ -382,7 +391,8 @@ function UIContentCreators.getDungeonData()
             currentLevel = currentLevel,
             currentScore = currentScore,
             isInTime = isInTime,
-            hasRun = hasRun
+            hasRun = hasRun,
+            runTime = runTime
         })
     end
     
