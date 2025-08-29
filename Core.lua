@@ -8,6 +8,9 @@ Author: Braunerr
 
 local MrMythical = MrMythical or {}
 
+-- Global debug variable for BraunerrsDevTools integration
+MrMythicalDebug = false
+
 local GradientsData = MrMythical.GradientsData
 local ConfigData = MrMythical.ConfigData
 local DungeonData = MrMythical.DungeonData
@@ -23,6 +26,16 @@ local Options = MrMythical.Options
 
 local GRADIENTS = GradientsData.GRADIENTS
 local currentPlayerRegion = "us"
+
+--- Debug logging function for development
+--- @param message string The debug message to log
+--- @param ... any Additional values to include in the debug output
+local function debugLog(message, ...)
+    if MrMythicalDebug then
+        local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)
+        print(formattedMessage)
+    end
+end
 
 --- Retrieves the dungeon score for a specific map from a RaiderIO profile
 --- @param profile table RaiderIO profile data containing mythic keystone information
@@ -64,6 +77,8 @@ end
 --- @param targetMapID number The dungeon map ID to get scores for
 --- @return table A mapping of player names to their dungeon scores
 function MrMythical.getGroupMythicDataParty(playerScore, targetMapID)
+    debugLog("Getting group mythic data for map ID: %d", targetMapID)
+    
     local groupScoreData = {}
     local playerName = UnitName("player")
     groupScoreData[playerName] = playerScore
@@ -181,6 +196,8 @@ end
 --- @param keyLevel number The keystone level
 --- @param mapID number The dungeon map ID
 local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID)
+    debugLog("Enhancing tooltip with reward info: level=%d, mapID=%d", keyLevel, mapID)
+    
     local currentScore = MrMythical.getCharacterMythicScore(itemString)
     local groupScoreData = MrMythical.getGroupMythicDataParty(currentScore, mapID)
     
@@ -298,20 +315,21 @@ local function handleKeystoneTooltip(tooltip)
     
     local name, link = tooltip:GetItem()
     if not link then 
-        return 
+        return
     end
     
     -- Process all keystone links found in the tooltip
     for keystoneLink in link:gmatch("|Hkeystone:.-|h.-|h|r") do
         local keystoneData = KeystoneUtils.parseKeystoneData(keystoneLink)
         if keystoneData then
+            debugLog("Enhancing tooltip for keystone: level %d, map ID %d", keystoneData.level, keystoneData.mapID)
             enhanceTooltipWithRewardInfo(tooltip, keystoneData.itemString, keystoneData.level, keystoneData.mapID)
             processKeystoneTooltip(tooltip)
+        else
+            debugLog("Failed to parse keystone data from link: %s", keystoneLink)
         end
     end
-end
-
---- Chat hyperlink hook handler for keystone links
+end--- Chat hyperlink hook handler for keystone links
 --- Adds reward information to keystone links clicked in chat
 --- @param self table The chat frame object
 --- @param hyperlink string The clicked hyperlink
@@ -347,6 +365,8 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
         if addonName == "MrMythical" then
+            debugLog("MrMythical addon loaded, initializing...")
+            
             -- Initialize basic addon settings
             Options.initializeSettings()
             
