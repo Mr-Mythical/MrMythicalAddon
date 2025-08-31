@@ -25,7 +25,6 @@ local RewardsFunctions = MrMythical.RewardsFunctions
 local Options = MrMythical.Options
 
 local GRADIENTS = GradientsData.GRADIENTS
-local currentPlayerRegion = "us"
 
 --- Debug logging function for development
 --- @param message string The debug message to log
@@ -34,99 +33,6 @@ local function debugLog(message, ...)
     if MrMythicalDebug then
         local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)
         print(formattedMessage)
-    end
-end
-
---- Retrieves the dungeon score for a specific map from a RaiderIO profile
---- @param profile table RaiderIO profile data containing mythic keystone information
---- @param targetMapID number The specific dungeon map ID to find score for
---- @return number The dungeon score, or 0 if no data found
-local function getDungeonScoreFromProfile(profile, targetMapID)
-    if profile and profile.mythicKeystoneProfile and profile.mythicKeystoneProfile.sortedDungeons then
-        for _, dungeonEntry in ipairs(profile.mythicKeystoneProfile.sortedDungeons) do
-            if dungeonEntry.dungeon and dungeonEntry.dungeon.keystone_instance == targetMapID then
-                local completedLevel = dungeonEntry.level or 0
-                local chestsEarned = dungeonEntry.chests or 0
-                local baseScore = RewardsFunctions.scoreFormula(completedLevel)
-                
-                local chestBonus = 0
-                if chestsEarned == 2 then
-                    chestBonus = 7.5
-                elseif chestsEarned >= 3 then
-                    chestBonus = 15
-                end
-                
-                return baseScore + chestBonus
-            end
-        end
-    end
-    
-    -- Fallback to average score if specific dungeon not found
-    if profile and profile.mythicKeystoneProfile and profile.mythicKeystoneProfile.currentScore then
-        local numDungeons = #profile.mythicKeystoneProfile.sortedDungeons
-        if numDungeons > 0 then
-            return profile.mythicKeystoneProfile.currentScore / numDungeons
-        end
-    end
-    
-    return 0
-end
-
---- Retrieves mythic+ scores for all group members for a specific dungeon
---- @param playerScore number The current player's score for this dungeon
---- @param targetMapID number The dungeon map ID to get scores for
---- @return table A mapping of player names to their dungeon scores
-function MrMythical.getGroupMythicDataParty(playerScore, targetMapID)
-    debugLog("Getting group mythic data for map ID: %d", targetMapID)
-    
-    local groupScoreData = {}
-    local playerName = UnitName("player")
-    groupScoreData[playerName] = playerScore
-    
-    local region = currentPlayerRegion
-    local numGroupMembers = GetNumGroupMembers() or 1
-    
-    for i = 1, numGroupMembers - 1 do
-        local unitID = "party" .. i
-        if UnitExists(unitID) then
-            local name, realm = UnitName(unitID)
-            realm = realm and realm ~= "" and realm or GetRealmName()
-            
-            if RaiderIO and RaiderIO.GetProfile then
-                local playerProfile = RaiderIO.GetProfile(name, realm, region)
-                local dungeonScore = 0
-                
-                if playerProfile and playerProfile.mythicKeystoneProfile then
-                    dungeonScore = getDungeonScoreFromProfile(playerProfile, targetMapID)
-                end
-                
-                groupScoreData[name] = dungeonScore
-            else
-                groupScoreData[name] = 0
-            end
-        end
-    end
-    
-    return groupScoreData
-end
-
---- Retrieves the player's best mythic+ score for a given keystone
---- @param itemString string The keystone item string to get score for
---- @return number The player's best score for this keystone, or 0 if no data
-function MrMythical.getCharacterMythicScore(itemString)
-    local mapID = KeystoneUtils.extractMapID(itemString)
-    if not mapID then
-        return 0
-    end
-    
-    local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapID)
-    
-    if intimeInfo and intimeInfo.dungeonScore then
-        return intimeInfo.dungeonScore
-    elseif overtimeInfo and overtimeInfo.dungeonScore then
-        return overtimeInfo.dungeonScore
-    else
-        return 0
     end
 end
 
@@ -198,8 +104,8 @@ end
 local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID)
     debugLog("Enhancing tooltip with reward info: level=%d, mapID=%d", keyLevel, mapID)
     
-    local currentScore = MrMythical.getCharacterMythicScore(itemString)
-    local groupScoreData = MrMythical.getGroupMythicDataParty(currentScore, mapID)
+    local currentScore = MrMythical.DungeonData.getCharacterMythicScore(itemString)
+    local groupScoreData = MrMythical.DungeonData.getGroupMythicDataParty(currentScore, mapID)
     
     -- Calculate group average potential gain
     local totalPotentialGain, playerCount = 0, 0
@@ -369,12 +275,6 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
             
             -- Initialize basic addon settings
             Options.initializeSettings()
-            
-            -- Determine player's region for RaiderIO integration
-            if GetCurrentRegion then
-                local regionNumber = GetCurrentRegion()
-                currentPlayerRegion = ConfigData.REGION_MAP[regionNumber]
-            end
             
             addonInitialized = true
         end
