@@ -131,11 +131,30 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
 
     -- Add dungeon timer if enabled (at the top)
     if MRM_SavedVars.SHOW_PAR_TIME then
-        local parTime = DungeonData.getParTime(mapID)
-        if parTime then
-            local formattedTime = DungeonData.formatTime(parTime)
-            tooltip:AddLine(string.format("%sDungeon Timer: %s|r", 
-                ConfigData.COLORS.WHITE, formattedTime))
+        if DungeonData then
+            local parTime = DungeonData.getParTime(mapID)
+            if parTime then
+                local formattedTime = DungeonData.formatTime(parTime)
+                tooltip:AddLine(string.format("%sDungeon Timer: %s|r", 
+                    ConfigData.COLORS.WHITE, formattedTime))
+            end
+        end
+    end
+
+    -- Add player's best run information if enabled
+    if MRM_SavedVars.SHOW_PLAYER_BEST then
+        local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
+        if bestRun then
+            local timeColor = bestRun.wasInTime and ConfigData.COLORS.GREEN or ConfigData.COLORS.YELLOW
+            local formattedTime = DungeonData and DungeonData.formatTime and DungeonData.formatTime(bestRun.bestTime) or "Unknown"
+            local timeStatus = bestRun.wasInTime and "In Time" or "Overtime"
+            
+            tooltip:AddLine(string.format("%sPersonal Best: Level %d (%s%s|r - %s) - Score: %s%d|r", 
+                ConfigData.COLORS.WHITE, bestRun.bestLevel, timeColor, formattedTime, timeStatus,
+                ConfigData.COLORS.BLUE, currentScore))
+        else
+            tooltip:AddLine(string.format("%sPersonal Best: %sNo data|r", 
+                ConfigData.COLORS.WHITE, ConfigData.COLORS.GRAY))
         end
     end
 
@@ -282,7 +301,9 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         -- Only proceed if our addon has been loaded
         if addonInitialized then
             -- Refresh dungeon data from API (now that APIs are available)
-            DungeonData.refreshFromAPI()
+            if DungeonData and DungeonData.refreshFromAPI then
+                DungeonData.refreshFromAPI()
+            end
             
             -- Initialize completion tracker (this will populate dungeon pool)
             CompletionTracker:initialize()

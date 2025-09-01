@@ -13,6 +13,7 @@ MrMythical.ConfigData = {
         WHITE = "|cffffffff",
         GOLD = "|cffffcc00", 
         GREEN = "|cff00ff00",
+        YELLOW = "|cffffff00",
         GRAY = "|cff808080",
         BLUE = "|cff0088ff",
         RED = "|cffff0000",

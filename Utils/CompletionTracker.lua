@@ -57,6 +57,11 @@ end
 
 --- Checks and ensures dungeon pool is populated during initialization
 local function checkDungeonPoolOnLoad()
+    -- Ensure DungeonData is available
+    if not MrMythical.DungeonData then
+        return
+    end
+    
     -- Ensure DungeonData is populated first
     MrMythical.DungeonData.refreshFromAPI()
     
@@ -97,6 +102,11 @@ function CompletionTracker:refreshDungeonPool()
         poolBefore[mapID] = true
     end
     
+    -- Ensure DungeonData is available
+    if not MrMythical.DungeonData then
+        return false
+    end
+    
     -- Refresh DungeonData first
     local success = MrMythical.DungeonData.refreshFromAPI()
     
@@ -125,6 +135,11 @@ end
 --- Initializes dungeon stats for a container if it's empty
 --- @param container table The stats container to initialize
 local function initializeDungeonStats(container)
+    -- Ensure DungeonData is available
+    if not MrMythical.DungeonData then
+        return
+    end
+    
     -- Only initialize if container is completely empty - don't wipe existing data
     if not container or next(container) then
         return -- Container already has data or is nil, don't wipe it
@@ -164,41 +179,43 @@ local function checkWeeklyReset()
         completionData.weekly.resetTime = nextReset
         
         -- Check for season/pool changes on weekly reset using DungeonData
-        local changes = MrMythical.DungeonData.checkSeasonAndPoolChanges()
-        if changes.currentSeasonID and changes.currentSeasonID > 0 then
-            -- First-time initialization
-            if not completionData.seasonal.seasonID or completionData.seasonal.seasonID <= 0 then
-                completionData.seasonal.seasonID = changes.currentSeasonID
-            end
-            if not completionData.seasonal.mapPoolSig then
-                completionData.seasonal.mapPoolSig = changes.currentPoolSignature
-            end
-
-            local seasonChanged = changes.currentSeasonID ~= completionData.seasonal.seasonID
-            local poolChanged = changes.currentPoolSignature ~= completionData.seasonal.mapPoolSig
-
-            if seasonChanged then
-                -- Reset seasonal stats for new season
-                completionData.seasonal.completed = 0
-                completionData.seasonal.failed = 0
-                
-                -- Reset individual dungeon stats but keep the structure
-                for mapID, dungeonData in pairs(completionData.seasonal.dungeons) do 
-                    dungeonData.completed = 0
-                    dungeonData.failed = 0
+        if MrMythical.DungeonData then
+            local changes = MrMythical.DungeonData.checkSeasonAndPoolChanges()
+            if changes.currentSeasonID and changes.currentSeasonID > 0 then
+                -- First-time initialization
+                if not completionData.seasonal.seasonID or completionData.seasonal.seasonID <= 0 then
+                    completionData.seasonal.seasonID = changes.currentSeasonID
+                end
+                if not completionData.seasonal.mapPoolSig then
+                    completionData.seasonal.mapPoolSig = changes.currentPoolSignature
                 end
 
-                -- Update markers
-                completionData.seasonal.seasonID = changes.currentSeasonID
-                completionData.seasonal.mapPoolSig = changes.currentPoolSignature
-            elseif poolChanged and changes.currentPoolSignature and changes.currentPoolSignature ~= "" then
-                -- Pool changed but not season - just sync the available dungeons
-                completionData.seasonal.mapPoolSig = changes.currentPoolSignature
+                local seasonChanged = changes.currentSeasonID ~= completionData.seasonal.seasonID
+                local poolChanged = changes.currentPoolSignature ~= completionData.seasonal.mapPoolSig
+
+                if seasonChanged then
+                    -- Reset seasonal stats for new season
+                    completionData.seasonal.completed = 0
+                    completionData.seasonal.failed = 0
+                    
+                    -- Reset individual dungeon stats but keep the structure
+                    for mapID, dungeonData in pairs(completionData.seasonal.dungeons) do 
+                        dungeonData.completed = 0
+                        dungeonData.failed = 0
+                    end
+
+                    -- Update markers
+                    completionData.seasonal.seasonID = changes.currentSeasonID
+                    completionData.seasonal.mapPoolSig = changes.currentPoolSignature
+                elseif poolChanged and changes.currentPoolSignature and changes.currentPoolSignature ~= "" then
+                    -- Pool changed but not season - just sync the available dungeons
+                    completionData.seasonal.mapPoolSig = changes.currentPoolSignature
+                end
+                
+                -- Sync dungeon pools for both seasonal and weekly after any changes
+                syncDungeonStats(completionData.seasonal.dungeons)
+                syncDungeonStats(completionData.weekly.dungeons)
             end
-            
-            -- Sync dungeon pools for both seasonal and weekly after any changes
-            syncDungeonStats(completionData.seasonal.dungeons)
-            syncDungeonStats(completionData.weekly.dungeons)
         end
     end
 end

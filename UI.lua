@@ -302,22 +302,23 @@ function UIContentCreators.createGainRows(gainsTableFrame)
     end
     
     -- Create initial dungeon data
-    local dungeonData = UIContentCreators.getDungeonData()
-    local startY = -25
-    
-    for i, data in ipairs(dungeonData) do
-        local yOffset = startY - ((i - 1) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
-        local isEven = i % 2 == 0
+    if MrMythical.DungeonData and MrMythical.DungeonData.getAllDungeonData then
+        local dungeonData = MrMythical.DungeonData.getAllDungeonData()
+        local startY = -25
         
-        UIHelpers.createRowBackground(gainsTableFrame, yOffset, 310, isEven)
-        
-        local levelText = "--"
-        if data.currentLevel > 0 then
-            levelText = tostring(data.currentLevel)
-        end
-        
-        -- Format the run time using DungeonData.formatTime
-        local runTimeText = DungeonData.formatTime(data.runTime)
+        for i, data in ipairs(dungeonData) do
+            local yOffset = startY - ((i - 1) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
+            local isEven = i % 2 == 0
+            
+            UIHelpers.createRowBackground(gainsTableFrame, yOffset, 310, isEven)
+            
+            local levelText = "--"
+            if data.currentLevel > 0 then
+                levelText = tostring(data.currentLevel)
+            end
+            
+            -- Format the run time using DungeonData.formatTime
+            local runTimeText = DungeonData and DungeonData.formatTime and DungeonData.formatTime(data.runTime) or "Unknown"
         
         gainRows[i] = {
             name = UIHelpers.createRowText(gainsTableFrame, data.mapInfo.name, 0, yOffset, 110),
@@ -340,71 +341,9 @@ function UIContentCreators.createGainRows(gainsTableFrame)
         end
     end
     
-    return gainRows
-end
-
-function UIContentCreators.getDungeonData()
-    local dungeonData = {}
-    
-    for i, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
-        local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapInfo.id)
-        local currentLevel = 0
-        local currentScore = 0
-        local isInTime = false
-        local hasRun = false
-        local runTime = 0
-        
-        -- Check both timed and overtime runs to find the highest score
-        local bestScore = 0
-        local bestLevel = 0
-        local bestIsInTime = false
-        local bestRunTime = 0
-        
-        if intimeInfo and intimeInfo.dungeonScore then
-            if intimeInfo.dungeonScore > bestScore then
-                bestScore = intimeInfo.dungeonScore
-                bestLevel = intimeInfo.level
-                bestIsInTime = true
-                bestRunTime = intimeInfo.durationSec or 0
-            end
-            hasRun = true
-        end
-        
-        if overtimeInfo and overtimeInfo.dungeonScore then
-            if overtimeInfo.dungeonScore > bestScore then
-                bestScore = overtimeInfo.dungeonScore
-                bestLevel = overtimeInfo.level
-                bestIsInTime = false
-                bestRunTime = overtimeInfo.durationSec or 0
-            end
-            hasRun = true
-        end
-        
-        currentLevel = bestLevel
-        currentScore = bestScore
-        isInTime = bestIsInTime
-        runTime = bestRunTime
-        
-        table.insert(dungeonData, {
-            index = i,
-            mapInfo = mapInfo,
-            currentLevel = currentLevel,
-            currentScore = currentScore,
-            isInTime = isInTime,
-            hasRun = hasRun,
-            runTime = runTime
-        })
     end
     
-    -- Sort by current score (highest first), then by name
-    table.sort(dungeonData, function(a, b)
-        if a.currentScore == b.currentScore then
-            return a.mapInfo.name < b.mapInfo.name
-        end
-        return a.currentScore > b.currentScore
-    end)
-    
-    return dungeonData
+    return gainRows
 end
 
 function UIContentCreators.setupScoreCalculator(timerSlider, currentKeyLevel, scoreRows, gainRows)
@@ -479,14 +418,15 @@ function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPe
     local finalScore = RewardsFunctions.scoreFormula(selectedLevel)
     finalScore = finalScore + math.floor(15 * (timerPercentage / 40))
     
-    local dungeonData = UIContentCreators.getDungeonData()
-    
-    for i, data in ipairs(dungeonData) do
-        if gainRows[i] then
-            local levelText = "--"
-            if data.currentLevel > 0 then
-                levelText = tostring(data.currentLevel)
-            end
+    if MrMythical.DungeonData and MrMythical.DungeonData.getAllDungeonData then
+        local dungeonData = MrMythical.DungeonData.getAllDungeonData()
+        
+        for i, data in ipairs(dungeonData) do
+            if gainRows[i] then
+                local levelText = "--"
+                if data.currentLevel > 0 then
+                    levelText = tostring(data.currentLevel)
+                end
             gainRows[i].current:SetText(levelText)
             
             if data.hasRun then
@@ -509,6 +449,7 @@ function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPe
                 UIHelpers.setTextColor(gainRows[i].gain, "DISABLED")
             end
         end
+    end
     end
 end
 

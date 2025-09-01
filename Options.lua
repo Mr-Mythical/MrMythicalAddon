@@ -84,6 +84,7 @@ function Options.initializeSettings()
         LEVEL_DISPLAY = "OFF",
         LEVEL_SHIFT_MODE = "NONE",
         SHORT_TITLE = false,
+        SHOW_PLAYER_BEST = true,
         UNIFIED_FRAME_POINT = "CENTER",
         UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
         UNIFIED_FRAME_X = 0,
@@ -286,6 +287,14 @@ function Options.createSettingsInCategory(category)
         "SHOW_PAR_TIME",
         false,
         "Display the dungeon timer in the keystone tooltip."
+    )
+
+    createSetting(
+        category,
+        "Show Player Best Run",
+        "SHOW_PLAYER_BEST",
+        true,
+        "Display your personal best level and time for this dungeon in the keystone tooltip."
     )
 
     createSetting(
