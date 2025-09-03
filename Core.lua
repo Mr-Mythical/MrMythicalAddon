@@ -19,7 +19,6 @@ local ColorUtils = MrMythical.ColorUtils
 local KeystoneUtils = MrMythical.KeystoneUtils
 local TooltipUtils = MrMythical.TooltipUtils
 local CommandHandlers = MrMythical.CommandHandlers
-local CompletionTracker = MrMythical.CompletionTracker
 local RewardsFunctions = MrMythical.RewardsFunctions
 
 local Options = MrMythical.Options
@@ -283,6 +282,7 @@ eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
 eventFrame:RegisterEvent("CHALLENGE_MODE_MAPS_UPDATE")
+eventFrame:RegisterEvent("CHALLENGE_MODE_START")
 
 local addonInitialized = false
 
@@ -305,28 +305,53 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
                 DungeonData.refreshFromAPI()
             end
             
-            -- Initialize completion tracker (this will populate dungeon pool)
-            CompletionTracker:initialize()
-            
             -- Unregister this event as we only need it once
             eventFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
         end
     elseif event == "CHALLENGE_MODE_MAPS_UPDATE" then
-        -- Mythic+ maps have been updated, refresh the dungeon pool
-        if addonInitialized and CompletionTracker and CompletionTracker.refreshDungeonPool then
+        -- Mythic+ maps have been updated, refresh dungeon data
+        if addonInitialized and DungeonData and DungeonData.refreshFromAPI then
             C_Timer.After(0.5, function()
-                CompletionTracker:refreshDungeonPool()
+                DungeonData.refreshFromAPI()
             end)
+        end
+    elseif event == "CHALLENGE_MODE_START" then
+        -- Track mythic+ dungeon start
+        local mapID = C_ChallengeMode.GetActiveChallengeMapID()
+        local level = C_ChallengeMode.GetActiveKeystoneInfo()
+
+        if mapID and level then
+            -- Track the start of the run with the new simplified signature
+            if MrMythical.CompletionTracker then
+                MrMythical.CompletionTracker:trackRunStart(mapID, level)
+            end
         end
     elseif event == "CHALLENGE_MODE_COMPLETED" then
         -- Track mythic+ completion when challenge mode finishes
-        local challengeInfo = C_ChallengeMode.GetChallengeCompletionInfo()
-        if challengeInfo then
-            CompletionTracker:trackRun(
-                challengeInfo.mapChallengeModeID,
-                challengeInfo.onTime,
-                challengeInfo.level
-            )
+        local mapChallengeModeID, level, time, onTime, keystoneUpgradeLevels, practiceRun, oldOverallDungeonScore, newOverallDungeonScore, IsMapRecord, IsAffixRecord, PrimaryAffix, isEligibleForScore, members = C_ChallengeMode.GetCompletionInfo()
+        
+        if mapChallengeModeID then
+            -- Create challengeInfo table from the API return values
+            local challengeInfo = {
+                mapChallengeModeID = mapChallengeModeID,
+                level = level,
+                time = time,
+                onTime = onTime,
+                keystoneUpgradeLevels = keystoneUpgradeLevels,
+                practiceRun = practiceRun,
+                oldOverallDungeonScore = oldOverallDungeonScore,
+                newOverallDungeonScore = newOverallDungeonScore,
+                IsMapRecord = IsMapRecord,
+                IsAffixRecord = IsAffixRecord,
+                PrimaryAffix = PrimaryAffix,
+                isEligibleForScore = isEligibleForScore,
+                members = members
+            }
+            
+            -- Use the correct API that returns the proper data structure
+            if MrMythical.CompletionTracker then
+                MrMythical.CompletionTracker:trackRun(challengeInfo)
+            end
         end
     end
 end)

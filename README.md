@@ -1,35 +1,39 @@
-# Mr. Mythical: Mythic+ Rewards and Score Tooltips
+# Mr. Mythical: Mythic+ Dashboard & Tooltips
 
-> **Enhanced Mythic+ keystone tooltips with detailed reward information and score calculations.**
+> **Your all-in-one Mythic+ toolkit with enhanced customizable tooltips, run tracking, score calculations, and reward information.**
 
 ## What Does This Addon Do?
 
-This addon enhances Mythic+ keystone tooltips with comprehensive reward and scoring information. When you hover over any Mythic+ keystone, you'll see detailed data to help you make informed decisions about your Mythic+ runs.
+Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone tooltips and a comprehensive dashboard interface. The core feature transforms every keystone tooltip into an information hub with reward details, score calculations, and progression data. Additionally, the dashboard provides tools for planning runs, tracking progress, and calculating potential gains.
 
 ## Key Features
 
-### **Enhanced Keystone Tooltips**
-When you hover over any Mythic+ keystone, the addon displays:
-- **Ilvl & track information**: Gear rewards for both dungeon drops and vault
-- **Crest rewards**: Types and quantities of crests earned
-- **Score calculations**: Potential Mythic+ score gains with timing bonuses
-- **Color-coded display**: Gradient-colored score information
+## Key Features
 
-### **Display Customization**
-Configure tooltip appearance to your preference:
-- **Level display options**: Choose between title, compact, or hidden modes
-- **Element filtering**: Hide duration text, affix descriptions, or other elements
-- **Title formatting**: Remove "Keystone:" prefix for cleaner display
+### **Customizable Keystone Tooltips**
+Transform every Mythic+ keystone tooltip with detailed, customizable information:
+- **Reward Information**: Gear item levels and track info for dungeon drops and vault rewards
+- **Crest Details**: Types and quantities of crests earned for completion
+- **Score Calculations**: Potential Mythic+ score gains with timing bonuses clearly displayed
+- **Flexible Customization**: Choose what information to show or hide
+- **Display Options**: Full, compact, or minimal information modes
+- **Element Control**: Show or hide duration text, affix descriptions, or other elements
+- **Clean Formatting**: Customize titles and remove clutter for your preferred appearance
 
-### **Unified Interface**
-Access all addon features through a single, seamless interface
+### **Dashboard & Planning Tools**
+Access powerful tools through an integrated dashboard interface:
+- **Rewards Calculator**: Browse gear rewards and crest earnings for any key level
+- **Interactive Score Calculator**: Calculate potential score gains for different key levels and timing
+- **Dungeon Timers**: Understand timer thresholds for chest rewards
+- **Statistics Overview**: Track your runs, completion rates, and timing success
+- **Run Tracking**: Automatic detection with simple overview of your recent Mythic+ activity
 
 ### **Command Interface**
-Access information and statistics via chat commands:
-- `/mrm` - Open main dashboard with access to all features
-- `/mrm rewards` - Open keystone rewards UI
-- `/mrm score` - Open score calculations UI
-- `/mrm stats` - Open completion statistics dashboard
+Access all features via convenient chat commands:
+- `/mrm` - Open main dashboard with access to all tools
+- `/mrm rewards` - Open reward calculator and browser
+- `/mrm score` - Open interactive score calculator
+- `/mrm stats` - Open simple statistics overview with run breakdown
 - `/mrm times` - Open dungeon timer calculator with chest thresholds
 - `/mrm help` - Display all available commands
 

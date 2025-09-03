@@ -1,28 +1,19 @@
 --[[
-UI.lua - Comprehensive Mythic+ Interface
+UI.lua - Mythic+ Interface
 
-This module provides a unified tabbed interface that consolidates all Mr. Mythical
-functionality into a single frame with navigation panels.
+Unified tabbed interface that consolidates all Mr. Mythical functionality.
 
-Dependencies:
-- RewardsFunctions: For reward calculations and score formulas
-- DungeonData: For dungeon information and par times
-- CompletionTracker: For player statistics tracking
-- WoW APIs: C_MythicPlus for player dungeon data
-
-Author: Braunerr
+Dependencies: RewardsFunctions, DungeonData, CompletionTracker, WoW APIs
 --]]
 
 local MrMythical = MrMythical or {}
 MrMythical.UnifiedUI = {}
 
--- Local references for performance
 local UnifiedUI = MrMythical.UnifiedUI
 local RewardsFunctions = MrMythical.RewardsFunctions
 local DungeonData = MrMythical.DungeonData
 local CompletionTracker = MrMythical.CompletionTracker
 
--- Constants
 local UI_CONSTANTS = {
     FRAME = {
         WIDTH = 850,
@@ -30,7 +21,6 @@ local UI_CONSTANTS = {
         NAV_PANEL_WIDTH = 140,
         CONTENT_WIDTH = 680,
     },
-    
     LAYOUT = {
         ROW_HEIGHT = 25,
         LARGE_ROW_HEIGHT = 30,
@@ -38,7 +28,6 @@ local UI_CONSTANTS = {
         PADDING = 10,
         LARGE_PADDING = 20,
     },
-    
     COLORS = {
         EVEN_ROW = {r = 0.1, g = 0.1, b = 0.1, a = 0.3},
         ODD_ROW = {r = 0.15, g = 0.15, b = 0.15, a = 0.3},
@@ -49,7 +38,6 @@ local UI_CONSTANTS = {
         INFO_TEXT = {r = 0.8, g = 0.8, b = 0.8},
         NAV_BACKGROUND = {r = 0.1, g = 0.1, b = 0.1, a = 0.8}
     },
-    
     CONTENT_TYPES = {
         DASHBOARD = "dashboard",
         REWARDS = "rewards",
@@ -60,7 +48,6 @@ local UI_CONSTANTS = {
     }
 }
 
--- Common UI helper functions
 local UIHelpers = {}
 
 function UIHelpers.createFontString(parent, layer, font, text, point, x, y)
@@ -109,9 +96,9 @@ function UIHelpers.setTextColor(fontString, colorName)
     end
 end
 
-
 local UIContentCreators = {}
 local NavigationManager = {}
+
 function UIContentCreators.dashboard(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge", 
         "Mr. Mythical Dashboard", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
@@ -175,7 +162,6 @@ function UIContentCreators.createRewardRow(parentFrame, level, startY, index)
         380, yOffset, 150)
 end
 
---- Creates the scores content with interactive score calculator
 function UIContentCreators.scores(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
         "Mythic+ Score Calculator", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
@@ -207,7 +193,6 @@ function UIContentCreators.createTimerSlider(parentFrame)
     timerSlider:SetValueStep(1)
     timerSlider.tooltipText = "Timer Percentage"
     
-    -- Set slider labels
     _G[timerSlider:GetName() .. "Low"]:SetText("0%")
     _G[timerSlider:GetName() .. "High"]:SetText("40%")
     _G[timerSlider:GetName() .. "Text"]:SetText("0%")
@@ -228,7 +213,6 @@ function UIContentCreators.createKeyLevelDropdown(parentFrame)
 end
 
 function UIContentCreators.createScoreTables(parentFrame)
-    -- Create score calculation table
     local scoreScrollFrame = CreateFrame("ScrollFrame", nil, parentFrame, "UIPanelScrollFrameTemplate")
     scoreScrollFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -110)
     scoreScrollFrame:SetSize(320, 320)
@@ -237,13 +221,11 @@ function UIContentCreators.createScoreTables(parentFrame)
     scoreContentFrame:SetSize(320, 800)
     scoreScrollFrame:SetScrollChild(scoreContentFrame)
     
-    -- Score table headers
     UIHelpers.createHeader(scoreContentFrame, "Key Level", 0, 70)
     UIHelpers.createHeader(scoreContentFrame, "Base Score", 70, 80)
     UIHelpers.createHeader(scoreContentFrame, "Timer Bonus", 150, 80)
     UIHelpers.createHeader(scoreContentFrame, "Final Score", 230, 90)
     
-    -- Create dungeon gains section
     local gainsLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
         "Your Dungeons", "TOPLEFT", 350, -80)
     
@@ -251,7 +233,6 @@ function UIContentCreators.createScoreTables(parentFrame)
     gainsTableFrame:SetPoint("TOPLEFT", 350, -140)
     gainsTableFrame:SetSize(310, 290)
     
-    -- Gains table headers
     UIHelpers.createHeader(gainsTableFrame, "Dungeon", 0, 110)
     UIHelpers.createHeader(gainsTableFrame, "Level", 110, 40)
     UIHelpers.createHeader(gainsTableFrame, "Score", 150, 50)
@@ -281,7 +262,6 @@ function UIContentCreators.createScoreRows(scoreContentFrame)
                 final = UIHelpers.createRowText(scoreContentFrame, tostring(baseScore), 230, yOffset, 90)
             }
             
-            -- Make the row interactive for hovering
             local rowFrame = CreateFrame("Button", nil, scoreContentFrame)
             rowFrame:SetPoint("TOPLEFT", 0, yOffset)
             rowFrame:SetSize(320, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
@@ -301,7 +281,6 @@ function UIContentCreators.createGainRows(gainsTableFrame)
         return gainRows
     end
     
-    -- Create initial dungeon data
     if MrMythical.DungeonData and MrMythical.DungeonData.getAllDungeonData then
         local dungeonData = MrMythical.DungeonData.getAllDungeonData()
         local startY = -25
@@ -317,7 +296,6 @@ function UIContentCreators.createGainRows(gainsTableFrame)
                 levelText = tostring(data.currentLevel)
             end
             
-            -- Format the run time using DungeonData.formatTime
             local runTimeText = DungeonData and DungeonData.formatTime and DungeonData.formatTime(data.runTime) or "Unknown"
         
         gainRows[i] = {
@@ -329,15 +307,14 @@ function UIContentCreators.createGainRows(gainsTableFrame)
             gain = UIHelpers.createRowText(gainsTableFrame, "--", 260, yOffset, 50)
         }
         
-        -- Color code the level text based on timing status
         if data.hasRun then
             if data.isInTime then
-                UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")  -- Green for timed
+                UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")
             else
-                UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_LOW")  -- Red for overtime
+                UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_LOW")
             end
         else
-            UIHelpers.setTextColor(gainRows[i].current, "DISABLED")  -- Gray for no run
+            UIHelpers.setTextColor(gainRows[i].current, "DISABLED")
         end
     end
     
@@ -352,7 +329,6 @@ function UIContentCreators.setupScoreCalculator(timerSlider, currentKeyLevel, sc
         UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPercentage)
     end
     
-    -- Setup dropdown
     local function currentKeyLevelOnClick(self)
         UIDropDownMenu_SetText(currentKeyLevel, self.value)
         updateScores(timerSlider:GetValue())
@@ -370,13 +346,11 @@ function UIContentCreators.setupScoreCalculator(timerSlider, currentKeyLevel, sc
     
     UIDropDownMenu_Initialize(currentKeyLevel, currentKeyLevelInitialize)
     
-    -- Setup slider callback
     timerSlider:SetScript("OnValueChanged", function(self, value)
         _G[self:GetName() .. "Text"]:SetText(string.format("%d%%", value))
         updateScores(value)
     end)
     
-    -- Setup row hover functionality
     for level, row in pairs(scoreRows) do
         if row.frame then
             row.frame:SetScript("OnEnter", function(self)
@@ -386,7 +360,6 @@ function UIContentCreators.setupScoreCalculator(timerSlider, currentKeyLevel, sc
         end
     end
     
-    -- Initial update
     updateScores(0)
 end
 
@@ -431,12 +404,12 @@ function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPe
             
             if data.hasRun then
                 if data.isInTime then
-                    UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")  -- Green for timed
+                    UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_HIGH")
                 else
-                    UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_LOW")  -- Red for overtime
+                    UIHelpers.setTextColor(gainRows[i].current, "SUCCESS_LOW")
                 end
             else
-                UIHelpers.setTextColor(gainRows[i].current, "DISABLED")  -- Gray for no run
+                UIHelpers.setTextColor(gainRows[i].current, "DISABLED")
             end
             
             local potentialGain = finalScore - data.currentScore
@@ -453,23 +426,26 @@ function UIContentCreators.updateDungeonGains(gainRows, currentKeyLevel, timerPe
     end
 end
 
---- Creates the stats content with completion tracking and analysis
 function UIContentCreators.stats(parentFrame)
-    -- Create overview panels
-    local seasonStats, weeklyStats = UIContentCreators.createStatsOverview(parentFrame)
+    local row1 = CreateFrame("Frame", nil, parentFrame)
+    row1:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
+    row1:SetSize(UI_CONSTANTS.FRAME.CONTENT_WIDTH - (UI_CONSTANTS.LAYOUT.LARGE_PADDING * 2), 220)
     
-    -- Create dungeon breakdown section
-    local dungeonBreakdown = UIContentCreators.createDungeonBreakdown(parentFrame)
+    local row2 = CreateFrame("Frame", nil, parentFrame)
+    row2:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -250)
+    row2:SetSize(UI_CONSTANTS.FRAME.CONTENT_WIDTH - (UI_CONSTANTS.LAYOUT.LARGE_PADDING * 2), 220)
     
-    -- Initial data update
-    UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
+    local statsOverview = UIContentCreators.createStatsOverview(row1)
+    local recentActivity = UIContentCreators.createRecentActivity(row1)
+    local dungeonBreakdown = UIContentCreators.createDungeonBreakdown(row2)
     
-    -- Update when frame becomes visible or data changes
+    UIContentCreators.updateStats(statsOverview, recentActivity, dungeonBreakdown)
+    
     parentFrame:SetScript("OnShow", function()
-        if seasonStats and weeklyStats and dungeonBreakdown then
+        if statsOverview and recentActivity and dungeonBreakdown then
             C_Timer.After(0.1, function()
                 if parentFrame:IsVisible() then
-                    UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
+                    UIContentCreators.updateStats(statsOverview, recentActivity, dungeonBreakdown)
                 end
             end)
         end
@@ -477,136 +453,98 @@ function UIContentCreators.stats(parentFrame)
 end
 
 function UIContentCreators.createStatsOverview(parentFrame)
-    -- Season overview section
-    local seasonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Season Overview", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
-    UIHelpers.setTextColor(seasonLabel, "SUCCESS_HIGH")
+    local statsLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
+        "Statistics Overview", "TOPLEFT", 0, 0)
+    UIHelpers.setTextColor(statsLabel, "SUCCESS_HIGH")
+
+    local statsOverview = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
+        "", "TOPLEFT", 0, -30)
+    statsOverview:SetWidth(320)
+    statsOverview:SetHeight(180)
+    statsOverview:SetJustifyH("LEFT")
+    statsOverview:SetJustifyV("TOP")
+
+    return statsOverview
+end
+
+function UIContentCreators.createRecentActivity(parentFrame)
+    local activityLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
+        "Recent Activity", "TOPLEFT", 340, 0)
+    UIHelpers.setTextColor(activityLabel, "SUCCESS_HIGH")
     
-    local seasonStats = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -60)
-    seasonStats:SetWidth(320)
-    seasonStats:SetJustifyH("LEFT")
-    
-    -- Weekly overview section
-    local weeklyLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "This Week", "TOPLEFT", 350, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
-    UIHelpers.setTextColor(weeklyLabel, "SUCCESS_HIGH")
-    
-    local weeklyStats = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "", "TOPLEFT", 350, -60)
-    weeklyStats:SetWidth(320)
-    weeklyStats:SetJustifyH("LEFT")
-    
-    return seasonStats, weeklyStats
+    local recentActivity = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
+        "", "TOPLEFT", 340, -30)
+    recentActivity:SetWidth(320)
+    recentActivity:SetHeight(180)
+    recentActivity:SetJustifyH("LEFT")
+    recentActivity:SetJustifyV("TOP")
+
+    return recentActivity
 end
 
 function UIContentCreators.createDungeonBreakdown(parentFrame)
     local dungeonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Dungeon Breakdown", "TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -140)
+        "Dungeon Breakdown", "TOPLEFT", 0, 0)
     UIHelpers.setTextColor(dungeonLabel, "SUCCESS_HIGH")
     
-    local seasonalTab, weeklyTab = UIContentCreators.createStatsTabs(parentFrame)
     local dungeonTableFrame = UIContentCreators.createDungeonTable(parentFrame)
     
     local dungeonRows = {}
-    local currentStatsView = {value = "weekly"}  -- Use table for reference passing
     
-    -- Setup tab functionality
-    seasonalTab:SetScript("OnClick", function()
-        currentStatsView.value = "seasonal"
-        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
-        seasonalTab:Disable()
-        weeklyTab:Enable()
-    end)
-    
-    weeklyTab:SetScript("OnClick", function()
-        currentStatsView.value = "weekly"
-        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
-        weeklyTab:Disable()
-        seasonalTab:Enable()
-    end)
-    
-    -- Set initial state
-    weeklyTab:Disable()
-    seasonalTab:Enable()
-    
-    -- Perform initial update to populate the dungeon breakdown table
     C_Timer.After(0.1, function()
-        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView.value)
+        UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, "seasonal")
     end)
     
     return {
         rows = dungeonRows,
-        tableFrame = dungeonTableFrame,
-        currentStatsView = currentStatsView,
-        seasonalTab = seasonalTab,
-        weeklyTab = weeklyTab
+        tableFrame = dungeonTableFrame
     }
-end
-
-function UIContentCreators.createStatsTabs(parentFrame)
-    local tabFrame = CreateFrame("Frame", nil, parentFrame)
-    tabFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -165)
-    tabFrame:SetSize(620, 30)
-    
-    local seasonalTab = CreateFrame("Button", nil, tabFrame, "UIPanelButtonTemplate")
-    seasonalTab:SetPoint("TOPLEFT", 0, 0)
-    seasonalTab:SetSize(100, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
-    seasonalTab:SetText("Seasonal")
-    
-    local weeklyTab = CreateFrame("Button", nil, tabFrame, "UIPanelButtonTemplate")
-    weeklyTab:SetPoint("TOPLEFT", 105, 0)
-    weeklyTab:SetSize(100, UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
-    weeklyTab:SetText("Weekly")
-    
-    return seasonalTab, weeklyTab
 end
 
 function UIContentCreators.createDungeonTable(parentFrame)
     local dungeonTableFrame = CreateFrame("Frame", nil, parentFrame)
-    dungeonTableFrame:SetPoint("TOPLEFT", UI_CONSTANTS.LAYOUT.LARGE_PADDING, -195)
-    dungeonTableFrame:SetSize(620, 220)
+    dungeonTableFrame:SetPoint("TOPLEFT", 0, -25)
+    dungeonTableFrame:SetSize(670, 190)
     
-    -- Create table headers
-    UIHelpers.createHeader(dungeonTableFrame, "Dungeon", 0, 200)
-    UIHelpers.createHeader(dungeonTableFrame, "Completed", 200, 100)
-    UIHelpers.createHeader(dungeonTableFrame, "Failed", 300, 100)
-    UIHelpers.createHeader(dungeonTableFrame, "Total", 400, 100)
-    UIHelpers.createHeader(dungeonTableFrame, "Success Rate", 500, 120)
+    UIHelpers.createHeader(dungeonTableFrame, "Dungeon", 0, 140)
+    UIHelpers.createHeader(dungeonTableFrame, "In Time", 140, 70)
+    UIHelpers.createHeader(dungeonTableFrame, "Overtime", 210, 70)
+    UIHelpers.createHeader(dungeonTableFrame, "Abandoned", 280, 70)
+    UIHelpers.createHeader(dungeonTableFrame, "Total", 350, 60)
+    UIHelpers.createHeader(dungeonTableFrame, "Completion %", 410, 70)
+    UIHelpers.createHeader(dungeonTableFrame, "In Time %", 480, 70)
     
     return dungeonTableFrame
 end
 
-function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, currentStatsView)
-    if not CompletionTracker or not dungeonTableFrame or not dungeonRows then
+function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows, stats)
+    if not stats or not dungeonTableFrame or not dungeonRows then
         return
     end
     
-    local success, stats = pcall(function() return CompletionTracker:getStats() end)
-    if not success or not stats then
-        return
-    end
-    
-    local statsSource = currentStatsView == "seasonal" and stats.seasonal or stats.weekly
-    if not statsSource or not statsSource.dungeons then
+    local statsSource = stats.dungeons
+    if not statsSource then
         return
     end
     
     local dungeonData = {}
     
-    for mapID, data in pairs(statsSource.dungeons) do
-        local dungeonTotal = data.completed + data.failed
-        -- Show dungeons even if they have no runs (to indicate they exist)
+    for mapID, data in pairs(statsSource) do
+        local dungeonTotal = (data.completedIntime or 0) + (data.completedOvertime or 0) + (data.abandoned or 0)
+        local completedTotal = (data.completedIntime or 0) + (data.completedOvertime or 0)
+        local intimeRate = completedTotal > 0 and math.floor((data.completedIntime or 0) / completedTotal * 100) or 0
+        
         table.insert(dungeonData, {
             name = data.name or ("Dungeon " .. tostring(mapID)),
-            completed = data.completed,
-            failed = data.failed,
+            completedIntime = data.completedIntime or 0,
+            completedOvertime = data.completedOvertime or 0, 
+            abandoned = data.abandoned or 0,
             total = dungeonTotal,
-            rate = dungeonTotal > 0 and math.floor(data.rate) or 0
+            successRate = dungeonTotal > 0 and math.floor((completedTotal / dungeonTotal) * 100) or 0,
+            intimeRate = intimeRate
         })
     end
     
-    -- Sort by total runs (highest first), then by name for consistency
     table.sort(dungeonData, function(a, b) 
         if a.total == b.total then
             return a.name < b.name
@@ -614,8 +552,7 @@ function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows
         return a.total > b.total 
     end)
     
-    -- Clear existing rows
-    for i = 1, #dungeonRows do
+    for i = 0, #dungeonRows do
         if dungeonRows[i] then
             for _, element in pairs(dungeonRows[i]) do
                 if element and element.Hide then
@@ -625,31 +562,44 @@ function UIContentCreators.updateDungeonBreakdown(dungeonTableFrame, dungeonRows
         end
     end
     for k in pairs(dungeonRows) do dungeonRows[k] = nil end
-    
 
     local startY = -25
     for i, data in ipairs(dungeonData) do
         local yOffset = startY - ((i - 1) * UI_CONSTANTS.LAYOUT.ROW_HEIGHT)
         local isEven = i % 2 == 0
         
-        UIHelpers.createRowBackground(dungeonTableFrame, yOffset, 620, isEven)
+        UIHelpers.createRowBackground(dungeonTableFrame, yOffset, 670, isEven)
         
         dungeonRows[i] = {
-            name = UIHelpers.createRowText(dungeonTableFrame, data.name, 0, yOffset, 200),
-            completed = UIHelpers.createRowText(dungeonTableFrame, tostring(data.completed), 200, yOffset, 100),
-            failed = UIHelpers.createRowText(dungeonTableFrame, tostring(data.failed), 300, yOffset, 100),
-            total = UIHelpers.createRowText(dungeonTableFrame, tostring(data.total), 400, yOffset, 100),
-            rate = UIHelpers.createRowText(dungeonTableFrame, string.format("%d%%", data.rate), 500, yOffset, 120)
+            name = UIHelpers.createRowText(dungeonTableFrame, data.name, 0, yOffset, 140),
+            inTime = UIHelpers.createRowText(dungeonTableFrame, tostring(data.completedIntime), 140, yOffset, 70),
+            overtime = UIHelpers.createRowText(dungeonTableFrame, tostring(data.completedOvertime), 210, yOffset, 70),
+            abandoned = UIHelpers.createRowText(dungeonTableFrame, tostring(data.abandoned), 280, yOffset, 70),
+            total = UIHelpers.createRowText(dungeonTableFrame, tostring(data.total), 350, yOffset, 60),
+            rate = UIHelpers.createRowText(dungeonTableFrame, string.format("%d%%", data.successRate), 410, yOffset, 70),
+            intimeRate = UIHelpers.createRowText(dungeonTableFrame, string.format("%d%%", data.intimeRate), 480, yOffset, 70)
         }
         
-        local colorName = UIContentCreators.getSuccessRateColor(data.rate)
+        local colorName = UIContentCreators.getSuccessRateColor(data.successRate)
         UIHelpers.setTextColor(dungeonRows[i].rate, colorName)
+        
+        local intimeColorName = UIContentCreators.getSuccessRateColor(data.intimeRate)
+        UIHelpers.setTextColor(dungeonRows[i].intimeRate, intimeColorName)
+        
+        if data.completedIntime > 0 then
+            UIHelpers.setTextColor(dungeonRows[i].inTime, "SUCCESS_HIGH")
+        end
+        if data.completedOvertime > 0 then
+            UIHelpers.setTextColor(dungeonRows[i].overtime, "SUCCESS_MEDIUM")
+        end
+        if data.abandoned > 0 then
+            UIHelpers.setTextColor(dungeonRows[i].abandoned, "SUCCESS_LOW")
+        end
     end
 
     if #dungeonData == 0 then
         dungeonRows[1] = {
-            name = UIHelpers.createRowText(dungeonTableFrame, 
-                string.format("No %s dungeon data available", currentStatsView), 0, startY, 620)
+            name = UIHelpers.createRowText(dungeonTableFrame, "No dungeon data available", 0, startY, 670)
         }
         dungeonRows[1].name:SetTextColor(0.7, 0.7, 0.7)
     end
@@ -665,47 +615,100 @@ function UIContentCreators.getSuccessRateColor(rate)
     end
 end
 
-function UIContentCreators.updateStats(seasonStats, weeklyStats, dungeonBreakdown)
+function UIContentCreators.updateStats(statsOverview, recentActivity, dungeonBreakdown)
     if not CompletionTracker then
-        seasonStats:SetText("CompletionTracker not available\n\nPlease run some Mythic+ dungeons to see statistics here.")
-        weeklyStats:SetText("Statistics will appear here once you complete some dungeons this week.")
+        statsOverview:SetText("CompletionTracker not available\n\nPlease run some Mythic+ dungeons to see statistics here.")
+        recentActivity:SetText("No data available")
         return
     end
-    
+
     local success, stats = pcall(function() return CompletionTracker:getStats() end)
     if not success or not stats then
-        seasonStats:SetText("Error loading statistics: " .. tostring(stats) .. "\n\nTry again in a moment.")
-        weeklyStats:SetText("Statistics temporarily unavailable.")
+        statsOverview:SetText("Error loading statistics: " .. tostring(stats) .. "\n\nTry again in a moment.")
+        recentActivity:SetText("Error loading data")
         return
     end
-    
-    -- Update season overview
-    local seasonTotal = (stats.seasonal.completed or 0) + (stats.seasonal.failed or 0)
-    local seasonRate = stats.seasonal.rate or 0
-    local seasonText = string.format("Total Runs: %d\nCompleted: %d (%d%%)\nFailed: %d (%d%%)",
+
+    local success2, charStats = pcall(function() return CompletionTracker:getStats() end)
+    local charStats = success2 and charStats or {}
+
+    local charName = UnitName("player") or "Unknown"
+    local charClass = select(2, UnitClass("player")) or "Unknown"
+    local currentSeason = C_MythicPlus.GetCurrentSeason() or "Unknown"
+
+    local seasonTotal = (stats.completedIntime or 0) + (stats.completedOvertime or 0) + (stats.abandoned or 0)
+    local seasonRate = stats.rate or 0
+    local bestLevel = charStats.bestLevel or 0
+
+    local statsText = string.format("%s (%s)\n\n", charName, charClass)
+
+    local completionRate = seasonTotal > 0 and math.floor((stats.completed or 0) / seasonTotal * 100) or 0
+    local intimeRate = (stats.completed or 0) > 0 and math.floor((stats.completedIntime or 0) / (stats.completed or 0) * 100) or 0
+    local abandonmentRate = seasonTotal > 0 and math.floor((stats.abandoned or 0) / seasonTotal * 100) or 0
+
+    statsText = statsText .. string.format("Total Runs: %d\nCompleted: %d (%d%%)\n  • In Time: %d (%d%%)\n  • Overtime: %d (%d%%)\nAbandoned: %d (%d%%)\nBest Level: +%d",
         seasonTotal,
-        stats.seasonal.completed or 0, math.floor(seasonRate),
-        stats.seasonal.failed or 0, math.floor(100 - seasonRate)
+        stats.completed or 0, completionRate,
+        stats.completedIntime or 0, intimeRate,
+        stats.completedOvertime or 0, 100 - intimeRate,
+        stats.abandoned or 0, abandonmentRate,
+        bestLevel
     )
-    seasonStats:SetText(seasonText)
+
+    statsOverview:SetText(statsText)
+
+    local allRuns = CompletionTracker:getRunHistory()
+    local activityText = ""
     
-    -- Update weekly overview
-    local weeklyTotal = (stats.weekly.completed or 0) + (stats.weekly.failed or 0)
-    local weeklyRate = stats.weekly.rate or 0
-    local weeklyText = string.format("Total Runs: %d\nCompleted: %d (%d%%)\nFailed: %d (%d%%)",
-        weeklyTotal,
-        stats.weekly.completed or 0, math.floor(weeklyRate),
-        stats.weekly.failed or 0, math.floor(100 - weeklyRate)
-    )
-    weeklyStats:SetText(weeklyText)
+    if #allRuns > 0 then
+        local recentRuns = {}
+        for i = 1, math.min(8, #allRuns) do
+            table.insert(recentRuns, allRuns[i])
+        end
+
+        for _, run in ipairs(recentRuns) do
+            local runResult = CompletionTracker.calculateRunResult(run)
+            local dungeonName = run.dungeon.name
+            
+            if runResult == "completed_intime" or runResult == "completed_overtime" then
+                local chestLevel = run.keystoneUpgradeLevels or 0
+                local timeStr = run.time and MrMythical.DungeonData.formatTime(run.time) or "Unknown"
+                
+                local color = ""
+                local statusPrefix = ""
+                
+                if runResult == "completed_intime" then
+                    color = "|cFF00FF00"
+                    if chestLevel >= 3 then
+                        statusPrefix = color .. "+++" .. run.level .. "|r"
+                    elseif chestLevel >= 2 then
+                        statusPrefix = color .. "++" .. run.level .. "|r"
+                    elseif chestLevel >= 1 then
+                        statusPrefix = color .. "+" .. run.level .. "|r"
+                    else
+                        statusPrefix = color .. run.level .. "|r"
+                    end
+                else
+                    color = "|cFF888888"
+                    statusPrefix = color .. run.level .. "|r"
+                end
+                
+                activityText = activityText .. string.format("\n%s %s%s|r (%s)", statusPrefix, color, dungeonName, timeStr)
+            elseif runResult == "abandoned" then
+                activityText = activityText .. string.format("\n|cFFFF0000%d|r |cFFFF0000%s|r", run.level, dungeonName)
+            end
+        end
+    else
+        activityText = "No runs recorded yet."
+    end
+
+    recentActivity:SetText(activityText)
     
-    -- Update dungeon breakdown
-    if dungeonBreakdown and dungeonBreakdown.tableFrame and dungeonBreakdown.rows and dungeonBreakdown.currentStatsView then
-        UIContentCreators.updateDungeonBreakdown(dungeonBreakdown.tableFrame, dungeonBreakdown.rows, dungeonBreakdown.currentStatsView.value)
+    if dungeonBreakdown and dungeonBreakdown.tableFrame and dungeonBreakdown.rows then
+        UIContentCreators.updateDungeonBreakdown(dungeonBreakdown.tableFrame, dungeonBreakdown.rows, stats)
     end
 end
 
---- Creates the times content with dungeon timer information
 function UIContentCreators.times(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
         "Mythic+ Timer Thresholds", "TOP", 0, -UI_CONSTANTS.LAYOUT.LARGE_PADDING)
@@ -719,13 +722,11 @@ function UIContentCreators.times(parentFrame)
 end
 
 function UIContentCreators.createTimesTable(parentFrame)
-    -- Create table headers
     UIHelpers.createHeader(parentFrame, "Dungeon", 0, 200)
     UIHelpers.createHeader(parentFrame, "1 Chest (0%)", 200, 140)
     UIHelpers.createHeader(parentFrame, "2 Chests (20%)", 340, 140)
     UIHelpers.createHeader(parentFrame, "3 Chests (40%)", 480, 140)
     
-    -- Populate with dungeon data
     if DungeonData and DungeonData.MYTHIC_MAPS then
         local startY = -25
         for i, mapInfo in ipairs(DungeonData.MYTHIC_MAPS) do
@@ -741,7 +742,6 @@ function UIContentCreators.createTimeRow(parentFrame, mapInfo, index, startY)
     
     UIHelpers.createRowBackground(parentFrame, yOffset, 620, isEven)
     
-    -- Create row content
     UIHelpers.createRowText(parentFrame, mapInfo.name, 0, yOffset, 200)
     UIHelpers.createRowText(parentFrame, DungeonData.formatTime(timers.oneChest), 200, yOffset, 140)
     UIHelpers.createRowText(parentFrame, DungeonData.formatTime(timers.twoChest), 340, yOffset, 140)
@@ -754,10 +754,28 @@ function UIContentCreators.calculateTimers(parTime)
     end
     
     return {
-        oneChest = parTime,  -- Must complete within par time for 1 chest
-        twoChest = math.floor(parTime * 0.8),  -- 20% faster for 2 chests
-        threeChest = math.floor(parTime * 0.6)  -- 40% faster for 3 chests
+        oneChest = parTime,
+        twoChest = math.floor(parTime * 0.8),
+        threeChest = math.floor(parTime * 0.6)
     }
+end
+
+function UIContentCreators.calculateChestLevel(completionTime, parTime)
+    if not completionTime or not parTime or parTime <= 0 then
+        return 0, "none"
+    end
+    
+    local timers = UIContentCreators.calculateTimers(parTime)
+    
+    if completionTime <= timers.threeChest then
+        return 3, "+3"
+    elseif completionTime <= timers.twoChest then
+        return 2, "+2"
+    elseif completionTime <= timers.oneChest then
+        return 1, "+1"
+    else
+        return 0, "none"
+    end
 end
 
 function UIContentCreators.createTimesInfoPanel(parentFrame)
@@ -893,7 +911,7 @@ end
 
 function NavigationManager.handleButtonClick(buttonInfo, button, navButtons, contentFrame)
     if buttonInfo.id == UI_CONSTANTS.CONTENT_TYPES.SETTINGS then
-        NavigationManager.openSettings()
+        MainFrameManager.openSettings()
         return
     end
     
@@ -901,7 +919,7 @@ function NavigationManager.handleButtonClick(buttonInfo, button, navButtons, con
     NavigationManager.showContent(buttonInfo.id, contentFrame)
 end
 
-function NavigationManager.openSettings()
+function MainFrameManager.openSettings()
     UnifiedUI:Hide()
     
     local registry = _G.MrMythicalSettingsRegistry
@@ -911,7 +929,9 @@ function NavigationManager.openSettings()
         MrMythical.Options.openSettings()
     else
         SettingsPanel:Open()
-        print("Mr. Mythical: Settings category not found. Please access via Game Menu > Options > AddOns.")
+        if MrMythicalDebug then
+            print("Mr. Mythical: Settings category not found. Please access via Game Menu > Options > AddOns.")
+        end
     end
 end
 
@@ -945,7 +965,6 @@ function NavigationManager.showContent(contentType, contentFrame)
     end
 end
 
--- Initialize the main UI
 local unifiedFrame = MainFrameManager.createUnifiedFrame()
 local navPanel = MainFrameManager.createNavigationPanel(unifiedFrame)
 local contentFrame = MainFrameManager.createContentFrame(unifiedFrame)
