@@ -15,7 +15,6 @@ local CompletionTracker = MrMythical.CompletionTracker
 local ConfigData = MrMythical.ConfigData
 local DungeonData = MrMythical.DungeonData
 
---- Displays mythic keystone rewards UI
 function CommandHandlers.handleRewardsCommand()
     if MrMythical.UnifiedUI then
         MrMythical.UnifiedUI:Show("rewards")
@@ -24,7 +23,6 @@ function CommandHandlers.handleRewardsCommand()
     end
 end
 
---- Displays mythic+ score calculations UI
 function CommandHandlers.handleScoreCommand()
     if MrMythical.UnifiedUI then
         MrMythical.UnifiedUI:Show("scores")
@@ -33,7 +31,6 @@ function CommandHandlers.handleScoreCommand()
     end
 end
 
---- Displays completion statistics for the current season and week
 function CommandHandlers.handleStatsCommand()
     if MrMythical.UnifiedUI then
         MrMythical.UnifiedUI:Show("stats")
@@ -42,7 +39,6 @@ function CommandHandlers.handleStatsCommand()
     end
 end
 
---- Displays the main dashboard UI
 function CommandHandlers.handleDashboardCommand()
     if MrMythical.UnifiedUI then
         MrMythical.UnifiedUI:Show("dashboard")
@@ -51,7 +47,6 @@ function CommandHandlers.handleDashboardCommand()
     end
 end
 
---- Displays help information for all available commands
 function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.GOLD .. "MrMythical Commands:|r")
     print(ConfigData.COLORS.WHITE .. "  /mrm - Open main dashboard")
@@ -60,11 +55,9 @@ function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.WHITE .. "  /mrm stats - Open completion statistics dashboard")
     print(ConfigData.COLORS.WHITE .. "  /mrm times - Open dungeon timers with chest thresholds")
     print(ConfigData.COLORS.WHITE .. "  /mrm settings - Open addon settings panel")
-    print(ConfigData.COLORS.WHITE .. "  /mrm debug - Show debug information and status")
     print(ConfigData.COLORS.WHITE .. "  /mrm help - Show this help message")
 end
 
---- Displays dungeon timers for all dungeons or opens the Times UI
 function CommandHandlers.handleTimesCommand()
     if MrMythical.UnifiedUI then
         MrMythical.UnifiedUI:Show("times")
@@ -73,26 +66,11 @@ function CommandHandlers.handleTimesCommand()
     end
 end
 
---- Opens the addon settings panel
 function CommandHandlers.handleSettingsCommand()
     if MrMythical.Options then
         MrMythical.Options.openSettings()
     else
         print("Settings not available")
-    end
-end
-
---- Displays debug information and allows toggling debug mode
-function CommandHandlers.handleDebugCommand()
-    print(ConfigData.COLORS.GOLD .. "MrMythical Debug Information:|r")
-    print(ConfigData.COLORS.WHITE .. "  Debug Mode: " .. (MrMythicalDebug and ConfigData.COLORS.GREEN .. "ENABLED" or ConfigData.COLORS.RED .. "DISABLED") .. "|r")
-    print(ConfigData.COLORS.WHITE .. "  Use BraunerrsDevTools to control: /bdtdebug enable MrMythicalDebug")
-    print(ConfigData.COLORS.WHITE .. "  Current Status: " .. (_G.MrMythicalDebug and "Active" or "Inactive"))
-    
-    if MrMythicalDebug then
-        print(ConfigData.COLORS.WHITE .. "  Debug logging is active. Check chat for detailed information.")
-    else
-        print(ConfigData.COLORS.WHITE .. "  Enable debug mode to see detailed addon activity.")
     end
 end
 
@@ -116,8 +94,6 @@ function CommandHandlers.processSlashCommand(commandString)
         CommandHandlers.handleTimesCommand()
     elseif command == "settings" or command == "config" or command == "options" then
         CommandHandlers.handleSettingsCommand()
-    elseif command == "debug" then
-        CommandHandlers.handleDebugCommand()
     elseif command == "help" then
         CommandHandlers.handleHelpCommand()
     else
