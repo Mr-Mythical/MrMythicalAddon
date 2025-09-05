@@ -56,7 +56,6 @@ end
 --- @param className string The class name to get color for
 --- @return string WoW color code
 function ColorUtils.getClassColor(className)
-    local white = ConfigData.COLORS.WHITE or "|cffffffff"
     
     local classColors = {
         ["Death Knight"] = "|cffc41e3a",
@@ -67,11 +66,11 @@ function ColorUtils.getClassColor(className)
         ["Mage"] = "|cff3fc7eb",
         ["Monk"] = "|cff00ff98",
         ["Paladin"] = "|cfff48cba",
-        ["Priest"] = white,
+        ["Priest"] = "|cffffffff",
         ["Rogue"] = "|cffffff00",
         ["Shaman"] = "|cff0070dd",
         ["Warlock"] = "|cff8788ee",
         ["Warrior"] = "|cffc69b6d",
     }
-    return classColors[className] or white
+    return classColors[className]
 end
