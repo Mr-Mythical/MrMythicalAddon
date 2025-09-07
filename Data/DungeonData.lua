@@ -210,15 +210,6 @@ local function getDungeonScoreFromProfile(profile, targetMapID)
             end
         end
     end
-    
-    -- Fallback to average score if specific dungeon not found
-    if profile and profile.mythicKeystoneProfile and profile.mythicKeystoneProfile.currentScore then
-        local numDungeons = #profile.mythicKeystoneProfile.sortedDungeons
-        if numDungeons > 0 then
-            return profile.mythicKeystoneProfile.currentScore / numDungeons
-        end
-    end
-    
     return 0
 end
 
