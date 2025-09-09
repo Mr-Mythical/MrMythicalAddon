@@ -645,14 +645,24 @@ function UIContentCreators.updateStats(statsOverview, recentActivity, dungeonBre
     local completionRate = seasonTotal > 0 and math.floor((stats.completed or 0) / seasonTotal * 100) or 0
     local intimeRate = (stats.completed or 0) > 0 and math.floor((stats.completedIntime or 0) / (stats.completed or 0) * 100) or 0
     local abandonmentRate = seasonTotal > 0 and math.floor((stats.abandoned or 0) / seasonTotal * 100) or 0
+    local allRunsIntimeRate = seasonTotal > 0 and math.floor((stats.completedIntime or 0) / seasonTotal * 100) or 0
 
-    statsText = statsText .. string.format("Total Runs: %d\nCompleted: %d (%d%%)\n  • In Time: %d (%d%%)\n  • Overtime: %d (%d%%)\nAbandoned: %d (%d%%)\nBest Level: +%d",
+    local uniqueDungeons = 0
+    if stats.dungeons then
+        for _ in pairs(stats.dungeons) do
+            uniqueDungeons = uniqueDungeons + 1
+        end
+    end
+
+    statsText = statsText .. string.format("Total Runs: %d\nCompleted: %d (%d%%)\n  • In Time: %d (%d%%)\n  • Overtime: %d (%d%%)\nAbandoned: %d (%d%%)\nBest Level: +%d\nTimed Dungeons: %d\nIn-Time Rate (All Runs): %d%%",
         seasonTotal,
         stats.completed or 0, completionRate,
         stats.completedIntime or 0, intimeRate,
         stats.completedOvertime or 0, 100 - intimeRate,
         stats.abandoned or 0, abandonmentRate,
-        bestLevel
+        bestLevel,
+        uniqueDungeons,
+        allRunsIntimeRate
     )
 
     statsOverview:SetText(statsText)
