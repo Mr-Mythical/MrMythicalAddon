@@ -654,14 +654,13 @@ function UIContentCreators.updateStats(statsOverview, recentActivity, dungeonBre
         end
     end
 
-    statsText = statsText .. string.format("Total Runs: %d\nCompleted: %d (%d%%)\n  • In Time: %d (%d%%)\n  • Overtime: %d (%d%%)\nAbandoned: %d (%d%%)\nBest Level: +%d\nTimed Dungeons: %d\nIn-Time Rate (All Runs): %d%%",
+    statsText = statsText .. string.format("Total Runs: %d\nCompleted: %d (%d%%)\n  • In Time: %d (%d%%)\n  • Overtime: %d (%d%%)\nAbandoned: %d (%d%%)\nBest Level: +%d\nIn-Time Rate (All Runs): %d%%",
         seasonTotal,
         stats.completed or 0, completionRate,
         stats.completedIntime or 0, intimeRate,
         stats.completedOvertime or 0, 100 - intimeRate,
         stats.abandoned or 0, abandonmentRate,
         bestLevel,
-        uniqueDungeons,
         allRunsIntimeRate
     )
 
