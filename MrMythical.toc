@@ -21,5 +21,12 @@ Utils/RewardsFunctions.lua
 Utils/CompletionTracker.lua
 Utils/CommandHandlers.lua
 Options.lua
+UI/UIConstants.lua
+UI/UIHelpers.lua
+UI/MainFrameManager.lua
+UI/NavigationManager.lua
+UI/ContentCreators.lua
+UI/ScoreCalculator.lua
+UI/Statistics.lua
 UI.lua
 Core.lua
