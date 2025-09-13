@@ -260,6 +260,11 @@ function Statistics.updateStats(statsOverview, recentActivity, dungeonBreakdown)
                 local chestLevel = run.keystoneUpgradeLevels or 0
                 local timeStr = run.time and MrMythical.DungeonData.formatTime(run.time) or "Unknown"
                 
+                local scoreIncrease = 0
+                if run.newOverallDungeonScore and run.oldOverallDungeonScore then
+                    scoreIncrease = run.newOverallDungeonScore - run.oldOverallDungeonScore
+                end
+                
                 local color = ""
                 local statusPrefix = ""
                 
@@ -279,7 +284,12 @@ function Statistics.updateStats(statsOverview, recentActivity, dungeonBreakdown)
                     statusPrefix = color .. run.level .. "|r"
                 end
                 
-                activityText = activityText .. string.format("\n%s %s%s|r (%s)", statusPrefix, color, dungeonName, timeStr)
+                local scoreStr = ""
+                if scoreIncrease > 0 then
+                    scoreStr = string.format(" +%d", scoreIncrease)
+                end
+                
+                activityText = activityText .. string.format("\n%s %s%s|r (%s%s)", statusPrefix, color, dungeonName, timeStr, scoreStr)
             elseif runResult == "abandoned" then
                 activityText = activityText .. string.format("\n|cFFFF0000%d|r |cFFFF0000%s|r", run.level, dungeonName)
             end
