@@ -1,5 +1,5 @@
 --[[
-MainFrameManager.lua - Main UI Frame Management
+MainFrameManager.lua - Main UI Frame Management Module
 
 Handles creation and management of the main unified interface frame.
 --]]
@@ -9,6 +9,8 @@ MrMythical.MainFrameManager = {}
 
 local MainFrameManager = MrMythical.MainFrameManager
 
+--- Creates the main unified interface frame with backdrop and positioning
+--- @return Frame The created main frame, or nil if UIConstants not available
 function MainFrameManager.createUnifiedFrame()
     local UIConstants = MrMythical.UIConstants
     if not UIConstants then
@@ -44,6 +46,8 @@ function MainFrameManager.createUnifiedFrame()
     return frame
 end
 
+--- Configures frame behavior including movement, closing, and keyboard handling
+--- @param frame Frame The frame to configure
 function MainFrameManager.setupFrameBehavior(frame)
     frame:SetMovable(true)
     frame:EnableMouse(true)
@@ -73,6 +77,9 @@ function MainFrameManager.setupFrameBehavior(frame)
     end)
 end
 
+--- Creates the navigation panel on the left side of the main frame
+--- @param parentFrame Frame The parent frame to attach the navigation panel to
+--- @return Frame The created navigation panel
 function MainFrameManager.createNavigationPanel(parentFrame)
     local UIConstants = MrMythical.UIConstants
     if not UIConstants then
@@ -95,6 +102,9 @@ function MainFrameManager.createNavigationPanel(parentFrame)
     return navPanel
 end
 
+--- Creates the main content frame where tab content is displayed
+--- @param parentFrame Frame The parent frame to attach the content frame to
+--- @return Frame The created content frame
 function MainFrameManager.createContentFrame(parentFrame)
     local UIConstants = MrMythical.UIConstants
     if not UIConstants then

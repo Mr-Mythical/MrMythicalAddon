@@ -1,5 +1,5 @@
 --[[
-UIConstants.lua - UI Constants and Configuration
+UIConstants.lua - UI Constants and Configuration Module
 
 Centralized constants for UI layout, colors, and sizing.
 --]]

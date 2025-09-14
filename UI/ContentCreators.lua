@@ -1,5 +1,5 @@
 --[[
-ContentCreators.lua - UI Content Creation
+ContentCreators.lua - UI Content Creation Module
 
 Creates the various content panels for the unified interface.
 This module handles dashboard, rewards, and times content.
@@ -10,7 +10,8 @@ MrMythical.ContentCreators = {}
 
 local ContentCreators = MrMythical.ContentCreators
 
--- Dashboard Content
+--- Creates the main dashboard content with welcome message and basic information
+--- @param parentFrame Frame The parent frame to attach the dashboard content to
 function ContentCreators.dashboard(parentFrame)
     local UIConstants = MrMythical.UIConstants
     local UIHelpers = MrMythical.UIHelpers
@@ -37,7 +38,8 @@ function ContentCreators.dashboard(parentFrame)
     UIHelpers.setTextColor(version, "DISABLED")
 end
 
--- Rewards Content
+--- Creates the rewards table interface showing Mythic+ rewards for different key levels
+--- @param parentFrame Frame The parent frame to attach the rewards content to
 function ContentCreators.rewards(parentFrame)
     local UIConstants = MrMythical.UIConstants
     local UIHelpers = MrMythical.UIHelpers
@@ -56,6 +58,8 @@ function ContentCreators.rewards(parentFrame)
     ContentCreators.createRewardsTable(rewardsTableFrame)
 end
 
+--- Creates the rewards table with headers and data rows
+--- @param parentFrame Frame The parent frame to attach the rewards table to
 function ContentCreators.createRewardsTable(parentFrame)
     local UIHelpers = MrMythical.UIHelpers
     if not UIHelpers then
@@ -102,7 +106,8 @@ function ContentCreators.createRewardRow(parentFrame, level, startY, index)
         380, yOffset, 150)
 end
 
--- Times Content
+--- Creates the dungeon timer thresholds interface
+--- @param parentFrame Frame The parent frame to attach the times content to
 function ContentCreators.times(parentFrame)
     local UIConstants = MrMythical.UIConstants
     local UIHelpers = MrMythical.UIHelpers
@@ -164,6 +169,9 @@ function ContentCreators.createTimeRow(parentFrame, mapInfo, index, startY)
     UIHelpers.createRowText(parentFrame, DungeonData.formatTime(timers.threeChest), 480, yOffset, 140)
 end
 
+--- Calculates the timer thresholds for chest completion based on par time
+--- @param parTime number The par time for the dungeon in seconds
+--- @return table Timer thresholds with oneChest, twoChest, and threeChest times
 function ContentCreators.calculateTimers(parTime)
     if not parTime or parTime <= 0 then
         return {oneChest = 0, twoChest = 0, threeChest = 0}
@@ -176,6 +184,10 @@ function ContentCreators.calculateTimers(parTime)
     }
 end
 
+--- Calculates the chest level based on completion time and par time
+--- @param completionTime number The actual completion time in seconds
+--- @param parTime number The par time for the dungeon in seconds
+--- @return number,number Chest level (0-3) and descriptive string
 function ContentCreators.calculateChestLevel(completionTime, parTime)
     if not completionTime or not parTime or parTime <= 0 then
         return 0, "none"

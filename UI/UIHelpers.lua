@@ -1,5 +1,5 @@
 --[[
-UIHelpers.lua - UI Helper Functions
+UIHelpers.lua - UI Helper Functions Module
 
 Common UI utility functions for creating and styling interface elements.
 --]]
@@ -9,6 +9,15 @@ MrMythical.UIHelpers = {}
 
 local UIHelpers = MrMythical.UIHelpers
 
+--- Creates a font string with specified properties
+--- @param parent Frame The parent frame
+--- @param layer string The draw layer (default: "OVERLAY")
+--- @param font string The font to use (default: "GameFontNormal")
+--- @param text string The text to display
+--- @param point string The anchor point
+--- @param x number X offset from anchor point
+--- @param y number Y offset from anchor point
+--- @return FontString The created font string
 function UIHelpers.createFontString(parent, layer, font, text, point, x, y)
     local fontString = parent:CreateFontString(nil, layer or "OVERLAY", font or "GameFontNormal")
     if point then
@@ -20,6 +29,12 @@ function UIHelpers.createFontString(parent, layer, font, text, point, x, y)
     return fontString
 end
 
+--- Creates a table header with consistent styling
+--- @param parent Frame The parent frame
+--- @param text string The header text
+--- @param x number X position
+--- @param width number Header width
+--- @return FontString The created header font string
 function UIHelpers.createHeader(parent, text, x, width)
     local header = UIHelpers.createFontString(parent, "OVERLAY", "GameFontHighlight", text, "TOPLEFT", x, 0)
     header:SetWidth(width)
@@ -54,6 +69,9 @@ function UIHelpers.createRowText(parent, text, x, yOffset, width, color)
     return fontString
 end
 
+--- Applies a predefined color scheme to a font string
+--- @param fontString FontString The font string to color
+--- @param colorName string The color name from UIConstants.COLORS
 function UIHelpers.setTextColor(fontString, colorName)
     local UIConstants = MrMythical.UIConstants
     local color = UIConstants and UIConstants.COLORS[colorName]
@@ -75,6 +93,9 @@ function UIHelpers.setTextColor(fontString, colorName)
     end
 end
 
+--- Determines the appropriate color name based on success rate percentage
+--- @param rate number Success rate percentage (0-100)
+--- @return string Color name ("SUCCESS_HIGH", "SUCCESS_MEDIUM", or "SUCCESS_LOW")
 function UIHelpers.getSuccessRateColor(rate)
     if rate >= 80 then
         return "SUCCESS_HIGH"

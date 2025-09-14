@@ -1,5 +1,5 @@
 --[[
-NavigationManager.lua - Navigation and Content Switching
+NavigationManager.lua - Navigation and Content Switching Module
 
 Handles navigation buttons and content switching in the unified interface.
 --]]
@@ -18,6 +18,10 @@ NavigationManager.BUTTON_DATA = {
     {id = "settings", text = "Settings", y = -220}
 }
 
+--- Creates all navigation buttons for the interface
+--- @param navPanel Frame The navigation panel to attach buttons to
+--- @param contentFrame Frame The content frame for displaying tab content
+--- @return table Table of created navigation buttons indexed by content type
 function NavigationManager.createButtons(navPanel, contentFrame)
     local navButtons = {}
     
@@ -47,6 +51,11 @@ function NavigationManager.createNavigationButton(navPanel, buttonInfo, contentF
     return button
 end
 
+--- Handles navigation button clicks and content switching
+--- @param buttonInfo table Button information with id and text
+--- @param button Button The clicked button
+--- @param navButtons table All navigation buttons
+--- @param contentFrame Frame The content frame to update
 function NavigationManager.handleButtonClick(buttonInfo, button, navButtons, contentFrame)
     if buttonInfo.id == "settings" then
         local MainFrameManager = MrMythical.MainFrameManager
@@ -79,6 +88,9 @@ function NavigationManager.clearContent(contentFrame)
     end
 end
 
+--- Displays the specified content type in the content frame
+--- @param contentType string The content type to display
+--- @param contentFrame Frame The frame to display content in
 function NavigationManager.showContent(contentType, contentFrame)
     NavigationManager.clearContent(contentFrame)
     

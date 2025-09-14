@@ -2,7 +2,7 @@
 UI.lua - Mythic+ Interface Main Controller
 
 Unified tabbed interface that consolidates all Mr. Mythical functionality.
-This file now acts as the main controller, importing modular UI components.
+This file acts as the main controller, importing and coordinating modular UI components.
 
 Dependencies: UI modules, RewardsFunctions, DungeonData, CompletionTracker, WoW APIs
 --]]
@@ -49,6 +49,8 @@ local function initializeUnifiedUI()
     return true
 end
 
+--- Shows the unified UI interface
+--- @param contentType string Optional content type to show (dashboard, rewards, scores, stats, times, settings)
 function UnifiedUI:Show(contentType)
     if not self._unifiedFrame then
         local success = initializeUnifiedUI()
@@ -90,6 +92,8 @@ function UnifiedUI:Hide()
     end
 end
 
+--- Toggles the visibility of the unified UI interface
+--- @param contentType string Optional content type to show when opening
 function UnifiedUI:Toggle(contentType)
     if self._unifiedFrame and self._unifiedFrame:IsShown() then
         self:Hide()
