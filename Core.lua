@@ -148,9 +148,11 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
             local formattedTime = DungeonData and DungeonData.formatTime and DungeonData.formatTime(bestRun.bestTime) or "Unknown"
             local timeStatus = bestRun.wasInTime and "In Time" or "Overtime"
             
+            local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
+            
             tooltip:AddLine(string.format("%sPersonal Best: Level %d (%s%s|r - %s) - Score: %s%d|r", 
                 ConfigData.COLORS.WHITE, bestRun.bestLevel, timeColor, formattedTime, timeStatus,
-                ConfigData.COLORS.BLUE, currentScore))
+                personalBestColor, currentScore))
         else
             tooltip:AddLine(string.format("%sPersonal Best: %sNo data|r", 
                 ConfigData.COLORS.WHITE, ConfigData.COLORS.GRAY))
