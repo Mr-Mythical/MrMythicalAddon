@@ -255,7 +255,9 @@ local function handleKeystoneTooltip(tooltip)
             debugLog("Failed to parse keystone data from link: %s", keystoneLink)
         end
     end
-end--- Chat hyperlink hook handler for keystone links
+end
+
+--- Chat hyperlink hook handler for keystone links
 --- Adds reward information to keystone links clicked in chat
 --- @param self table The chat frame object
 --- @param hyperlink string The clicked hyperlink
