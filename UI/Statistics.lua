@@ -247,6 +247,19 @@ function Statistics.updateStats(statsOverview, recentActivity, dungeonBreakdown)
     local activityText = ""
     
     if #allRuns > 0 then
+        -- Sort runs by startTime to ensure proper chronological order
+        table.sort(allRuns, function(a, b)
+            if a.startTime and b.startTime then
+                return a.startTime > b.startTime  -- Most recent first
+            elseif a.startTime then
+                return true  -- a has startTime, b doesn't
+            elseif b.startTime then
+                return false  -- b has startTime, a doesn't
+            else
+                return false  -- Neither has startTime, maintain current order
+            end
+        end)
+        
         local recentRuns = {}
         for i = 1, math.min(8, #allRuns) do
             table.insert(recentRuns, allRuns[i])

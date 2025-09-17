@@ -159,15 +159,22 @@ function RunRecordManager.updateWithCompletion(runRecord, challengeInfo)
 end
 
 function RunRecordManager.findExistingRun(mapID, level)
+    local latestRun = nil
+    local latestStartTime = 0
+
     for i, run in ipairs(MRM_RunHistory.runs) do
         if run.dungeon.mapID == mapID and
            run.level == level and
            not run.completed and
            not run.time then
-            return run
+            -- Find the most recent run with this mapID/level combination
+            if run.startTime and run.startTime > latestStartTime then
+                latestRun = run
+                latestStartTime = run.startTime
+            end
         end
     end
-    return nil
+    return latestRun
 end
 
 function CompletionTracker:trackRunStart(mapID, level)
