@@ -79,7 +79,7 @@ function Options.initializeSettings()
         HIDE_AFFIX_TEXT = false,
         HIDE_DURATION = false,
         SHOW_TIMING = true,
-        SHOW_PAR_TIME = false,
+        TIMER_DISPLAY_MODE = "NONE",
         PLAIN_SCORE_COLORS = false,
         LEVEL_DISPLAY = "OFF",
         LEVEL_SHIFT_MODE = "NONE",
@@ -96,6 +96,12 @@ function Options.initializeSettings()
         if MRM_SavedVars[key] == nil then
             MRM_SavedVars[key] = default
         end
+    end
+
+    -- Backwards compatibility: migrate SHOW_PAR_TIME to TIMER_DISPLAY_MODE
+    if MRM_SavedVars.SHOW_PAR_TIME == true then
+        MRM_SavedVars.TIMER_DISPLAY_MODE = "DUNGEON"
+        MRM_SavedVars.SHOW_PAR_TIME = nil
     end
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
@@ -281,12 +287,23 @@ function Options.createSettingsInCategory(category)
         "Show the potential timing bonus (0-15)."
     )
 
-    createSetting(
+
+    local timerDropdownOptions = {
+        { text = "None", value = "NONE" },
+        { text = "Dungeon Timer", value = "DUNGEON" },
+        { text = "Upgrade Timers", value = "UPGRADE" }
+    }
+
+    createDropdownSetting(
         category,
-        "Show Dungeon Timer",
-        "SHOW_PAR_TIME",
-        false,
-        "Display the dungeon timer in the keystone tooltip."
+        "Timer Display",
+        "TIMER_DISPLAY_MODE",
+        "NONE",
+        "Choose which timer(s) to display in the keystone tooltip:\n\n" ..
+        ConfigData.COLORS.WHITE .. "None:|r No timer\n" ..
+        ConfigData.COLORS.WHITE .. "Dungeon Timer:|r Show only the dungeon timer\n" ..
+        ConfigData.COLORS.WHITE .. "Upgrade Timers:|r Show +2/+3 upgrade timers and the dungeon timer on one line",
+        timerDropdownOptions
     )
 
     createSetting(

@@ -28,6 +28,7 @@ local GRADIENTS = GradientsData.GRADIENTS
 --- Debug logging function for development
 --- @param message string The debug message to log
 --- @param ... any Additional values to include in the debug output
+
 local function debugLog(message, ...)
     if MrMythicalDebug then
         local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)
@@ -35,7 +36,7 @@ local function debugLog(message, ...)
     end
 end
 
---- Processes and rebuilds keystone tooltip according to user preferences
+-- Processes and rebuilds keystone tooltip according to user preferences
 --- Handles level display modes, text filtering, and title modifications
 --- @param tooltip table The GameTooltip object to process
 local function processKeystoneTooltip(tooltip)
@@ -128,14 +129,20 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     local crest = RewardsFunctions.getCrestReward(keyLevel)
 
-    -- Add dungeon timer if enabled (at the top)
-    if MRM_SavedVars.SHOW_PAR_TIME then
-        if DungeonData then
-            local parTime = DungeonData.getParTime(mapID)
-            if parTime then
+
+    -- Add timer line based on dropdown
+    local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
+    if DungeonData then
+        local parTime = DungeonData.getParTime(mapID)
+        if parTime then
+            if timerMode == "DUNGEON" then
                 local formattedTime = DungeonData.formatTime(parTime)
-                tooltip:AddLine(string.format("%sDungeon Timer: %s|r", 
-                    ConfigData.COLORS.WHITE, formattedTime))
+                tooltip:AddLine(string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, formattedTime))
+            elseif timerMode == "UPGRADE" then
+                local timer1 = DungeonData.formatTime(parTime)
+                local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
+                local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
+                tooltip:AddLine(string.format("%sDungeon Timer: %s/%s/%s|r", ConfigData.COLORS.WHITE, timer1, timer2, timer3))
             end
         end
     end
