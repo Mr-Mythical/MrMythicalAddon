@@ -74,16 +74,17 @@ local function processKeystoneTooltip(tooltip)
             local lineText = leftLine:GetText() or ""
             local red, green, blue = leftLine:GetTextColor()
             local lineColor = {red, green, blue}
+            local shouldProcess = true
             
             -- Handle different level display modes
             if levelDisplayMode == "COMPACT" then
                 lineText = TooltipUtils.processCompactLevelDisplay(lineText, isShiftPressed, lineColor)
             elseif TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPressed) then
-                lineText = nil
+                shouldProcess = false
             end
             
             -- Filter unwanted text based on user settings
-            if lineText and not TooltipUtils.shouldHideTooltipText(lineText) then
+            if shouldProcess and lineText and not TooltipUtils.shouldHideTooltipText(lineText) then
                 table.insert(processedLines, {
                     left = lineText,
                     right = rightLine and rightLine:GetText(),
