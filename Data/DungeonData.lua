@@ -279,7 +279,7 @@ end
 
 --- Retrieves the player's best mythic+ level and time for a given keystone
 --- @param itemString string The keystone item string to get data for
---- @return table Table with bestLevel, bestTime, and wasInTime, or nil if no data
+--- @return table|nil Table with bestLevel, bestTime, and wasInTime, or nil if no data
 function MrMythical.DungeonData.getCharacterBestRun(itemString)
     local mapID = MrMythical.KeystoneUtils.extractMapID(itemString)
     if not mapID then
