@@ -27,8 +27,7 @@ local GRADIENTS = GradientsData.GRADIENTS
 
 --- Debug logging function for development
 --- @param message string The debug message to log
---- @param ... any Additional values to include in the debug output
-
+--- @param ... any Additional values to include in the debug output  
 local function debugLog(message, ...)
     if MrMythicalDebug then
         local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)

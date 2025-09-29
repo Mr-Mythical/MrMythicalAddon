@@ -1,20 +1,3 @@
--- ...existing code...
-
---[[
-TooltipUtils.lua - Tooltip Processing and Enhancement Utilities
-
-Purpose: Processes and enhances tooltip display with filtering and formatting
-Dependencies: ParsingData
-Author: Braunerr
---]]
-
-local MrMythical = MrMythical or {}
-MrMythical.TooltipUtils = {}
-
-local TooltipUtils = MrMythical.TooltipUtils
-local ParsingData = MrMythical.ParsingData
-
-
 --[[
 TooltipUtils.lua - Tooltip Processing and Enhancement Utilities
 
@@ -28,16 +11,6 @@ MrMythical.TooltipUtils = MrMythical.TooltipUtils or {}
 local TooltipUtils = MrMythical.TooltipUtils
 local ParsingData = MrMythical.ParsingData
 
---- Adds upgrade timers to the tooltip if the option is enabled
---- @param tooltip table The GameTooltip object
---- @param mapID number The dungeon map ID
---- @param keyLevel number The keystone level
-
---- Adds a single timer line to the tooltip based on dropdown selection
---- @param tooltip table The GameTooltip object
---- @param mapID number The dungeon map ID
---- @param keyLevel number The keystone level
-
 --- Determines if tooltip text should be hidden based on user preferences
 --- @param text string The text to check
 --- @return boolean True if the text should be hidden
@@ -46,21 +19,18 @@ function TooltipUtils.shouldHideTooltipText(text)
         return false 
     end
     
-    -- Check duration strings
     for _, duration in ipairs(ParsingData.DURATION_STRINGS) do
         if text:find(duration, 1, true) then
             return MRM_SavedVars.HIDE_DURATION
         end
     end
     
-    -- Check affix strings
     for _, affix in ipairs(ParsingData.AFFIX_STRINGS) do
         if text:find(affix, 1, true) then
             return MRM_SavedVars.HIDE_AFFIX_TEXT
         end
     end
     
-    -- Check unwanted strings
     for _, unwanted in ipairs(ParsingData.UNWANTED_STRINGS) do
         if text:find(unwanted, 1, true) then
             return MRM_SavedVars.HIDE_UNWANTED_TEXT
