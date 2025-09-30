@@ -291,7 +291,8 @@ function Options.createSettingsInCategory(category)
     local timerDropdownOptions = {
         { text = "None", value = "NONE" },
         { text = "Dungeon Timer", value = "DUNGEON" },
-        { text = "Upgrade Timers", value = "UPGRADE" }
+        { text = "Upgrade Timers", value = "UPGRADE" },
+        { text = "Shift to Show", value = "SHIFT" }
     }
 
     createDropdownSetting(
@@ -302,7 +303,8 @@ function Options.createSettingsInCategory(category)
         "Choose which timer(s) to display in the keystone tooltip:\n\n" ..
         ConfigData.COLORS.WHITE .. "None:|r No timer\n" ..
         ConfigData.COLORS.WHITE .. "Dungeon Timer:|r Show only the dungeon timer\n" ..
-        ConfigData.COLORS.WHITE .. "Upgrade Timers:|r Show +2/+3 upgrade timers and the dungeon timer on one line",
+        ConfigData.COLORS.WHITE .. "Upgrade Timers:|r Show +2/+3 upgrade timers and the dungeon timer on one line\n" ..
+        ConfigData.COLORS.WHITE .. "Shift to Show:|r Hold Shift to show upgrade timers",
         timerDropdownOptions
     )
 
