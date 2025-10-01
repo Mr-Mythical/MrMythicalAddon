@@ -8,7 +8,6 @@ Author: Braunerr
 
 local MrMythical = MrMythical or {}
 
--- Global debug variable for BraunerrsDevTools integration
 MrMythicalDebug = false
 
 local GradientsData = MrMythical.GradientsData
@@ -35,7 +34,6 @@ local function debugLog(message, ...)
     end
 end
 
--- Processes and rebuilds keystone tooltip according to user preferences
 --- Handles level display modes, text filtering, and title modifications
 --- @param tooltip table The GameTooltip object to process
 local function processKeystoneTooltip(tooltip)
@@ -44,7 +42,6 @@ local function processKeystoneTooltip(tooltip)
     local firstLine = _G["GameTooltipTextLeft1"]
     local levelDisplayMode = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
     
-    -- Process title line with level information if needed
     if firstLine then
         local titleText = firstLine:GetText()
         if titleText then
@@ -64,7 +61,6 @@ local function processKeystoneTooltip(tooltip)
         })
     end
 
-    -- Process remaining tooltip lines
     for i = 2, tooltip:NumLines() do
         local leftLine = _G["GameTooltipTextLeft"..i]
         local rightLine = _G["GameTooltipTextRight"..i]
@@ -75,14 +71,12 @@ local function processKeystoneTooltip(tooltip)
             local lineColor = {red, green, blue}
             local shouldProcess = true
             
-            -- Handle different level display modes
             if levelDisplayMode == "COMPACT" then
                 lineText = TooltipUtils.processCompactLevelDisplay(lineText, isShiftPressed, lineColor)
             elseif TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPressed) then
                 shouldProcess = false
             end
             
-            -- Filter unwanted text based on user settings
             if shouldProcess and lineText and not TooltipUtils.shouldHideTooltipText(lineText) then
                 table.insert(processedLines, {
                     left = lineText,
@@ -107,7 +101,6 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     local currentScore = MrMythical.DungeonData.getCharacterMythicScore(itemString)
     local groupScoreData = MrMythical.DungeonData.getGroupMythicDataParty(currentScore, mapID)
     
-    -- Calculate group average potential gain
     local totalPotentialGain, playerCount = 0, 0
     local potentialScore = RewardsFunctions.scoreFormula(keyLevel)
     
@@ -119,18 +112,15 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     
     local averageGroupGain = (playerCount > 0) and (totalPotentialGain / playerCount) or 0
     
-    -- Generate color-coded displays
     local groupColor = ColorUtils.calculateGradientColor(averageGroupGain, 0, 200, GRADIENTS)
     local baseColor = ColorUtils.calculateGradientColor(potentialScore, 165, 500, GRADIENTS)
     local playerGain = math.max(potentialScore - currentScore, 0)
     local gainColor = ColorUtils.calculateGradientColor(playerGain, 0, 200, GRADIENTS)
     
-    -- Get reward information
     local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     local crest = RewardsFunctions.getCrestReward(keyLevel)
 
 
-    -- Add timer line based on dropdown
     local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
     if DungeonData then
         local parTime = DungeonData.getParTime(mapID)
@@ -154,7 +144,6 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
         end
     end
 
-    -- Add player's best run information if enabled
     if MRM_SavedVars.SHOW_PLAYER_BEST then
         local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
         if bestRun then
@@ -173,14 +162,12 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
         end
     end
 
-    -- Add gear and crest information
     tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
         ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
         rewards.vaultTrack, rewards.vaultItem))
     tooltip:AddLine(string.format("%sCrest: %s (%s)|r", 
         ConfigData.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
 
-    -- Add score information with timing consideration
     local scoreLine, gainString = "", ""
     
     if MRM_SavedVars.SHOW_TIMING then
@@ -204,15 +191,12 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     
     tooltip:AddLine(scoreLine .. gainString)
 
-    -- Add group information if in a group (but not raid)
     if IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid() then
         local isShiftPressed = IsShiftKeyDown()
         
         if isShiftPressed then
-            -- Show detailed individual player scores when shift is held
             tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
             
-            -- Sort players by gain (highest first) for better readability
             local sortedPlayers = {}
             for playerName, playerScore in pairs(groupScoreData) do
                 local individualGain = math.max(potentialScore - playerScore, 0)
@@ -237,7 +221,6 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
                 end
             end
         else
-            -- Show group average gain when shift is not held
             tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r %s(Hold Shift for details)|r", 
                 ConfigData.COLORS.WHITE, groupColor, averageGroupGain, ConfigData.COLORS.GRAY))
         end
@@ -248,7 +231,6 @@ end
 --- Enhances tooltips with reward information and processes display settings
 --- @param tooltip table The GameTooltip object being processed
 local function handleKeystoneTooltip(tooltip)
-    -- Only proceed if the tooltip supports GetItem (excludes ShoppingTooltips)
     if not tooltip.GetItem then 
         return 
     end
@@ -258,7 +240,6 @@ local function handleKeystoneTooltip(tooltip)
         return
     end
     
-    -- Process all keystone links found in the tooltip
     for keystoneLink in link:gmatch("|Hkeystone:.-|h.-|h|r") do
         local keystoneData = KeystoneUtils.parseKeystoneData(keystoneLink)
         if keystoneData then
@@ -286,15 +267,12 @@ local function handleKeystoneChatHyperlink(self, hyperlink)
     ItemRefTooltip:Show()
 end
 
--- Register tooltip and chat hooks
 hooksecurefunc("ChatFrame_OnHyperlinkShow", handleKeystoneChatHyperlink)
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, handleKeystoneTooltip)
 
--- Register slash command handler
 SLASH_MRMYTHICAL1 = "/mrm"
 SlashCmdList["MRMYTHICAL"] = CommandHandlers.processSlashCommand
 
---- Event handler for addon initialization and mythic+ completion tracking
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -310,46 +288,37 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         if addonName == "MrMythical" then
             debugLog("MrMythical addon loaded, initializing...")
             
-            -- Initialize basic addon settings
             Options.initializeSettings()
             
             addonInitialized = true
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
-        -- Only proceed if our addon has been loaded
         if addonInitialized then
-            -- Refresh dungeon data from API (now that APIs are available)
             if DungeonData and DungeonData.refreshFromAPI then
                 DungeonData.refreshFromAPI()
             end
             
-            -- Unregister this event as we only need it once
             eventFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
         end
     elseif event == "CHALLENGE_MODE_MAPS_UPDATE" then
-        -- Mythic+ maps have been updated, refresh dungeon data
         if addonInitialized and DungeonData and DungeonData.refreshFromAPI then
             C_Timer.After(0.5, function()
                 DungeonData.refreshFromAPI()
             end)
         end
     elseif event == "CHALLENGE_MODE_START" then
-        -- Track mythic+ dungeon start
         local mapID = C_ChallengeMode.GetActiveChallengeMapID()
         local level = C_ChallengeMode.GetActiveKeystoneInfo()
 
         if mapID and level then
-            -- Track the start of the run with the new simplified signature
             if MrMythical.CompletionTracker then
                 MrMythical.CompletionTracker:trackRunStart(mapID, level)
             end
         end
     elseif event == "CHALLENGE_MODE_COMPLETED" then
-        -- Track mythic+ completion when challenge mode finishes
         local mapChallengeModeID, level, time, onTime, keystoneUpgradeLevels, practiceRun, oldOverallDungeonScore, newOverallDungeonScore, IsMapRecord, IsAffixRecord, PrimaryAffix, isEligibleForScore, members = C_ChallengeMode.GetCompletionInfo()
         
         if mapChallengeModeID then
-            -- Create challengeInfo table from the API return values
             local challengeInfo = {
                 mapChallengeModeID = mapChallengeModeID,
                 level = level,
@@ -366,7 +335,6 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
                 members = members
             }
             
-            -- Use the correct API that returns the proper data structure
             if MrMythical.CompletionTracker then
                 MrMythical.CompletionTracker:trackRun(challengeInfo)
             end
