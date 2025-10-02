@@ -187,7 +187,7 @@ end
 --- Calculates the chest level based on completion time and par time
 --- @param completionTime number The actual completion time in seconds
 --- @param parTime number The par time for the dungeon in seconds
---- @return number,number Chest level (0-3) and descriptive string
+--- @return number, string Chest level (0-3) and descriptive string
 function ContentCreators.calculateChestLevel(completionTime, parTime)
     if not completionTime or not parTime or parTime <= 0 then
         return 0, "none"
