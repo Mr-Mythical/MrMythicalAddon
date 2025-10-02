@@ -16,10 +16,8 @@ local UnifiedUI = MrMythical.UnifiedUI
 local function initializeUnifiedUI()
     -- Import UI modules (they should be loaded by now due to TOC order)
     local UIConstants = MrMythical.UIConstants
-    local UIHelpers = MrMythical.UIHelpers
     local MainFrameManager = MrMythical.MainFrameManager
     local NavigationManager = MrMythical.NavigationManager
-    local ContentCreators = MrMythical.ContentCreators
     
     if not MainFrameManager or not NavigationManager or not UIConstants then
         if MrMythicalDebug then
@@ -74,8 +72,7 @@ function UnifiedUI:Show(contentType)
     
     local UIConstants = self._UIConstants
     local NavigationManager = self._NavigationManager
-    
-    local targetContent = contentType or UIConstants.CONTENT_TYPES.DASHBOARD
+
     if contentType and contentType ~= UIConstants.CONTENT_TYPES.DASHBOARD then
         NavigationManager.showContent(contentType, self._contentFrame)
         if self._navButtons[contentType] then

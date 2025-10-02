@@ -211,10 +211,8 @@ function Statistics.updateStats(statsOverview, recentActivity, dungeonBreakdown)
 
     local charName = UnitName("player") or "Unknown"
     local charClass = select(2, UnitClass("player")) or "Unknown"
-    local currentSeason = C_MythicPlus.GetCurrentSeason() or "Unknown"
 
     local seasonTotal = (stats.completedIntime or 0) + (stats.completedOvertime or 0) + (stats.abandoned or 0)
-    local seasonRate = stats.rate or 0
     local bestLevel = charStats.bestLevel or 0
 
     local statsText = string.format("%s (%s)\n\n", charName, charClass)

@@ -33,9 +33,6 @@ function ScoreCalculator.create(parentFrame)
 end
 
 function ScoreCalculator.createTimerSlider(parentFrame)
-    local timerLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "Timer Bonus:", "TOPLEFT", UIConstants.LAYOUT.LARGE_PADDING, -80)
-    
     local timerSlider = CreateFrame("Slider", "MrMythicalUnifiedTimerSlider", parentFrame, "OptionsSliderTemplate")
     timerSlider:SetPoint("TOPLEFT", 120, -75)
     timerSlider:SetSize(200, 20)
@@ -52,9 +49,6 @@ function ScoreCalculator.createTimerSlider(parentFrame)
 end
 
 function ScoreCalculator.createKeyLevelDropdown(parentFrame)
-    local currentKeyLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
-        "Using Key Level:", "TOPLEFT", 350, -110)
-    
     local currentKeyLevel = CreateFrame("Frame", "MrMythicalUnifiedCurrentKeyLevel", parentFrame, "UIDropDownMenuTemplate")
     currentKeyLevel:SetPoint("TOPLEFT", 450, -105)
     UIDropDownMenu_SetWidth(currentKeyLevel, 60)
@@ -76,9 +70,6 @@ function ScoreCalculator.createScoreTables(parentFrame)
     UIHelpers.createHeader(scoreContentFrame, "Base Score", 70, 80)
     UIHelpers.createHeader(scoreContentFrame, "Timer Bonus", 150, 80)
     UIHelpers.createHeader(scoreContentFrame, "Final Score", 230, 90)
-    
-    local gainsLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Your Dungeons", "TOPLEFT", 350, -80)
     
     local gainsTableFrame = CreateFrame("Frame", nil, parentFrame)
     gainsTableFrame:SetPoint("TOPLEFT", 350, -140)
