@@ -54,7 +54,7 @@ end
 
 --- Gets class color for a given class name
 --- @param className string The class name to get color for
---- @return string WoW color code
+--- @return string classColors WoW color code
 function ColorUtils.getClassColor(className)
     
     local classColors = {

@@ -10,10 +10,7 @@ local MrMythical = MrMythical or {}
 MrMythical.CommandHandlers = {}
 
 local CommandHandlers = MrMythical.CommandHandlers
-local RewardsFunctions = MrMythical.RewardsFunctions
-local CompletionTracker = MrMythical.CompletionTracker
 local ConfigData = MrMythical.ConfigData
-local DungeonData = MrMythical.DungeonData
 
 function CommandHandlers.handleRewardsCommand()
     if MrMythical.UnifiedUI then
