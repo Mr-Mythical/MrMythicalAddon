@@ -153,8 +153,11 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
             
             local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
             
-            tooltip:AddLine(string.format("%sPersonal Best: Level %d (%s%s|r - %s) - Score: %s%d|r", 
-                ConfigData.COLORS.WHITE, bestRun.bestLevel, timeColor, formattedTime, timeStatus,
+            local pluses = string.rep("+", bestRun.upgrade or 0)
+            local levelText = "Level " .. pluses .. bestRun.bestLevel
+            
+            tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r - %s) - Score: %s%d|r", 
+                ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime, timeStatus,
                 personalBestColor, currentScore))
         else
             tooltip:AddLine(string.format("%sPersonal Best: %sNo data|r", 

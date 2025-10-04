@@ -303,10 +303,25 @@ function MrMythical.DungeonData.getCharacterBestRun(itemString)
     end
     
     if bestInfo then
+        local upgrade = 0
+        if MRM_RunHistory and MRM_RunHistory.runs then
+            local playerName = UnitName("player")
+            local maxCompleted = 0
+            for _, run in ipairs(MRM_RunHistory.runs) do
+                if run.player and run.player.name == playerName and run.dungeon and run.dungeon.mapID == mapID and run.completed then
+                    local completed = run.level + (run.keystoneUpgradeLevels or 0)
+                    if completed > maxCompleted then
+                        maxCompleted = completed
+                        upgrade = run.keystoneUpgradeLevels or 0
+                    end
+                end
+            end
+        end
         return {
             bestLevel = bestInfo.level,
             bestTime = bestInfo.durationSec,
-            wasInTime = (bestInfo == intimeInfo)
+            wasInTime = (bestInfo == intimeInfo),
+            upgrade = upgrade
         }
     end
 end
