@@ -144,21 +144,25 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
         end
     end
 
-    if MRM_SavedVars.SHOW_PLAYER_BEST then
+    local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
+    if playerBestDisplay ~= "NONE" then
         local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
         if bestRun then
             local timeColor = bestRun.wasInTime and ConfigData.COLORS.GREEN or ConfigData.COLORS.YELLOW
             local formattedTime = DungeonData and DungeonData.formatTime and DungeonData.formatTime(bestRun.bestTime) or "Unknown"
-            local timeStatus = bestRun.wasInTime and "In Time" or "Overtime"
-            
-            local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
             
             local pluses = string.rep("+", bestRun.upgrade or 0)
             local levelText = "Level " .. pluses .. bestRun.bestLevel
             
-            tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r - %s) - Score: %s%d|r", 
-                ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime, timeStatus,
-                personalBestColor, currentScore))
+            if playerBestDisplay == "WITH_SCORE" then
+                local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
+                tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r) - Score: %s%d|r", 
+                    ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime,
+                    personalBestColor, currentScore))
+            else -- WITHOUT_SCORE
+                tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r)|r", 
+                    ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime))
+            end
         else
             tooltip:AddLine(string.format("%sPersonal Best: %sNo data|r", 
                 ConfigData.COLORS.WHITE, ConfigData.COLORS.GRAY))

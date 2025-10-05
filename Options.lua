@@ -84,7 +84,7 @@ function Options.initializeSettings()
         LEVEL_DISPLAY = "OFF",
         LEVEL_SHIFT_MODE = "NONE",
         SHORT_TITLE = false,
-        SHOW_PLAYER_BEST = true,
+        PLAYER_BEST_DISPLAY = "WITH_SCORE",
         UNIFIED_FRAME_POINT = "CENTER",
         UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
         UNIFIED_FRAME_X = 0,
@@ -92,6 +92,18 @@ function Options.initializeSettings()
     }
 
     MRM_SavedVars = MRM_SavedVars or {}
+    
+    -- Backwards compatibility: Convert old SHOW_PLAYER_BEST boolean to new PLAYER_BEST_DISPLAY dropdown
+    if MRM_SavedVars.SHOW_PLAYER_BEST ~= nil and MRM_SavedVars.PLAYER_BEST_DISPLAY == nil then
+        if MRM_SavedVars.SHOW_PLAYER_BEST then
+            MRM_SavedVars.PLAYER_BEST_DISPLAY = "WITH_SCORE"
+        else
+            MRM_SavedVars.PLAYER_BEST_DISPLAY = "NONE"
+        end
+        -- Remove the old setting
+        MRM_SavedVars.SHOW_PLAYER_BEST = nil
+    end
+    
     for key, default in pairs(defaults) do
         if MRM_SavedVars[key] == nil then
             MRM_SavedVars[key] = default
@@ -308,12 +320,22 @@ function Options.createSettingsInCategory(category)
         timerDropdownOptions
     )
 
-    createSetting(
+    local playerBestDropdownOptions = {
+        { text = "None", value = "NONE" },
+        { text = "Without Score", value = "WITHOUT_SCORE" },
+        { text = "With Score", value = "WITH_SCORE" }
+    }
+
+    createDropdownSetting(
         category,
-        "Show Player Best Run",
-        "SHOW_PLAYER_BEST",
-        true,
-        "Display your personal best level and time for this dungeon in the keystone tooltip."
+        "Player Best Display",
+        "PLAYER_BEST_DISPLAY",
+        "WITH_SCORE",
+        "Choose how to display your personal best run for this dungeon:\n\n" ..
+        ConfigData.COLORS.WHITE .. "None:|r Don't show personal best information\n" ..
+        ConfigData.COLORS.WHITE .. "Without Score:|r Show level, time, and upgrades only\n" ..
+        ConfigData.COLORS.WHITE .. "With Score:|r Show level, time, upgrades, and score",
+        playerBestDropdownOptions
     )
 
     createSetting(
