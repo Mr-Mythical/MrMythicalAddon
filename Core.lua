@@ -145,7 +145,16 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     end
 
     local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
-    if playerBestDisplay ~= "NONE" then
+    local isShiftPressed = IsShiftKeyDown()
+    local shouldShowPlayerBest = false
+    
+    if playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "WITHOUT_SCORE" then
+        shouldShowPlayerBest = true
+    elseif playerBestDisplay == "SHIFT_WITH_SCORE" and isShiftPressed then
+        shouldShowPlayerBest = true
+    end
+    
+    if shouldShowPlayerBest then
         local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
         if bestRun then
             local timeColor = bestRun.wasInTime and ConfigData.COLORS.GREEN or ConfigData.COLORS.YELLOW
@@ -154,7 +163,7 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
             local pluses = string.rep("+", bestRun.upgrade or 0)
             local levelText = "Level " .. pluses .. bestRun.bestLevel
             
-            if playerBestDisplay == "WITH_SCORE" then
+            if playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "SHIFT_WITH_SCORE" then
                 local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
                 tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r) - Score: %s%d|r", 
                     ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime,

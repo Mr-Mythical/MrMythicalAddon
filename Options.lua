@@ -323,7 +323,8 @@ function Options.createSettingsInCategory(category)
     local playerBestDropdownOptions = {
         { text = "None", value = "NONE" },
         { text = "Without Score", value = "WITHOUT_SCORE" },
-        { text = "With Score", value = "WITH_SCORE" }
+        { text = "With Score", value = "WITH_SCORE" },
+        { text = "Shift to Show", value = "SHIFT_WITH_SCORE" }
     }
 
     createDropdownSetting(
@@ -334,7 +335,8 @@ function Options.createSettingsInCategory(category)
         "Choose how to display your personal best run for this dungeon:\n\n" ..
         ConfigData.COLORS.WHITE .. "None:|r Don't show personal best information\n" ..
         ConfigData.COLORS.WHITE .. "Without Score:|r Show level, time, and upgrades only\n" ..
-        ConfigData.COLORS.WHITE .. "With Score:|r Show level, time, upgrades, and score",
+        ConfigData.COLORS.WHITE .. "With Score:|r Show level, time, upgrades, and score\n" ..
+        ConfigData.COLORS.WHITE .. "Shift to Show:|r Hold Shift to show personal best with score",
         playerBestDropdownOptions
     )
 
