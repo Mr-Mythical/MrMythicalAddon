@@ -4,17 +4,6 @@ Options.lua - Mr. Mythical Keystone Tooltips Options Panel
 Purpose: Manages settings panel and global registry for Mr. Mythical addons
 Dependencies: ConfigData
 Author: Braunerr
-
-This addon implements the global registry pattern for coordinating settings panels
-across multiple Mr. Mythical addons. As a sibling addon, it:
-
-1. Creates the shared "Mr. Mythical" parent category (or uses existing one)
-2. Creates a "Keystone Tooltips" subcategory under the parent
-3. Stores references in _G.MrMythicalSettingsRegistry for other addons to use
-4. Provides utility functions for integration status checking and debugging
-
-Other Mr. Mythical addons should create their own subcategories under the shared parent.
-See SETTINGS_INTEGRATION_GUIDE.md for detailed integration guide.
 --]]
 
 local MrMythical = MrMythical or {}

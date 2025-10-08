@@ -48,9 +48,6 @@ function ContentCreators.rewards(parentFrame)
         return
     end
     
-    local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Mythic+ Rewards", "TOP", 0, UIConstants and -UIConstants.LAYOUT.LARGE_PADDING or -20)
-    
     local rewardsTableFrame = CreateFrame("Frame", nil, parentFrame)
     rewardsTableFrame:SetPoint("TOPLEFT", UIConstants and UIConstants.LAYOUT.LARGE_PADDING or 20, -60)
     rewardsTableFrame:SetSize(530, 380)
@@ -115,9 +112,6 @@ function ContentCreators.times(parentFrame)
     if not UIHelpers then
         return
     end
-    
-    local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Mythic+ Timer Thresholds", "TOP", 0, UIConstants and -UIConstants.LAYOUT.LARGE_PADDING or -20)
     
     local timesTableFrame = CreateFrame("Frame", nil, parentFrame)
     timesTableFrame:SetPoint("TOPLEFT", UIConstants and UIConstants.LAYOUT.LARGE_PADDING or 20, -60)

@@ -358,5 +358,4 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     end
 end)
 
--- Export the main addon object to global scope
 _G.MrMythical = MrMythical
