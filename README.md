@@ -8,8 +8,6 @@ Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone t
 
 ## Key Features
 
-## Key Features
-
 ### **Customizable Keystone Tooltips**
 Transform every Mythic+ keystone tooltip with detailed, customizable information:
 - **Reward Information**: Gear item levels and track info for dungeon drops and vault rewards
@@ -47,13 +45,19 @@ Get the latest version from your preferred addon manager:
 
 ## Related Addons
 
-Looking for more Mythic+ tools? Check out our companion addon:
+Looking for more Mythic+ tools? Check out our companion addons:
 
 **[Mr. Mythical: Leaderboard](https://github.com/Mr-Mythical/MrMythicalLeaderboard)** - Display top Mythic+ runs from Raider.IO directly in your keystone tooltips.
 
 [Download on CurseForge](https://www.curseforge.com/wow/addons/mr-mythical-leaderboard)
 
 [Download on Wago](https://addons.wago.io/addons/mrmythicalleaderboard)
+
+**[Mr. Mythical: Gear Check](https://github.com/Mr-Mythical/MrMythicalGearCheck)** - Comprehensive gear validation tool for detecting common gear issues and preparation problems.
+
+[Download on CurseForge](https://www.curseforge.com/wow/addons/mr-mythical-gear-check)
+
+[Download on Wago](https://addons.wago.io/addons/mrmythicalgearcheck)
 
 ## More Tools & Resources
 
