@@ -34,6 +34,8 @@ local function debugLog(message, ...)
     end
 end
 
+MrMythical.debugLog = debugLog
+
 --- Handles level display modes, text filtering, and title modifications
 --- @param tooltip table The GameTooltip object to process
 local function processKeystoneTooltip(tooltip)

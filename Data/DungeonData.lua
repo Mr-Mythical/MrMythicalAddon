@@ -177,16 +177,6 @@ function MrMythical.DungeonData.formatTime(timeInSeconds)
     return string.format("%d:%02d", minutes, seconds)
 end
 
---- Debug logging function for development
---- @param message string The debug message to log
---- @param ... any Additional values to include in the debug output
-local function debugLog(message, ...)
-    if MrMythicalDebug then
-        local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)
-        print(formattedMessage)
-    end
-end
-
 --- Retrieves the dungeon score for a specific map from a RaiderIO profile
 --- @param profile table RaiderIO profile data containing mythic keystone information
 --- @param targetMapID number The specific dungeon map ID to find score for
@@ -218,7 +208,7 @@ end
 --- @param targetMapID number The dungeon map ID to get scores for
 --- @return table A mapping of player names to their dungeon scores
 function MrMythical.DungeonData.getGroupMythicDataParty(playerScore, targetMapID)
-    debugLog("Getting group mythic data for map ID: %d", targetMapID)
+    MrMythical.debugLog("Getting group mythic data for map ID: %d", targetMapID)
     
     local groupScoreData = {}
     local playerName = UnitName("player")
