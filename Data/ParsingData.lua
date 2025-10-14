@@ -13,7 +13,12 @@ MrMythical.ParsingData = {
         "Fortified",
         "Tyrannical",
         "Xal'atath",
-        "Dungeon Modifiers:"
+        "Dungeon Modifiers:",
+        "Explosive",
+        "Bolstering",
+        "Grievous",
+        "Eternus",
+        "Teeming",
     },
 
     DURATION_STRINGS = {
