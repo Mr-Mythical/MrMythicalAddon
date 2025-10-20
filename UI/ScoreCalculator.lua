@@ -13,6 +13,10 @@ local UIHelpers = MrMythical.UIHelpers
 local RewardsFunctions = MrMythical.RewardsFunctions
 local DungeonData = MrMythical.DungeonData
 
+-- Constants for key level range
+local MIN_KEY_LEVEL = 2 -- Todo: Make these configurable in ui
+local MAX_KEY_LEVEL = 30
+
 function ScoreCalculator.create(parentFrame)
     local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
         "Mythic+ Score Calculator", "TOP", 0, -UIConstants.LAYOUT.LARGE_PADDING)
@@ -52,7 +56,7 @@ function ScoreCalculator.createKeyLevelDropdown(parentFrame)
     local currentKeyLevel = CreateFrame("Frame", "MrMythicalUnifiedCurrentKeyLevel", parentFrame, "UIDropDownMenuTemplate")
     currentKeyLevel:SetPoint("TOPLEFT", 450, -105)
     UIDropDownMenu_SetWidth(currentKeyLevel, 60)
-    UIDropDownMenu_SetText(currentKeyLevel, "2")
+    UIDropDownMenu_SetText(currentKeyLevel, tostring(MIN_KEY_LEVEL))
     
     return currentKeyLevel
 end
@@ -88,8 +92,8 @@ function ScoreCalculator.createScoreRows(scoreContentFrame)
     local scoreRows = {}
     local startY = -25
     
-    for level = 2, 30 do
-        local yOffset = startY - ((level - 2) * UIConstants.LAYOUT.ROW_HEIGHT)
+    for level = MIN_KEY_LEVEL, MAX_KEY_LEVEL do
+        local yOffset = startY - ((level - MIN_KEY_LEVEL) * UIConstants.LAYOUT.ROW_HEIGHT)
         local isEven = level % 2 == 0
         
         UIHelpers.createRowBackground(scoreContentFrame, yOffset, 320, isEven)
@@ -177,7 +181,7 @@ function ScoreCalculator.setupScoreCalculator(timerSlider, currentKeyLevel, scor
     
     local function currentKeyLevelInitialize(self, level)
         local info = UIDropDownMenu_CreateInfo()
-        for i = 2, 30 do
+        for i = MIN_KEY_LEVEL, MAX_KEY_LEVEL do
             info.text = i
             info.value = i
             info.func = currentKeyLevelOnClick
@@ -209,7 +213,7 @@ function ScoreCalculator.updateScoreTable(scoreRows, timerPercentage)
         return
     end
     
-    for level = 2, 30 do
+    for level = MIN_KEY_LEVEL, MAX_KEY_LEVEL do
         local row = scoreRows[level]
         if row then
             local baseScore = RewardsFunctions.scoreFormula(level)
