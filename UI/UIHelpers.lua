@@ -77,19 +77,6 @@ function UIHelpers.setTextColor(fontString, colorName)
     local color = UIConstants and UIConstants.COLORS[colorName]
     if color then
         fontString:SetTextColor(color.r, color.g, color.b, color.a)
-    else
-        -- Fallback colors if UIConstants not available
-        local fallbackColors = {
-            SUCCESS_HIGH = {r = 0, g = 1, b = 0},
-            SUCCESS_MEDIUM = {r = 1, g = 1, b = 0},
-            SUCCESS_LOW = {r = 1, g = 0, b = 0},
-            DISABLED = {r = 0.5, g = 0.5, b = 0.5},
-            INFO_TEXT = {r = 0.8, g = 0.8, b = 0.8}
-        }
-        local fallbackColor = fallbackColors[colorName]
-        if fallbackColor then
-            fontString:SetTextColor(fallbackColor.r, fallbackColor.g, fallbackColor.b)
-        end
     end
 end
 

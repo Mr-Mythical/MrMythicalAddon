@@ -179,7 +179,7 @@ function ScoreCalculator.setupScoreCalculator(timerSlider, currentKeyLevel, scor
         updateScores(timerSlider:GetValue())
     end
     
-    local function currentKeyLevelInitialize(self, level)
+    local function currentKeyLevelInitialize()
         local info = UIDropDownMenu_CreateInfo()
         for i = MIN_KEY_LEVEL, MAX_KEY_LEVEL do
             info.text = i
