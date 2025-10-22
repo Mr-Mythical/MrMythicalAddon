@@ -12,9 +12,7 @@ MrMythical.UnifiedUI = {}
 
 local UnifiedUI = MrMythical.UnifiedUI
 
--- Initialize the unified UI interface
 local function initializeUnifiedUI()
-    -- Import UI modules (they should be loaded by now due to TOC order)
     local UIConstants = MrMythical.UIConstants
     local MainFrameManager = MrMythical.MainFrameManager
     local NavigationManager = MrMythical.NavigationManager
@@ -42,7 +40,7 @@ local function initializeUnifiedUI()
     UnifiedUI._NavigationManager = NavigationManager
     
     -- Initialize with dashboard content
-    NavigationManager.showContent(UIConstants.CONTENT_TYPES.DASHBOARD, contentFrame)
+    NavigationManager.showContent("dashboard", contentFrame)
     
     return true
 end
@@ -73,13 +71,13 @@ function UnifiedUI:Show(contentType)
     local UIConstants = self._UIConstants
     local NavigationManager = self._NavigationManager
 
-    if contentType and contentType ~= UIConstants.CONTENT_TYPES.DASHBOARD then
+    if contentType and contentType ~= "dashboard" then
         NavigationManager.showContent(contentType, self._contentFrame)
         if self._navButtons[contentType] then
             NavigationManager.updateButtonStates(self._navButtons[contentType], self._navButtons)
         end
     else
-        NavigationManager.showContent(UIConstants.CONTENT_TYPES.DASHBOARD, self._contentFrame)
+        NavigationManager.showContent("dashboard", self._contentFrame)
     end
 end
 

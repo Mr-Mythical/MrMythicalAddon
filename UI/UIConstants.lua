@@ -35,13 +35,4 @@ UIConstants.COLORS = {
     NAV_BACKGROUND = {r = 0.1, g = 0.1, b = 0.1, a = 0.8}
 }
 
-UIConstants.CONTENT_TYPES = {
-    DASHBOARD = "dashboard",
-    REWARDS = "rewards",
-    SCORES = "scores",
-    STATS = "stats",
-    TIMES = "times",
-    SETTINGS = "settings"
-}
-
 return UIConstants
