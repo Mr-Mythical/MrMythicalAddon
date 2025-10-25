@@ -189,7 +189,7 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     local scoreLine, gainString = "", ""
     
     if MRM_SavedVars.SHOW_TIMING then
-        local maxScore = potentialScore + 15  -- +15 bonus for perfect timing
+        local maxScore = potentialScore + 15  -- bonus for perfect timing
         scoreLine = string.format("%sScore: %s%d|r - %s%d|r", 
             ConfigData.COLORS.WHITE, baseColor, potentialScore, baseColor, maxScore)
             

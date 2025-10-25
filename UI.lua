@@ -68,7 +68,6 @@ function UnifiedUI:Show(contentType)
     end
     self._unifiedFrame:Show()
     
-    local UIConstants = self._UIConstants
     local NavigationManager = self._NavigationManager
 
     if contentType and contentType ~= "dashboard" then
