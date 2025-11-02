@@ -1,7 +1,9 @@
 --[[
 UIHelpers.lua - UI Helper Functions Module
 
-Common UI utility functions for creating and styling interface elements.
+Purpose: Common UI utility functions for creating and styling interface elements
+Dependencies: None
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

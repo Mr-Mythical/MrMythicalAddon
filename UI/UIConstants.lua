@@ -1,7 +1,9 @@
 --[[
 UIConstants.lua - UI Constants and Configuration Module
 
-Centralized constants for UI layout, colors, and sizing.
+Purpose: Centralized constants for UI layout, colors, and sizing
+Dependencies: None
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

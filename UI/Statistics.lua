@@ -1,7 +1,9 @@
 --[[
 Statistics.lua - Statistics Content
 
-Handles the statistics interface and data presentation.
+Purpose: Handles the statistics interface and data presentation
+Dependencies: UIConstants, UIHelpers, CompletionTracker
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

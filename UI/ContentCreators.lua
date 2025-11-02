@@ -1,8 +1,9 @@
 --[[
 ContentCreators.lua - UI Content Creation Module
 
-Creates the various content panels for the unified interface.
-This module handles dashboard, rewards, and times content.
+Purpose: Creates the various content panels for the unified interface including dashboard, rewards, and times content
+Dependencies: UIConstants, UIHelpers, RewardsFunctions, CompletionTracker
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

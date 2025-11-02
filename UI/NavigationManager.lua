@@ -1,7 +1,9 @@
 --[[
 NavigationManager.lua - Navigation and Content Switching Module
 
-Handles navigation buttons and content switching in the unified interface.
+Purpose: Handles navigation buttons and content switching in the unified interface
+Dependencies: UIConstants, UIHelpers
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

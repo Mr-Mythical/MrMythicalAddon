@@ -1,7 +1,9 @@
 --[[
 ScoreCalculator.lua - Mythic+ Score Calculator Content
 
-Handles the score calculator interface and functionality.
+Purpose: Handles the score calculator interface and functionality
+Dependencies: UIConstants, UIHelpers, RewardsFunctions, DungeonData
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

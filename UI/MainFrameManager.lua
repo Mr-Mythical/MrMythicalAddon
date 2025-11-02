@@ -1,7 +1,9 @@
 --[[
 MainFrameManager.lua - Main UI Frame Management Module
 
-Handles creation and management of the main unified interface frame.
+Purpose: Handles creation and management of the main unified interface frame
+Dependencies: UIConstants, UIHelpers
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}

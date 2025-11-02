@@ -1,10 +1,9 @@
 --[[
 UI.lua - Mythic+ Interface Main Controller
 
-Unified tabbed interface that consolidates all Mr. Mythical functionality.
-This file acts as the main controller, importing and coordinating modular UI components.
-
+Purpose: Unified tabbed interface that consolidates all Mr. Mythical functionality as the main controller
 Dependencies: UI modules, RewardsFunctions, DungeonData, CompletionTracker, WoW APIs
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}
