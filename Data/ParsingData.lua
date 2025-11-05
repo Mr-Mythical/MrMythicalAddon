@@ -19,6 +19,8 @@ MrMythical.ParsingData = {
         "Grievous",
         "Eternus",
         "Teeming",
+        "Quaking",
+        "Raging",
     },
 
     DURATION_STRINGS = {
