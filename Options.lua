@@ -22,6 +22,7 @@ local DEFAULTS = {
     LEVEL_DISPLAY = "OFF",
     LEVEL_SHIFT_MODE = "NONE",
     SHORT_TITLE = false,
+    SHORT_DUNGEON_NAMES = false,
     PLAYER_BEST_DISPLAY = "WITH_SCORE",
     UNIFIED_FRAME_POINT = "CENTER",
     UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
@@ -256,7 +257,9 @@ function Options.createSettingsInCategory(category)
                 { name = "Shift Modifier Behavior for Levels", key = "LEVEL_SHIFT_MODE", type = "string", 
                   tooltip = TOOLTIPS.LEVEL_SHIFT_MODE, options = DROPDOWN_OPTIONS.LEVEL_SHIFT_MODE },
                 { name = "Short Keystone Title", key = "SHORT_TITLE", type = "boolean", 
-                  tooltip = "Remove 'Keystone:' from keystone titles" }
+                  tooltip = "Remove 'Keystone:' from keystone titles" },
+                { name = "Short Dungeon Names", key = "SHORT_DUNGEON_NAMES", type = "boolean", 
+                  tooltip = "Show short dungeon names (e.g. 'FLOOD') instead of full names in keystone titles" }
             }
         },
         {

@@ -38,7 +38,8 @@ MrMythical.debugLog = debugLog
 
 --- Handles level display modes, text filtering, and title modifications
 --- @param tooltip table The GameTooltip object to process
-local function processKeystoneTooltip(tooltip)
+--- @param mapID number The dungeon map ID
+local function processKeystoneTooltip(tooltip, mapID)
     local isShiftPressed = IsShiftKeyDown()
     local processedLines = {}
     local firstLine = _G["GameTooltipTextLeft1"]
@@ -52,6 +53,18 @@ local function processKeystoneTooltip(tooltip)
                 titleText = TooltipUtils.processLevelInTitle(titleText, keyLevel, resilientLevel, isShiftPressed)
             elseif MRM_SavedVars.SHORT_TITLE and titleText:find("^Keystone: ") then
                 titleText = titleText:gsub("^Keystone: ", "")
+            end
+            
+            -- Replace dungeon name with short name if option is enabled
+            if MRM_SavedVars.SHORT_DUNGEON_NAMES and mapID then
+                local shortName = DungeonData.getShortDungeonName(mapID)
+                if shortName then
+                    -- Replace the dungeon name in the title with the short name
+                    local dungeonName = DungeonData.getDungeonName(mapID)
+                    if dungeonName and titleText:find(dungeonName, 1, true) then
+                        titleText = titleText:gsub(dungeonName, shortName, 1)
+                    end
+                end
             end
             firstLine:SetText(titleText)
         end
@@ -263,7 +276,7 @@ local function handleKeystoneTooltip(tooltip)
         if keystoneData then
             debugLog("Enhancing tooltip for keystone: level %d, map ID %d", keystoneData.level, keystoneData.mapID)
             enhanceTooltipWithRewardInfo(tooltip, keystoneData.itemString, keystoneData.level, keystoneData.mapID)
-            processKeystoneTooltip(tooltip)
+            processKeystoneTooltip(tooltip, keystoneData.mapID)
         else
             debugLog("Failed to parse keystone data from link: %s", keystoneLink)
         end

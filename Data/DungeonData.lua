@@ -15,6 +15,18 @@ MrMythical.DungeonData = {
     _seasonCache = {
         seasonID = nil,
         mapPoolSignature = nil
+    },
+
+    -- Short names for dungeons
+    SHORT_NAMES = {
+        ["Ara-Kara, City of Echoes"] = "ARAK",
+        ["Eco-Dome Al'dani"] = "EDA",
+        ["Halls of Atonement"] = "HOA",
+        ["Operation: Floodgate"] = "FLOOD",
+        ["Priory of the Sacred Flame"] = "PSF",
+        ["Tazavesh: So'leah's Gambit"] = "GMBT",
+        ["Tazavesh: Streets of Wonder"] = "STRT",
+        ["The Dawnbreaker"] = "DAWN"
     }
 }
 
@@ -45,10 +57,13 @@ function MrMythical.DungeonData.refreshFromAPI()
             end
         end
         
+        local shortName = name and MrMythical.DungeonData.SHORT_NAMES[name] or nil
+        
         table.insert(maps, { 
             id = id, 
             name = name or ("Map " .. tostring(id)), 
-            parTime = parTime 
+            parTime = parTime,
+            shortName = shortName
         })
     end
 
@@ -94,6 +109,26 @@ function MrMythical.DungeonData.getDungeonName(mapID)
     end
 
     return "Dungeon " .. tostring(mapID)
+end
+
+--- Gets the short name for a specific dungeon map ID
+--- @param mapID number The dungeon map ID
+--- @return string|nil The dungeon short name, or nil if not found
+function MrMythical.DungeonData.getShortDungeonName(mapID)
+    local mapInfo = findMapByID(mapID)
+    if mapInfo and mapInfo.shortName then
+        return mapInfo.shortName
+    end
+
+    -- Fallback to lookup by name from API
+    if C_ChallengeMode and C_ChallengeMode.GetMapUIInfo then
+        local name = C_ChallengeMode.GetMapUIInfo(mapID)
+        if name and MrMythical.DungeonData.SHORT_NAMES[name] then
+            return MrMythical.DungeonData.SHORT_NAMES[name]
+        end
+    end
+
+    return nil
 end
 
 --- Gets all current Mythic+ map IDs
