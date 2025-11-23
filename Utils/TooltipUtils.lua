@@ -137,7 +137,8 @@ end
 --- Extracts level information from tooltip lines
 --- @param tooltip table The GameTooltip object
 --- @param startLine number Line number to start searching from
---- @return number|nil, number|nil keyLevel, resilientLevel
+--- @return number|nil keyLevel
+--- @return number|nil resilientLevel
 function TooltipUtils.extractLevelInfoFromTooltip(tooltip, startLine)
     local keyLevel, resilientLevel
     
