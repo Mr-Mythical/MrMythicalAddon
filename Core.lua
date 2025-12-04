@@ -285,10 +285,9 @@ end
 
 --- Chat hyperlink hook handler for keystone links
 --- Adds reward information to keystone links clicked in chat
---- @param self table The chat frame object
---- @param hyperlink string The clicked hyperlink
-local function handleKeystoneChatHyperlink(self, hyperlink)
-    local keystoneData = KeystoneUtils.parseKeystoneData(hyperlink)
+--- @param link string The clicked hyperlink
+local function handleKeystoneChatHyperlink(link)
+    local keystoneData = KeystoneUtils.parseKeystoneData(link)
     if not keystoneData then 
         return 
     end
@@ -298,7 +297,7 @@ local function handleKeystoneChatHyperlink(self, hyperlink)
     ItemRefTooltip:Show()
 end
 
-hooksecurefunc("ChatFrame_OnHyperlinkShow", handleKeystoneChatHyperlink)
+hooksecurefunc("SetItemRef", handleKeystoneChatHyperlink)
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, handleKeystoneTooltip)
 
 SLASH_MRMYTHICAL1 = "/mrm"
