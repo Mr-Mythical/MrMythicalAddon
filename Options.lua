@@ -129,19 +129,6 @@ end
 --- Initializes saved variables with default values and sets up settings UI
 function Options.initializeSettings()
     MRM_SavedVars = MRM_SavedVars or {}
-
-    -- Backwards compatibility: Convert old SHOW_PLAYER_BEST boolean to new PLAYER_BEST_DISPLAY dropdown
-    if MRM_SavedVars.SHOW_PLAYER_BEST ~= nil and MRM_SavedVars.PLAYER_BEST_DISPLAY == nil then
-        MRM_SavedVars.PLAYER_BEST_DISPLAY = MRM_SavedVars.SHOW_PLAYER_BEST and "WITH_SCORE" or "NONE"
-        MRM_SavedVars.SHOW_PLAYER_BEST = nil
-    end
-
-    -- Backwards compatibility: migrate SHOW_PAR_TIME to TIMER_DISPLAY_MODE
-    if MRM_SavedVars.SHOW_PAR_TIME == true then
-        MRM_SavedVars.TIMER_DISPLAY_MODE = "DUNGEON"
-        MRM_SavedVars.SHOW_PAR_TIME = nil
-    end
-
     -- Set defaults for any missing values
     for key, default in pairs(DEFAULTS) do
         if MRM_SavedVars[key] == nil then
