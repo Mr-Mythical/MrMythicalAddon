@@ -346,28 +346,10 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
             end
         end
     elseif event == "CHALLENGE_MODE_COMPLETED" then
-        local mapChallengeModeID, level, time, onTime, keystoneUpgradeLevels, practiceRun, oldOverallDungeonScore, newOverallDungeonScore, IsMapRecord, IsAffixRecord, PrimaryAffix, isEligibleForScore, members = C_ChallengeMode.GetCompletionInfo()
+        local completionInfo = C_ChallengeMode.GetChallengeCompletionInfo()
         
-        if mapChallengeModeID then
-            local challengeInfo = {
-                mapChallengeModeID = mapChallengeModeID,
-                level = level,
-                time = time,
-                onTime = onTime,
-                keystoneUpgradeLevels = keystoneUpgradeLevels,
-                practiceRun = practiceRun,
-                oldOverallDungeonScore = oldOverallDungeonScore,
-                newOverallDungeonScore = newOverallDungeonScore,
-                IsMapRecord = IsMapRecord,
-                IsAffixRecord = IsAffixRecord,
-                PrimaryAffix = PrimaryAffix,
-                isEligibleForScore = isEligibleForScore,
-                members = members
-            }
-            
-            if MrMythical.CompletionTracker then
-                MrMythical.CompletionTracker:trackRun(challengeInfo)
-            end
+        if completionInfo and MrMythical.CompletionTracker then
+            MrMythical.CompletionTracker:trackRun(completionInfo)
         end
     end
 end)
