@@ -146,7 +146,7 @@ function MrMythical.DungeonData.getMapPoolSignature()
 end
 
 --- Checks if season/pool has changed and updates cache
---- @return table Result with seasonChanged and poolChanged flags
+--- @return table result with seasonChanged and poolChanged flags
 function MrMythical.DungeonData.checkSeasonAndPoolChanges()
     local result = {
         seasonChanged = false,
@@ -208,7 +208,7 @@ end
 --- Retrieves the dungeon score for a specific map from a RaiderIO profile
 --- @param profile table RaiderIO profile data containing mythic keystone information
 --- @param targetMapID number The specific dungeon map ID to find score for
---- @return number The dungeon score, or 0 if no data found
+--- @return number dungeonScore The dungeon score, or 0 if no data found
 local function getDungeonScoreFromProfile(profile, targetMapID)
     if profile and profile.mythicKeystoneProfile and profile.mythicKeystoneProfile.sortedDungeons then
         for _, dungeonEntry in ipairs(profile.mythicKeystoneProfile.sortedDungeons) do
@@ -224,7 +224,8 @@ local function getDungeonScoreFromProfile(profile, targetMapID)
                     chestBonus = 15
                 end
                 
-                return baseScore + chestBonus
+                local dungeonScore = baseScore + chestBonus
+                return dungeonScore
             end
         end
     end
@@ -234,7 +235,7 @@ end
 --- Retrieves mythic+ scores for all group members for a specific dungeon
 --- @param playerScore number The current player's score for this dungeon
 --- @param targetMapID number The dungeon map ID to get scores for
---- @return table A mapping of player names to their dungeon scores
+--- @return table groupScoreData A mapping of player names to their dungeon scores
 function MrMythical.DungeonData.getGroupMythicDataParty(playerScore, targetMapID)
     MrMythical.debugLog("Getting group mythic data for map ID: %d", targetMapID)
     
