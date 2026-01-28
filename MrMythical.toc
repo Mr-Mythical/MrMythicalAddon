@@ -1,4 +1,4 @@
-## Interface: 120000, 110207
+## Interface: 120000
 ## Title: Mr. Mythical: Mythic+ Dashboard & Tooltips
 ## Notes: Your all-in-one Mythic+ toolkit with enhanced customizable tooltips, run tracking, score calculations, and reward information
 ## Version: @project-version@
