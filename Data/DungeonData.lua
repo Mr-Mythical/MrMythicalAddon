@@ -31,9 +31,11 @@ MrMythical.DungeonData = {
 }
 
 --- Refresh the MYTHIC_MAPS list from the live API (id, name, parTime if available)
-function MrMythical.DungeonData.refreshFromAPI()
+--- @param mapIDsOverride table|nil Optional table of map IDs to use instead of querying C_ChallengeMode
+--- @return boolean success True if map data was updated, false otherwise
+function MrMythical.DungeonData.refreshFromAPI(mapIDsOverride)
     local maps = {}
-    local mapIDs = C_ChallengeMode and C_ChallengeMode.GetMapTable and C_ChallengeMode.GetMapTable() or nil
+    local mapIDs = mapIDsOverride or (C_ChallengeMode and C_ChallengeMode.GetMapTable and C_ChallengeMode.GetMapTable()) or nil
     if type(mapIDs) ~= "table" or #mapIDs == 0 then
         -- Nothing to do; keep current table (possibly empty)
         return false
