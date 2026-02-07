@@ -6,6 +6,12 @@
 
 Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone tooltips and a comprehensive dashboard interface. The core feature transforms every keystone tooltip into an information hub with reward details, score calculations, and progression data. Additionally, the dashboard provides tools for planning runs, tracking progress, and calculating potential gains.
 
+---
+
+**❤️ Support development on [Patreon](https://www.patreon.com/c/mrmythical)** - Help keep Mr. Mythical and all our addons updated and feature-rich!
+
+---
+
 ## Key Features
 
 ### **Customizable Keystone Tooltips**
@@ -59,11 +65,15 @@ Looking for more Mythic+ tools? Check out our companion addons:
 
 [Download on Wago](https://addons.wago.io/addons/mrmythicalgearcheck)
 
+**[Mr. Mythical: Assistant](https://github.com/Mr-Mythical/MrMythicalAssistant)** - A sophisticated unicorn companion who provides witty commentary and helpful automation for your adventures.
+
+[Download on CurseForge](https://www.curseforge.com/wow/addons/mr-mythical-assistant)
+
+[Download on Wago](https://addons.wago.io/addons/mrmythicalassistant)
+
 ## More Tools & Resources
 
 Visit **[MrMythical.com](https://mrmythical.com)** for additional Mythic+ & Raid tools.
-
-Support development on **[Patreon](https://www.patreon.com/c/mrmythical)** 
 
 ### **Want to report a bug or suggest a feature?**
 Visit our [GitHub Issues](https://github.com/Mr-Mythical/MrMythicalAddon/issues) page for bug reports and feature requests.
