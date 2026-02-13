@@ -55,14 +55,19 @@ local function processKeystoneTooltip(tooltip, mapID)
                 titleText = titleText:gsub("^Keystone: ", "")
             end
             
-            -- Replace dungeon name with short name if option is enabled
-            if MRM_SavedVars.SHORT_DUNGEON_NAMES and mapID then
+            -- Replace dungeon name based on display mode
+            local dungeonNameMode = MRM_SavedVars.SHORT_DUNGEON_NAMES or "OFF"
+            if dungeonNameMode ~= "OFF" and mapID then
                 local shortName = DungeonData.getShortDungeonName(mapID)
                 if shortName then
-                    -- Replace the dungeon name in the title with the short name
-                    local dungeonName = DungeonData.getDungeonName(mapID)
-                    if dungeonName and titleText:find(dungeonName, 1, true) then
-                        titleText = titleText:gsub(dungeonName, shortName, 1)
+                    local fullName = DungeonData.getDungeonName(mapID)
+                    local startPos, endPos = titleText:find(fullName, 1, true)
+                    if startPos then
+                        local replacement = shortName
+                        if dungeonNameMode == "SHORT_FULL" then
+                            replacement = shortName .. " - " .. fullName
+                        end
+                        titleText = titleText:sub(1, startPos - 1) .. replacement .. titleText:sub(endPos + 1)
                     end
                 end
             end

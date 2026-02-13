@@ -126,6 +126,28 @@ function MrMythical.DungeonData.getShortDungeonName(mapID)
     return MrMythical.DungeonData.SHORT_NAMES[mapID]
 end
 
+--- Gets the formatted dungeon name based on display mode
+--- @param mapID number The dungeon map ID
+--- @param displayMode string "OFF" for full name, "SHORT" for short only, "SHORT_FULL" for "SHORT - FULL"
+--- @return string The formatted dungeon name
+function MrMythical.DungeonData.getFormattedDungeonName(mapID, displayMode)
+    local fullName = MrMythical.DungeonData.getDungeonName(mapID)
+
+    if displayMode == "SHORT" then
+        local shortName = MrMythical.DungeonData.getShortDungeonName(mapID)
+        return shortName or fullName
+    elseif displayMode == "SHORT_FULL" then
+        local shortName = MrMythical.DungeonData.getShortDungeonName(mapID)
+        if shortName then
+            return shortName .. " - " .. fullName
+        end
+        return fullName
+    end
+
+    -- Default to "OFF": return full name
+    return fullName
+end
+
 --- Gets all current Mythic+ map IDs
 --- @return table Array of map IDs
 function MrMythical.DungeonData.getCurrentMapIDs()

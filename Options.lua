@@ -22,7 +22,7 @@ local DEFAULTS = {
     LEVEL_DISPLAY = "OFF",
     LEVEL_SHIFT_MODE = "NONE",
     SHORT_TITLE = false,
-    SHORT_DUNGEON_NAMES = false,
+    SHORT_DUNGEON_NAMES = "OFF",
     PLAYER_BEST_DISPLAY = "WITH_SCORE",
     UNIFIED_FRAME_POINT = "CENTER",
     UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
@@ -52,6 +52,11 @@ local DROPDOWN_OPTIONS = {
         { text = "Without Score", value = "WITHOUT_SCORE" },
         { text = "With Score",    value = "WITH_SCORE" },
         { text = "Shift to Show", value = "SHIFT_WITH_SCORE" }
+    },
+    SHORT_DUNGEON_NAMES = {
+        { text = "Full Name",       value = "OFF" },
+        { text = "Short Only",      value = "SHORT" },
+        { text = "Short - Full",    value = "SHORT_FULL" }
     }
 }
 
@@ -134,6 +139,11 @@ function Options.initializeSettings()
         if MRM_SavedVars[key] == nil then
             MRM_SavedVars[key] = default
         end
+    end
+
+    -- Migrate old boolean SHORT_DUNGEON_NAMES to new string format
+    if type(MRM_SavedVars.SHORT_DUNGEON_NAMES) == "boolean" then
+        MRM_SavedVars.SHORT_DUNGEON_NAMES = MRM_SavedVars.SHORT_DUNGEON_NAMES and "SHORT" or "OFF"
     end
 
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
@@ -281,8 +291,9 @@ function Options.createSettingsInCategory(category)
                 {
                     name = "Short Dungeon Names",
                     key = "SHORT_DUNGEON_NAMES",
-                    type = "boolean",
-                    tooltip = "Show short dungeon names (e.g. 'FLOOD') instead of full names in keystone titles"
+                    type = "string",
+                    tooltip = "How to display dungeon names in keystone titles",
+                    options = DROPDOWN_OPTIONS.SHORT_DUNGEON_NAMES
                 }
             }
         },
