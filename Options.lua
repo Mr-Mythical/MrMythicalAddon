@@ -24,6 +24,7 @@ local DEFAULTS = {
     SHORT_TITLE = false,
     SHORT_DUNGEON_NAMES = "OFF",
     PLAYER_BEST_DISPLAY = "WITH_SCORE",
+    REWARDS_DISPLAY = "SHOW",
     UNIFIED_FRAME_POINT = "CENTER",
     UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
     UNIFIED_FRAME_X = 0,
@@ -57,6 +58,11 @@ local DROPDOWN_OPTIONS = {
         { text = "Full Name",       value = "OFF" },
         { text = "Short Only",      value = "SHORT" },
         { text = "Short - Full",    value = "SHORT_FULL" }
+    },
+    REWARDS_DISPLAY = {
+        { text = "Hide",          value = "HIDE" },
+        { text = "Always Show",   value = "SHOW" },
+        { text = "Shift to Show", value = "SHIFT" }
     }
 }
 
@@ -83,7 +89,12 @@ local TOOLTIPS = {
         WHITE .. "None:|r Don't show personal best information\n" ..
         WHITE .. "Without Score:|r Show level, time, and upgrades only\n" ..
         WHITE .. "With Score:|r Show level, time, upgrades, and score\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show personal best with score"
+        WHITE .. "Shift to Show:|r Hold Shift to show personal best with score",
+
+    REWARDS_DISPLAY = "Choose how to display crest and gear rewards:\n\n" ..
+        WHITE .. "Hide:|r Don't show reward information\n" ..
+        WHITE .. "Always Show:|r Always display crest and gear rewards\n" ..
+        WHITE .. "Shift to Show:|r Hold Shift to show rewards"
 }
 
 --- Creates a setting with appropriate UI element
@@ -319,6 +330,13 @@ function Options.createSettingsInCategory(category)
                     type = "string",
                     tooltip = TOOLTIPS.PLAYER_BEST_DISPLAY,
                     options = DROPDOWN_OPTIONS.PLAYER_BEST_DISPLAY
+                },
+                {
+                    name = "Rewards Display",
+                    key = "REWARDS_DISPLAY",
+                    type = "string",
+                    tooltip = TOOLTIPS.REWARDS_DISPLAY,
+                    options = DROPDOWN_OPTIONS.REWARDS_DISPLAY
                 },
                 {
                     name = "Remove Score Colors",

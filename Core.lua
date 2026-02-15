@@ -198,11 +198,22 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
         end
     end
 
-    tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
-        ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
-        rewards.vaultTrack, rewards.vaultItem))
-    tooltip:AddLine(string.format("%sCrest: %s (%s)|r", 
-        ConfigData.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
+    local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
+    local shouldShowRewards = false
+    
+    if rewardsDisplay == "SHOW" then
+        shouldShowRewards = true
+    elseif rewardsDisplay == "SHIFT" and isShiftPressed then
+        shouldShowRewards = true
+    end
+    
+    if shouldShowRewards then
+        tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
+            ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
+            rewards.vaultTrack, rewards.vaultItem))
+        tooltip:AddLine(string.format("%sCrest: %s (%s)|r", 
+            ConfigData.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
+    end
 
     local scoreLine, gainString = "", ""
     
