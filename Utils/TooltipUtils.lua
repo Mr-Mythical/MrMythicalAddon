@@ -45,7 +45,7 @@ end
 --- @param keyLevel number The keystone level
 --- @param resilientLevel number|nil The resilient level if available
 --- @param isShiftPressed boolean Whether shift key is pressed
---- @return string The modified title text
+--- @return string titleText The modified title text
 function TooltipUtils.processLevelInTitle(titleText, keyLevel, resilientLevel, isShiftPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     
@@ -70,7 +70,7 @@ end
 --- @param lineText string The line text containing level info
 --- @param isShiftPressed boolean Whether shift key is pressed
 --- @param lineColor table RGB color values for the line
---- @return string|nil The processed line text, or nil if should be hidden
+--- @return string|nil lineText The processed line text, or nil if should be hidden
 function TooltipUtils.processCompactLevelDisplay(lineText, isShiftPressed, lineColor)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     local level = lineText:match("Mythic Level (%d+)")
@@ -95,7 +95,7 @@ end
 --- @param lineText string The line text to check
 --- @param levelDisplayMode string The level display mode setting
 --- @param isShiftPressed boolean Whether shift key is pressed
---- @return boolean True if the line should be hidden
+--- @return boolean shiftMode True if the line should be hidden
 function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     local isMythicLevel = lineText:match("Mythic Level")
