@@ -68,13 +68,13 @@ function MainFrameManager.setupFrameBehavior(frame)
     end)
     
     frame:EnableKeyboard(true)
-    if frame.SetPropagateKeyboardInput and not InCombatLockdown() then
-        frame:SetPropagateKeyboardInput(true)
-    end
     frame:SetScript("OnKeyDown", function(self, key)
         if key == "ESCAPE" then
             frame:Hide()
             return
+        end
+        if self.SetPropagateKeyboardInput and not InCombatLockdown() then
+            self:SetPropagateKeyboardInput(true)
         end
     end)
 end
