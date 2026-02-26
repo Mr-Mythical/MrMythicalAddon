@@ -54,17 +54,7 @@ function UnifiedUI:Show(contentType)
             return
         end
     end
-    
-    if MRM_SavedVars and MRM_SavedVars.UNIFIED_FRAME_POINT then
-        self._unifiedFrame:ClearAllPoints()
-        self._unifiedFrame:SetPoint(
-            MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER",
-            UIParent,
-            MRM_SavedVars.UNIFIED_FRAME_RELATIVE_POINT or (MRM_SavedVars.UNIFIED_FRAME_POINT or "CENTER"),
-            MRM_SavedVars.UNIFIED_FRAME_X or 0,
-            MRM_SavedVars.UNIFIED_FRAME_Y or 0
-        )
-    end
+
     self._unifiedFrame:Show()
     
     local NavigationManager = self._NavigationManager

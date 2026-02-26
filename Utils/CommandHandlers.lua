@@ -12,35 +12,20 @@ MrMythical.CommandHandlers = {}
 local CommandHandlers = MrMythical.CommandHandlers
 local ConfigData = MrMythical.ConfigData
 
-function CommandHandlers.handleRewardsCommand()
-    if MrMythical.UnifiedUI then
-        MrMythical.UnifiedUI:Show("rewards")
-    else
-        print("Rewards UI not available")
-    end
-end
+-- Maps command names to their UnifiedUI content types
+local UI_COMMANDS = {
+    rewards = "rewards",
+    score = "scores",
+    stats = "stats",
+    dashboard = "dashboard",
+    times = "times",
+}
 
-function CommandHandlers.handleScoreCommand()
+local function showUIContent(contentType)
     if MrMythical.UnifiedUI then
-        MrMythical.UnifiedUI:Show("scores")
+        MrMythical.UnifiedUI:Show(contentType)
     else
-        print("Scores UI not available")
-    end
-end
-
-function CommandHandlers.handleStatsCommand()
-    if MrMythical.UnifiedUI then
-        MrMythical.UnifiedUI:Show("stats")
-    else
-        print("Stats UI not available")
-    end
-end
-
-function CommandHandlers.handleDashboardCommand()
-    if MrMythical.UnifiedUI then
-        MrMythical.UnifiedUI:Show("dashboard")
-    else
-        print("Dashboard UI not available")
+        print(contentType:sub(1,1):upper() .. contentType:sub(2) .. " UI not available")
     end
 end
 
@@ -53,14 +38,6 @@ function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.WHITE .. "  /mrm times - Open dungeon timers with chest thresholds")
     print(ConfigData.COLORS.WHITE .. "  /mrm settings - Open addon settings panel")
     print(ConfigData.COLORS.WHITE .. "  /mrm help - Show this help message")
-end
-
-function CommandHandlers.handleTimesCommand()
-    if MrMythical.UnifiedUI then
-        MrMythical.UnifiedUI:Show("times")
-    else
-        print("Times UI not available")
-    end
 end
 
 function CommandHandlers.handleSettingsCommand()
@@ -78,22 +55,15 @@ function CommandHandlers.processSlashCommand(commandString)
     for word in string.gmatch(commandString, "%S+") do
         table.insert(args, word)
     end
-    
+
     local command = args[1] and args[1]:lower() or "dashboard"
 
-    if command == "rewards" then
-        CommandHandlers.handleRewardsCommand()
-    elseif command == "score" then
-        CommandHandlers.handleScoreCommand()
-    elseif command == "stats" then
-        CommandHandlers.handleStatsCommand()
-    elseif command == "times" then
-        CommandHandlers.handleTimesCommand()
-    elseif command == "settings" or command == "config" or command == "options" then
+    if command == "settings" or command == "config" or command == "options" then
         CommandHandlers.handleSettingsCommand()
     elseif command == "help" then
         CommandHandlers.handleHelpCommand()
     else
-        CommandHandlers.handleDashboardCommand()
+        local contentType = UI_COMMANDS[command] or "dashboard"
+        showUIContent(contentType)
     end
 end

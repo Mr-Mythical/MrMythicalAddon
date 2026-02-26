@@ -148,18 +148,11 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
             if timerMode == "DUNGEON" then
                 local formattedTime = DungeonData.formatTime(parTime)
                 tooltip:AddLine(string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, formattedTime))
-            elseif timerMode == "UPGRADE" then
+            elseif timerMode == "UPGRADE" or (timerMode == "SHIFT" and IsShiftKeyDown()) then
                 local timer1 = DungeonData.formatTime(parTime)
                 local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
                 local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
                 tooltip:AddLine(string.format("%sDungeon Timer: %s/%s/%s|r", ConfigData.COLORS.WHITE, timer1, timer2, timer3))
-            elseif timerMode == "SHIFT" then
-                if IsShiftKeyDown() then
-                    local timer1 = DungeonData.formatTime(parTime)
-                    local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
-                    local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
-                    tooltip:AddLine(string.format("%sDungeon Timer: %s/%s/%s|r", ConfigData.COLORS.WHITE, timer1, timer2, timer3))
-                end
             end
         end
     end
@@ -239,8 +232,6 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     tooltip:AddLine(scoreLine .. gainString)
 
     if IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid() then
-        local isShiftPressed = IsShiftKeyDown()
-        
         if isShiftPressed then
             tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
             

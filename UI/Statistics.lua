@@ -208,8 +208,7 @@ function Statistics.updateStats(statsOverview, recentActivity, dungeonBreakdown)
         return
     end
 
-    local success2, charStats = pcall(function() return CompletionTracker:getStats() end)
-    local charStats = success2 and charStats or {}
+    local charStats = stats
 
     local charName = UnitName("player") or "Unknown"
     local charClass = select(2, UnitClass("player")) or "Unknown"

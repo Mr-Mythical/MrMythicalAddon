@@ -52,25 +52,25 @@ function ColorUtils.calculateGradientColor(value, domainMin, domainMax, colorSto
     return ColorUtils.interpolateColorFromStops(normalizedValue, colorStops)
 end
 
+local CLASS_COLORS = {
+    ["Death Knight"] = "|cffc41e3a",
+    ["Demon Hunter"] = "|cffa330c9",
+    ["Druid"] = "|cffff7c0a",
+    ["Evoker"] = "|cff33937f",
+    ["Hunter"] = "|cffaad372",
+    ["Mage"] = "|cff3fc7eb",
+    ["Monk"] = "|cff00ff98",
+    ["Paladin"] = "|cfff48cba",
+    ["Priest"] = "|cffffffff",
+    ["Rogue"] = "|cffffff00",
+    ["Shaman"] = "|cff0070dd",
+    ["Warlock"] = "|cff8788ee",
+    ["Warrior"] = "|cffc69b6d",
+}
+
 --- Gets class color for a given class name
 --- @param className string The class name to get color for
 --- @return string classColors WoW color code
 function ColorUtils.getClassColor(className)
-    
-    local classColors = {
-        ["Death Knight"] = "|cffc41e3a",
-        ["Demon Hunter"] = "|cffa330c9",
-        ["Druid"] = "|cffff7c0a",
-        ["Evoker"] = "|cff33937f",
-        ["Hunter"] = "|cffaad372",
-        ["Mage"] = "|cff3fc7eb",
-        ["Monk"] = "|cff00ff98",
-        ["Paladin"] = "|cfff48cba",
-        ["Priest"] = "|cffffffff",
-        ["Rogue"] = "|cffffff00",
-        ["Shaman"] = "|cff0070dd",
-        ["Warlock"] = "|cff8788ee",
-        ["Warrior"] = "|cffc69b6d",
-    }
-    return classColors[className]
+    return CLASS_COLORS[className]
 end

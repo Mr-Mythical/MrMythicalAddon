@@ -295,6 +295,35 @@ function MrMythical.DungeonData.getGroupMythicDataParty(playerScore, targetMapID
     return groupScoreData
 end
 
+--- Compares intime and overtime run info to find the best-scoring run for a map
+--- @param mapID number The dungeon map ID
+--- @return table|nil bestInfo The best run info, or nil if no data
+--- @return number bestScore The best score found
+--- @return boolean hasRun Whether any run data exists
+--- @return table|nil intimeInfo The intime run info (for wasInTime comparison)
+local function getBestSeasonRun(mapID)
+    local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapID)
+    local bestInfo = nil
+    local bestScore = 0
+    local hasRun = false
+
+    if intimeInfo and intimeInfo.dungeonScore then
+        bestInfo = intimeInfo
+        bestScore = intimeInfo.dungeonScore
+        hasRun = true
+    end
+
+    if overtimeInfo and overtimeInfo.dungeonScore then
+        if overtimeInfo.dungeonScore > bestScore then
+            bestInfo = overtimeInfo
+            bestScore = overtimeInfo.dungeonScore
+        end
+        hasRun = true
+    end
+
+    return bestInfo, bestScore, hasRun, intimeInfo
+end
+
 --- Retrieves the player's best mythic+ score for a given keystone
 --- @param itemString string The keystone item string to get score for
 --- @return number The player's best score for this keystone, or 0 if no data
@@ -303,20 +332,8 @@ function MrMythical.DungeonData.getCharacterMythicScore(itemString)
     if not mapID then
         return 0
     end
-    
-    local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapID)
-    
-    -- Return the highest score between in-time and overtime runs
-    local bestScore = 0
-    
-    if intimeInfo and intimeInfo.dungeonScore then
-        bestScore = intimeInfo.dungeonScore
-    end
-    
-    if overtimeInfo and overtimeInfo.dungeonScore and overtimeInfo.dungeonScore > bestScore then
-        bestScore = overtimeInfo.dungeonScore
-    end
-    
+
+    local _, bestScore = getBestSeasonRun(mapID)
     return bestScore
 end
 
@@ -328,23 +345,9 @@ function MrMythical.DungeonData.getCharacterBestRun(itemString)
     if not mapID then
         return nil
     end
-    
-    local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapID)
-    
-    -- Compare scores to find the best scoring run
-    local bestInfo = nil
-    local bestScore = 0
-    
-    if intimeInfo and intimeInfo.dungeonScore then
-        bestInfo = intimeInfo
-        bestScore = intimeInfo.dungeonScore
-    end
-    
-    if overtimeInfo and overtimeInfo.dungeonScore and overtimeInfo.dungeonScore > bestScore then
-        bestInfo = overtimeInfo
-        bestScore = overtimeInfo.dungeonScore
-    end
-    
+
+    local bestInfo, _, _, intimeInfo = getBestSeasonRun(mapID)
+
     if bestInfo then
         local upgrade = 0
         if MRM_RunHistory and MRM_RunHistory.runs then
@@ -373,37 +376,14 @@ end
 --- @return table Array of dungeon data with best scores, levels, and timing info
 function MrMythical.DungeonData.getAllDungeonData()
     local dungeonData = {}
-    
+
     for i, mapInfo in ipairs(MrMythical.DungeonData.MYTHIC_MAPS) do
-        local intimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(mapInfo.id)
-        local hasRun = false
-        
-        -- Check both timed and overtime runs to find the highest score
-        local bestScore = 0
-        local bestLevel = 0
-        local bestIsInTime = false
-        local bestRunTime = 0
-        
-        if intimeInfo and intimeInfo.dungeonScore then
-            if intimeInfo.dungeonScore > bestScore then
-                bestScore = intimeInfo.dungeonScore
-                bestLevel = intimeInfo.level
-                bestIsInTime = true
-                bestRunTime = intimeInfo.durationSec or 0
-            end
-            hasRun = true
-        end
-        
-        if overtimeInfo and overtimeInfo.dungeonScore then
-            if overtimeInfo.dungeonScore > bestScore then
-                bestScore = overtimeInfo.dungeonScore
-                bestLevel = overtimeInfo.level
-                bestIsInTime = false
-                bestRunTime = overtimeInfo.durationSec or 0
-            end
-            hasRun = true
-        end
-        
+        local bestInfo, bestScore, hasRun, intimeInfo = getBestSeasonRun(mapInfo.id)
+
+        local bestLevel = bestInfo and bestInfo.level or 0
+        local bestIsInTime = bestInfo and (bestInfo == intimeInfo) or false
+        local bestRunTime = bestInfo and (bestInfo.durationSec or 0) or 0
+
         table.insert(dungeonData, {
             index = i,
             mapInfo = mapInfo,
