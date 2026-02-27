@@ -19,14 +19,14 @@ MrMythical.DungeonData = {
 
     -- Short names for dungeons (keyed by challenge_mode_id)
     SHORT_NAMES = {
-        [503] = "ARAK",  -- Ara-Kara, City of Echoes
-        [542] = "EDA",   -- Eco-Dome Al'dani
-        [378] = "HOA",   -- Halls of Atonement
-        [525] = "FLOOD", -- Operation: Floodgate
-        [499] = "PSF",   -- Priory of the Sacred Flame
-        [392] = "GMBT",  -- Tazavesh: So'leah's Gambit
-        [391] = "STRT",  -- Tazavesh: Streets of Wonder
-        [505] = "DAWN"   -- The Dawnbreaker
+        [402] = "AA",    -- Algeth'ar Academy
+        [558] = "MT",    -- Magisters' Terrace
+        [560] = "MC",    -- Maisara Caverns
+        [559] = "NPX",   -- Nexus-Point Xenas
+        [556] = "POS",   -- Pit of Saron
+        [239] = "SEAT",  -- Seat of the Triumvirate
+        [161] = "SR",    -- Skyreach
+        [557] = "WS"     -- Windrunner Spire
     }
 }
 
