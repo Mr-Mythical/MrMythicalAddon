@@ -27,10 +27,10 @@ MrMythical.RewardsData = {
         { itemLevel = 263, upgradeTrack = "Hero 2" },      -- Key Level 4
         { itemLevel = 263, upgradeTrack = "Hero 2" },      -- Key Level 5
         { itemLevel = 266, upgradeTrack = "Hero 3" },      -- Key Level 6
-        { itemLevel = 269, upgradeTrack = "Hero 3" },      -- Key Level 7
-        { itemLevel = 269, upgradeTrack = "Hero 3" },      -- Key Level 8
-        { itemLevel = 269, upgradeTrack = "Hero 3" },      -- Key Level 9
-        { itemLevel = 272, upgradeTrack = "Hero 3" }       -- Key Level 10+
+        { itemLevel = 269, upgradeTrack = "Hero 4" },      -- Key Level 7
+        { itemLevel = 269, upgradeTrack = "Hero 4" },      -- Key Level 8
+        { itemLevel = 269, upgradeTrack = "Hero 4" },      -- Key Level 9
+        { itemLevel = 272, upgradeTrack = "Myth 1" }       -- Key Level 10+
     },
 
     CRESTS = {
