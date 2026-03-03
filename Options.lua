@@ -256,7 +256,6 @@ function Options.createSettingsInCategory(category)
         layout:AddInitializer(headerInitializer)
     end
 
-    -- Define all settings in a table-driven way
     local settingsConfig = {
         {
             header = { name = "Compact Mode Options", tooltip = "Settings that affect the appearance of keystone tooltips" },
@@ -381,7 +380,6 @@ function Options.getIntegrationInfo()
     }
 end
 
---- Opens the addon settings panel
 function Options.openSettings()
     local registry = _G.MrMythicalSettingsRegistry
     if registry and registry.parentCategory then
