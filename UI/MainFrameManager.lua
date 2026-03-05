@@ -12,7 +12,7 @@ MrMythical.MainFrameManager = {}
 local MainFrameManager = MrMythical.MainFrameManager
 
 --- Creates the main unified interface frame with backdrop and positioning
---- @return Frame The created main frame, or nil if UIConstants not available
+--- @return Frame|nil The created main frame, or nil if UIConstants not available
 function MainFrameManager.createUnifiedFrame()
     local UIConstants = MrMythical.UIConstants
     if not UIConstants then
@@ -81,7 +81,7 @@ end
 
 --- Creates the navigation panel on the left side of the main frame
 --- @param parentFrame Frame The parent frame to attach the navigation panel to
---- @return Frame The created navigation panel
+--- @return Frame|nil The created navigation panel or nil if UIConstants is not available
 function MainFrameManager.createNavigationPanel(parentFrame)
     local UIConstants = MrMythical.UIConstants
     if not UIConstants then
@@ -106,7 +106,7 @@ end
 
 --- Creates the main content frame where tab content is displayed
 --- @param parentFrame Frame The parent frame to attach the content frame to
---- @return Frame The created content frame
+--- @return Frame|nil The created content frame or nil if UIConstants is not available
 function MainFrameManager.createContentFrame(parentFrame)
     local UIConstants = MrMythical.UIConstants
     if not UIConstants then

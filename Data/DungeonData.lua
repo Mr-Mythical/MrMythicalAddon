@@ -326,7 +326,7 @@ end
 
 --- Retrieves the player's best mythic+ score for a given keystone
 --- @param itemString string The keystone item string to get score for
---- @return number The player's best score for this keystone, or 0 if no data
+--- @return number bestScore The player's best score for this keystone, or 0 if no data
 function MrMythical.DungeonData.getCharacterMythicScore(itemString)
     local mapID = MrMythical.KeystoneUtils.extractMapID(itemString)
     if not mapID then
