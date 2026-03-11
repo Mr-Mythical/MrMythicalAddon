@@ -110,6 +110,122 @@ local function processKeystoneTooltip(tooltip, mapID)
     TooltipUtils.rebuildTooltipWithProcessedLines(tooltip, processedLines)
 end
 
+--- Adds timer information to tooltip based on display mode
+--- @param tooltip table The GameTooltip object
+--- @param mapID number The dungeon map ID
+local function addTimerToTooltip(tooltip, mapID)
+    local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
+    if not DungeonData then return end
+
+    local parTime = DungeonData.getParTime(mapID)
+    if not parTime then return end
+
+    if timerMode == "DUNGEON" then
+        local formattedTime = DungeonData.formatTime(parTime)
+        tooltip:AddLine(string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, formattedTime))
+    elseif timerMode == "UPGRADE" or (timerMode == "SHIFT" and IsShiftKeyDown()) then
+        local timer1 = DungeonData.formatTime(parTime)
+        local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
+        local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
+        tooltip:AddLine(string.format("%sDungeon Timer: %s/%s/%s|r", ConfigData.COLORS.WHITE, timer1, timer2, timer3))
+    end
+end
+
+--- Adds personal best run info to tooltip
+--- @param tooltip table The GameTooltip object
+--- @param itemString string The keystone item string
+--- @param currentScore number The player's current score
+--- @param isShiftPressed boolean Whether shift is held
+local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
+    local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
+    local shouldShow = playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "WITHOUT_SCORE"
+        or (playerBestDisplay == "SHIFT_WITH_SCORE" and isShiftPressed)
+
+    if not shouldShow then return end
+
+    local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
+    if bestRun then
+        local timeColor = bestRun.wasInTime and ConfigData.COLORS.GREEN or ConfigData.COLORS.YELLOW
+        local formattedTime = DungeonData and DungeonData.formatTime and DungeonData.formatTime(bestRun.bestTime) or "Unknown"
+        local pluses = string.rep("+", bestRun.upgrade or 0)
+        local levelText = "Level " .. pluses .. bestRun.bestLevel
+
+        if playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "SHIFT_WITH_SCORE" then
+            local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
+            tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r) - Score: %s%d|r",
+                ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime,
+                personalBestColor, currentScore))
+        else
+            tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r)|r",
+                ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime))
+        end
+    else
+        tooltip:AddLine(string.format("%sPersonal Best: %sNo data|r",
+            ConfigData.COLORS.WHITE, ConfigData.COLORS.GRAY))
+    end
+end
+
+--- Adds reward info (gear/crest) to tooltip
+--- @param tooltip table The GameTooltip object
+--- @param keyLevel number The keystone level
+--- @param isShiftPressed boolean Whether shift is held
+local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
+    local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
+    local shouldShow = rewardsDisplay == "SHOW" or (rewardsDisplay == "SHIFT" and isShiftPressed)
+
+    if not shouldShow then return end
+
+    local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
+    local crest = RewardsFunctions.getCrestReward(keyLevel)
+    tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
+        ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
+        rewards.vaultTrack, rewards.vaultItem))
+    tooltip:AddLine(string.format("%sCrest: %s (%s)|r",
+        ConfigData.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
+end
+
+--- Adds group score details to tooltip
+--- @param tooltip table The GameTooltip object
+--- @param groupScoreData table Player name to score mapping
+--- @param potentialScore number The potential score for this key level
+--- @param averageGroupGain number The average gain across the group
+--- @param groupColor string Color code for group gain display
+--- @param isShiftPressed boolean Whether shift is held
+local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isShiftPressed)
+    if not (IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid()) then return end
+
+    if isShiftPressed then
+        tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
+
+        local sortedPlayers = {}
+        for playerName, playerScore in pairs(groupScoreData) do
+            local individualGain = math.max(potentialScore - playerScore, 0)
+            local individualGainColor = ColorUtils.calculateGradientColor(individualGain, 0, 200, GRADIENTS)
+            table.insert(sortedPlayers, {
+                name = playerName,
+                score = playerScore,
+                gain = individualGain,
+                gainColor = individualGainColor
+            })
+        end
+
+        table.sort(sortedPlayers, function(a, b) return a.gain > b.gain end)
+
+        for _, player in ipairs(sortedPlayers) do
+            if player.gain > 0 then
+                tooltip:AddLine(string.format("  %s: %s+%d|r",
+                    player.name, player.gainColor, player.gain))
+            else
+                tooltip:AddLine(string.format("  %s: %sNo gain|r",
+                    player.name, ConfigData.COLORS.GRAY))
+            end
+        end
+    else
+        tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r %s(Hold Shift for details)|r",
+            ConfigData.COLORS.WHITE, groupColor, averageGroupGain, ConfigData.COLORS.GRAY))
+    end
+end
+
 --- Adds comprehensive reward and score information to keystone tooltips
 --- @param tooltip table The GameTooltip object to enhance
 --- @param itemString string The keystone item string
@@ -117,152 +233,54 @@ end
 --- @param mapID number The dungeon map ID
 local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID)
     debugLog("Enhancing tooltip with reward info: level=%d, mapID=%d", keyLevel, mapID)
-    
+
     local currentScore = MrMythical.DungeonData.getCharacterMythicScore(itemString)
     local groupScoreData = MrMythical.DungeonData.getGroupMythicDataParty(currentScore, mapID)
-    
+
     local totalPotentialGain, playerCount = 0, 0
     local potentialScore = RewardsFunctions.scoreFormula(keyLevel)
-    
+
     for _, playerScore in pairs(groupScoreData) do
         local playerGain = math.max(potentialScore - playerScore, 0)
         totalPotentialGain = totalPotentialGain + playerGain
         playerCount = playerCount + 1
     end
-    
+
     local averageGroupGain = (playerCount > 0) and (totalPotentialGain / playerCount) or 0
-    
     local groupColor = ColorUtils.calculateGradientColor(averageGroupGain, 0, 200, GRADIENTS)
     local baseColor = ColorUtils.calculateGradientColor(potentialScore, 165, 500, GRADIENTS)
     local playerGain = math.max(potentialScore - currentScore, 0)
     local gainColor = ColorUtils.calculateGradientColor(playerGain, 0, 200, GRADIENTS)
-    
-    local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
-    local crest = RewardsFunctions.getCrestReward(keyLevel)
-
-
-    local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
-    if DungeonData then
-        local parTime = DungeonData.getParTime(mapID)
-        if parTime then
-            if timerMode == "DUNGEON" then
-                local formattedTime = DungeonData.formatTime(parTime)
-                tooltip:AddLine(string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, formattedTime))
-            elseif timerMode == "UPGRADE" or (timerMode == "SHIFT" and IsShiftKeyDown()) then
-                local timer1 = DungeonData.formatTime(parTime)
-                local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
-                local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
-                tooltip:AddLine(string.format("%sDungeon Timer: %s/%s/%s|r", ConfigData.COLORS.WHITE, timer1, timer2, timer3))
-            end
-        end
-    end
-
-    local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
     local isShiftPressed = IsShiftKeyDown()
-    local shouldShowPlayerBest = false
-    
-    if playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "WITHOUT_SCORE" then
-        shouldShowPlayerBest = true
-    elseif playerBestDisplay == "SHIFT_WITH_SCORE" and isShiftPressed then
-        shouldShowPlayerBest = true
-    end
-    
-    if shouldShowPlayerBest then
-        local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
-        if bestRun then
-            local timeColor = bestRun.wasInTime and ConfigData.COLORS.GREEN or ConfigData.COLORS.YELLOW
-            local formattedTime = DungeonData and DungeonData.formatTime and DungeonData.formatTime(bestRun.bestTime) or "Unknown"
-            
-            local pluses = string.rep("+", bestRun.upgrade or 0)
-            local levelText = "Level " .. pluses .. bestRun.bestLevel
-            
-            if playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "SHIFT_WITH_SCORE" then
-                local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
-                tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r) - Score: %s%d|r", 
-                    ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime,
-                    personalBestColor, currentScore))
-            else -- WITHOUT_SCORE
-                tooltip:AddLine(string.format("%sPersonal Best: %s (%s%s|r)|r", 
-                    ConfigData.COLORS.WHITE, levelText, timeColor, formattedTime))
-            end
-        else
-            tooltip:AddLine(string.format("%sPersonal Best: %sNo data|r", 
-                ConfigData.COLORS.WHITE, ConfigData.COLORS.GRAY))
-        end
-    end
 
-    local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
-    local shouldShowRewards = false
-    
-    if rewardsDisplay == "SHOW" then
-        shouldShowRewards = true
-    elseif rewardsDisplay == "SHIFT" and isShiftPressed then
-        shouldShowRewards = true
-    end
-    
-    if shouldShowRewards then
-        tooltip:AddLine(string.format("%sGear: %s (%s) / Vault: %s (%s)|r",
-            ConfigData.COLORS.WHITE, rewards.dungeonTrack, rewards.dungeonItem,
-            rewards.vaultTrack, rewards.vaultItem))
-        tooltip:AddLine(string.format("%sCrest: %s (%s)|r", 
-            ConfigData.COLORS.WHITE, crest.crestType, tostring(crest.crestAmount)))
-    end
+    addTimerToTooltip(tooltip, mapID)
+    addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
+    addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
 
     local scoreLine, gainString = "", ""
-    
+
     if MRM_SavedVars.SHOW_TIMING then
-        local maxScore = potentialScore + 15  -- bonus for perfect timing
-        scoreLine = string.format("%sScore: %s%d|r - %s%d|r", 
+        local maxScore = potentialScore + 15
+        scoreLine = string.format("%sScore: %s%d|r - %s%d|r",
             ConfigData.COLORS.WHITE, baseColor, potentialScore, baseColor, maxScore)
-            
+
         local minGain = playerGain
         local maxGain = math.max(maxScore - currentScore, 0)
         if maxGain > 0 then
             gainString = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
         end
     else
-        scoreLine = string.format("%sScore: %s%d|r", 
+        scoreLine = string.format("%sScore: %s%d|r",
             ConfigData.COLORS.WHITE, baseColor, potentialScore)
-            
+
         if playerGain > 0 then
             gainString = string.format(" %s(+%d)|r", gainColor, playerGain)
         end
     end
-    
+
     tooltip:AddLine(scoreLine .. gainString)
 
-    if IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid() then
-        if isShiftPressed then
-            tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
-            
-            local sortedPlayers = {}
-            for playerName, playerScore in pairs(groupScoreData) do
-                local individualGain = math.max(potentialScore - playerScore, 0)
-                local individualGainColor = ColorUtils.calculateGradientColor(individualGain, 0, 200, GRADIENTS)
-                table.insert(sortedPlayers, {
-                    name = playerName,
-                    score = playerScore,
-                    gain = individualGain,
-                    gainColor = individualGainColor
-                })
-            end
-            
-            table.sort(sortedPlayers, function(a, b) return a.gain > b.gain end)
-            
-            for _, player in ipairs(sortedPlayers) do
-                if player.gain > 0 then
-                    tooltip:AddLine(string.format("  %s: %s+%d|r", 
-                        player.name, player.gainColor, player.gain))
-                else
-                    tooltip:AddLine(string.format("  %s: %sNo gain|r", 
-                        player.name, ConfigData.COLORS.GRAY))
-                end
-            end
-        else
-            tooltip:AddLine(string.format("%sGroup Avg Gain: %s+%.1f|r %s(Hold Shift for details)|r", 
-                ConfigData.COLORS.WHITE, groupColor, averageGroupGain, ConfigData.COLORS.GRAY))
-        end
-    end
+    addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isShiftPressed)
 end
 
 --- Tooltip hook handler for keystone items
