@@ -2,7 +2,7 @@
 UI.lua - Mythic+ Interface Main Controller
 
 Purpose: Unified tabbed interface that consolidates all Mr. Mythical functionality as the main controller
-Dependencies: UI modules, RewardsFunctions, DungeonData, CompletionTracker, WoW APIs
+Dependencies: UIConstants, MainFrameManager, NavigationManager
 Author: Braunerr
 --]]
 

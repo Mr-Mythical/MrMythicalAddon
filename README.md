@@ -35,10 +35,12 @@ Access powerful tools through an integrated dashboard interface:
 ### **Command Interface**
 Access all features via convenient chat commands:
 - `/mrm` - Open main dashboard with access to all tools
+- `/mrm dashboard` - Open main dashboard explicitly
 - `/mrm rewards` - Open reward calculator and browser
 - `/mrm score` - Open interactive score calculator
 - `/mrm stats` - Open simple statistics overview with run breakdown
 - `/mrm times` - Open dungeon timer calculator with chest thresholds
+- `/mrm settings` - Open addon settings panel
 - `/mrm help` - Display all available commands
 
 ## Download

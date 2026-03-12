@@ -1,8 +1,8 @@
 --[[
 ContentCreators.lua - UI Content Creation Module
 
-Purpose: Creates the various content panels for the unified interface including dashboard, rewards, and times content
-Dependencies: UIConstants, UIHelpers, RewardsFunctions, CompletionTracker
+Purpose: Creates dashboard, rewards, and timer content panels for the unified interface
+Dependencies: UIConstants, UIHelpers, RewardsFunctions, DungeonData
 Author: Braunerr
 --]]
 

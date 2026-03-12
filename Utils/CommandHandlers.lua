@@ -1,8 +1,8 @@
 --[[
 CommandHandlers.lua - Slash Command Processing
 
-Purpose: Handles all slash command functionality for Mr. Mythical addon
-Dependencies: RewardsFunctions, CompletionTracker, ConfigData, DungeonData
+Purpose: Handles slash command parsing and routing for the unified UI and settings
+Dependencies: ConfigData, UnifiedUI, Options
 Author: Braunerr
 --]]
 

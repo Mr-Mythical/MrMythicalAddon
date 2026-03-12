@@ -1,8 +1,8 @@
 --[[
 DungeonData.lua - Mythic+ Dungeon Map Data
 
-Purpose: Contains mapping data for all current season Mythic+ dungeons
-Dependencies: None
+Purpose: Contains mapping data and score helpers for current season Mythic+ dungeons
+Dependencies: WoW Mythic+ APIs, RewardsFunctions, KeystoneUtils, ConfigData
 Author: Braunerr
 --]]
 

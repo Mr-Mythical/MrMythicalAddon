@@ -2,7 +2,7 @@
 MainFrameManager.lua - Main UI Frame Management Module
 
 Purpose: Handles creation and management of the main unified interface frame
-Dependencies: UIConstants, UIHelpers
+Dependencies: UIConstants, UnifiedUI (for settings navigation)
 Author: Braunerr
 --]]
 
