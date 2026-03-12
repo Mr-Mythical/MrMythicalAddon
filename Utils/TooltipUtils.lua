@@ -95,7 +95,7 @@ end
 --- @param lineText string The line text to check
 --- @param levelDisplayMode string The level display mode setting
 --- @param isShiftPressed boolean Whether shift key is pressed
---- @return boolean shouldHide True if the line should be hidden
+--- @return boolean shiftMode True if the line should be hidden
 function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     local isMythicLevel = lineText:match("Mythic Level")
