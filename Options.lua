@@ -72,7 +72,7 @@ local TOOLTIPS = {
     LEVEL_DISPLAY = "Choose how the mythic keystone level is displayed:\n\n" ..
         WHITE .. "Default:|r Show level in its own line (e.g. 'Mythic Level 15')\n\n" ..
         WHITE .. "Compact:|r Show level as +X (e.g. '+15')\n\n" ..
-        WHITE .. "In Title:|r Add level to keystone title (e.g. 'Operation: Floodgate +15')",
+        WHITE .. "In Title:|r Add level to keystone title (e.g. 'Windrunner Spire +15')",
 
     LEVEL_SHIFT_MODE = "Choose how holding Shift affects level display (Mythic & Resilient):\n\n" ..
         WHITE .. "None:|r Show both levels always\n\n" ..
