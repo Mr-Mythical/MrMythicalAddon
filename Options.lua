@@ -151,12 +151,6 @@ function Options.initializeSettings()
             MRM_SavedVars[key] = default
         end
     end
-
-    -- Migrate old boolean SHORT_DUNGEON_NAMES to new string format
-    if type(MRM_SavedVars.SHORT_DUNGEON_NAMES) == "boolean" then
-        MRM_SavedVars.SHORT_DUNGEON_NAMES = MRM_SavedVars.SHORT_DUNGEON_NAMES and "SHORT" or "OFF"
-    end
-
     if not Settings or not Settings.RegisterVerticalLayoutCategory then
         return
     end
