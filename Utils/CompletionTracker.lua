@@ -324,5 +324,3 @@ initializeSavedVariables()
 MrMythical = MrMythical or {}
 MrMythical.CompletionTracker = CompletionTracker
 _G.MrMythical = MrMythical
-
-debugLog("CompletionTracker module loaded")
