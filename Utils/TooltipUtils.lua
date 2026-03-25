@@ -145,26 +145,23 @@ function TooltipUtils.extractLevelInfoFromTooltip(tooltip, startLine)
     for i = startLine or 2, tooltip:NumLines() do
         local fontString = _G["GameTooltipTextLeft"..i]
         if not fontString then break end
-        local ok, text = pcall(fontString.GetText, fontString)
-        local line = (ok and text) or ""
+        -- GetText() may return a tainted string; string.match on a tainted string
+        -- also fails ("string conversion on secret value"), so keep every string
+        -- operation inside the same pcall closure so taint never escapes.
+        local ok, kl, rl = pcall(function()
+            local text = fontString:GetText()
+            if not text then return nil, nil end
+            local k = not keyLevel     and string.match(text, "Mythic Level (%d+)")     or nil
+            local r = not resilientLevel and string.match(text, "Resilient Level (%d+)") or nil
+            return k, r
+        end)
 
-        if not keyLevel then
-            keyLevel = string.match(line, "Mythic Level (%d+)")
-            if keyLevel then
-                keyLevel = tonumber(keyLevel)
-            end
+        if ok then
+            if kl then keyLevel     = tonumber(kl) end
+            if rl then resilientLevel = tonumber(rl) end
         end
-        
-        if not resilientLevel then
-            resilientLevel = string.match(line, "Resilient Level (%d+)")
-            if resilientLevel then
-                resilientLevel = tonumber(resilientLevel)
-            end
-        end
-        
-        if keyLevel and resilientLevel then
-            break
-        end
+
+        if keyLevel and resilientLevel then break end
     end
     
     return keyLevel, resilientLevel

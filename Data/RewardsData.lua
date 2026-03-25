@@ -34,8 +34,8 @@ MrMythical.RewardsData = {
     },
 
     CRESTS = {
-        { crestType = "Champion", amount = 10 },   -- Key Level 2
-        { crestType = "Champion", amount = 12 },   -- Key Level 3
+        { crestType = "Champion", amount = 12 },   -- Key Level 2
+        { crestType = "Champion", amount = 14 },   -- Key Level 3
         { crestType = "Hero", amount = 10 },   -- Key Level 4
         { crestType = "Hero", amount = 12 },   -- Key Level 5
         { crestType = "Hero", amount = 14 },   -- Key Level 6
