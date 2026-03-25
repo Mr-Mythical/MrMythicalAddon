@@ -143,17 +143,20 @@ function TooltipUtils.extractLevelInfoFromTooltip(tooltip, startLine)
     local keyLevel, resilientLevel
     
     for i = startLine or 2, tooltip:NumLines() do
-        local line = _G["GameTooltipTextLeft"..i]:GetText() or ""
-        
+        local fontString = _G["GameTooltipTextLeft"..i]
+        if not fontString then break end
+        local ok, text = pcall(fontString.GetText, fontString)
+        local line = (ok and text) or ""
+
         if not keyLevel then
-            keyLevel = line:match("Mythic Level (%d+)")
+            keyLevel = string.match(line, "Mythic Level (%d+)")
             if keyLevel then
                 keyLevel = tonumber(keyLevel)
             end
         end
         
         if not resilientLevel then
-            resilientLevel = line:match("Resilient Level (%d+)")
+            resilientLevel = string.match(line, "Resilient Level (%d+)")
             if resilientLevel then
                 resilientLevel = tonumber(resilientLevel)
             end

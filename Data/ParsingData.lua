@@ -14,6 +14,7 @@ MrMythical.ParsingData = {
         "Tyrannical",
         "Xal'atath",
         "Dungeon Modifiers:",
+        "Lindormi's"
     },
 
     DURATION_STRINGS = {
