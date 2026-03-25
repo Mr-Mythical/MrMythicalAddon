@@ -59,12 +59,13 @@ end
 --- @return number The base score value (before timing bonuses)
 function RewardsFunctions.scoreFormula(keyLevel)
     if keyLevel < 2 then return 0 end
-    local affixBreakpoints = { [2] = 15, [7] = 15, [10] = 15, [12] = 15 }
-    local parScore = 140
-    for current = 2, keyLevel do
+    local affixBreakpoints = { [4] = 15, [7] = 15, [10] = 15, [12] = 15 }
+    local parScore = 155
+    for current = 2, keyLevel - 1 do
         parScore = parScore + 15
-        if affixBreakpoints[current] then
-            parScore = parScore + affixBreakpoints[current]
+        local nextLevel = current + 1
+        if affixBreakpoints[nextLevel] then
+            parScore = parScore + affixBreakpoints[nextLevel]
         end
     end
     return parScore
