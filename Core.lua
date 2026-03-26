@@ -24,9 +24,6 @@ local Options = MrMythical.Options
 
 local GRADIENTS = GradientsData.GRADIENTS
 
---- Debug logging function for development
---- @param message string The debug message to log
---- @param ... any Additional values to include in the debug output
 local function debugLog(message, ...)
     if MrMythicalDebug then
         local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)
@@ -36,7 +33,7 @@ end
 
 MrMythical.debugLog = debugLog
 
-local function buildTooltipTitle(mapID, keyLevel, resilientLevel, tooltip)
+local function buildTooltipTitle(mapID, keyLevel, resilientLevel)
     local fullName = mapID and DungeonData.getDungeonName(mapID) or nil
     if not fullName then
         return nil
@@ -47,12 +44,7 @@ local function buildTooltipTitle(mapID, keyLevel, resilientLevel, tooltip)
     local newTitle = "Keystone: " .. fullName
 
     if levelDisplayMode == "TITLE" then
-        local kl, rl = keyLevel, resilientLevel
-        if not kl then
-            kl, rl = TooltipUtils.extractLevelInfoFromTooltip(tooltip)
-        end
-
-        newTitle = TooltipUtils.processLevelInTitle(newTitle, kl, rl, isShiftPressed)
+        newTitle = TooltipUtils.processLevelInTitle(newTitle, keyLevel, resilientLevel, isShiftPressed)
     elseif MRM_SavedVars.SHORT_TITLE and string.find(newTitle, "^Keystone: ") then
         newTitle = string.gsub(newTitle, "^Keystone: ", "")
     end
@@ -77,76 +69,94 @@ local function buildTooltipTitle(mapID, keyLevel, resilientLevel, tooltip)
     return newTitle
 end
 
-local function buildProcessedTooltipLines(tooltip, mapID, keyLevel, resilientLevel)
-    local isShiftPressed = IsShiftKeyDown()
-    local levelDisplayMode = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
-    local capturedLines = TooltipUtils.captureTooltipLines(tooltip)
-    local processedLines = {}
-    local newTitle = buildTooltipTitle(mapID, keyLevel, resilientLevel, tooltip)
+local function extractLevelsFromTooltipDataLines(lines)
+    local keyLevel, resilientLevel
 
-    for _, line in ipairs(capturedLines) do
-        pcall(function()
-            local leftText = line.left
-            if not leftText or leftText == "" then
-                return
-            end
+    if not lines then
+        return nil, nil
+    end
 
-            local keepLine = true
-            local replacementText = leftText
-
-            if line.index == 1 and newTitle then
-                replacementText = newTitle
-            elseif line.index >= 2 then
-                if levelDisplayMode == "COMPACT" then
-                    local processedText = TooltipUtils.processCompactLevelDisplay(
-                        leftText,
-                        isShiftPressed,
-                        line.color
-                    )
-
-                    if processedText == nil then
-                        keepLine = false
-                    else
-                        replacementText = processedText
-                    end
-                else
-                    if TooltipUtils.shouldHideLevelLine(leftText, levelDisplayMode, isShiftPressed)
-                        or TooltipUtils.shouldHideTooltipText(leftText) then
-                        keepLine = false
-                    end
+    for _, line in ipairs(lines) do
+        local text = line and line.leftText
+        if text then
+            if not keyLevel then
+                local matchedKeyLevel = string.match(text, "Mythic Level (%d+)")
+                if matchedKeyLevel then
+                    keyLevel = tonumber(matchedKeyLevel)
                 end
             end
 
-            if keepLine then
-                table.insert(processedLines, {
-                    left = replacementText,
-                    right = line.right,
-                    color = line.color,
-                })
+            if not resilientLevel then
+                local matchedResilientLevel = string.match(text, "Resilient Level (%d+)")
+                if matchedResilientLevel then
+                    resilientLevel = tonumber(matchedResilientLevel)
+                end
             end
-        end)
+        end
+
+        if keyLevel and resilientLevel then
+            break
+        end
     end
 
-    return processedLines
+    return keyLevel, resilientLevel
 end
 
---- Handles level display modes, text filtering, and title modifications.
---- Reads all lines before rebuilding to avoid relying on hiding individual
---- Blizzard-created font strings in place.
---- Must be called BEFORE enhanceTooltipWithRewardInfo so the tooltip
---- is still clean / untainted when we read.
---- @param tooltip table The GameTooltip object to process
---- @param mapID number The dungeon map ID
---- @param keyLevel number|nil The keystone level from parsed link data
---- @param resilientLevel number|nil The resilient level if known
-local function processKeystoneTooltip(tooltip, mapID, keyLevel, resilientLevel)
-    local processedLines = buildProcessedTooltipLines(tooltip, mapID, keyLevel, resilientLevel)
-    TooltipUtils.rebuildTooltipWithProcessedLines(tooltip, processedLines)
+local function processKeystoneTooltipData(data, mapID, keyLevel, resilientLevel)
+    if not data or not data.lines then
+        return
+    end
+
+    local isShiftPressed = IsShiftKeyDown()
+    local levelDisplayMode = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
+
+    if levelDisplayMode == "TITLE" and not keyLevel then
+        keyLevel, resilientLevel = extractLevelsFromTooltipDataLines(data.lines)
+    end
+
+    local newTitle = buildTooltipTitle(mapID, keyLevel, resilientLevel)
+
+    for index, line in ipairs(data.lines) do
+        local leftText = line and line.leftText
+
+        if leftText and leftText ~= "" then
+            if index == 1 and newTitle then
+                line.leftText = newTitle
+            elseif index >= 2 then
+                if levelDisplayMode == "COMPACT" then
+                    local leftColor = line.leftColor or {}
+                    local processed = TooltipUtils.processCompactLevelDisplay(
+                        leftText,
+                        isShiftPressed,
+                        {
+                            leftColor.r or 1,
+                            leftColor.g or 1,
+                            leftColor.b or 1,
+                        }
+                    )
+
+                    if processed == nil then
+                        line.leftText = ""
+                        line.rightText = nil
+                    elseif processed ~= leftText then
+                        line.leftText = processed
+                        line.rightText = nil
+                    end
+                else
+                    local shouldHide =
+                        TooltipUtils.shouldHideLevelLine(leftText, levelDisplayMode, isShiftPressed)
+                        or TooltipUtils.shouldHideTooltipText(leftText)
+
+                    if shouldHide then
+                        line.leftText = ""
+                        line.rightText = nil
+                    end
+                end
+            end
+        end
+    end
 end
 
---- Adds timer information to tooltip based on display mode
---- @param tooltip table The GameTooltip object
---- @param mapID number The dungeon map ID
 local function addTimerToTooltip(tooltip, mapID)
     local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
     if not DungeonData then
@@ -169,11 +179,6 @@ local function addTimerToTooltip(tooltip, mapID)
     end
 end
 
---- Adds personal best run info to tooltip
---- @param tooltip table The GameTooltip object
---- @param itemString string The keystone item string
---- @param currentScore number The player's current score
---- @param isShiftPressed boolean Whether shift is held
 local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
     local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
     local shouldShow = playerBestDisplay == "WITH_SCORE"
@@ -220,10 +225,6 @@ local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShi
     end
 end
 
---- Adds reward info (gear/crest) to tooltip
---- @param tooltip table The GameTooltip object
---- @param keyLevel number The keystone level
---- @param isShiftPressed boolean Whether shift is held
 local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
     local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
     local shouldShow = rewardsDisplay == "SHOW" or (rewardsDisplay == "SHIFT" and isShiftPressed)
@@ -250,13 +251,6 @@ local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
     ))
 end
 
---- Adds group score details to tooltip
---- @param tooltip table The GameTooltip object
---- @param groupScoreData table Player name to score mapping
---- @param potentialScore number The potential score for this key level
---- @param averageGroupGain number The average gain across the group
---- @param groupColor string Color code for group gain display
---- @param isShiftPressed boolean Whether shift is held
 local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isShiftPressed)
     if not (IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid()) then
         return
@@ -308,11 +302,6 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
     end
 end
 
---- Adds comprehensive reward and score information to keystone tooltips
---- @param tooltip table The GameTooltip object to enhance
---- @param itemString string The keystone item string
---- @param keyLevel number The keystone level
---- @param mapID number The dungeon map ID
 local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID)
     debugLog("Enhancing tooltip with reward info: level=%d, mapID=%d", keyLevel, mapID)
 
@@ -383,35 +372,33 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     )
 end
 
--- Cache of last successfully parsed keystone data per tooltip object.
--- Used as a fallback when the tooltip link is tainted on periodic refreshes.
 local tooltipKeystoneCache = {}
 
---- Tooltip hook handler for keystone items
---- Enhances tooltips with reward information and processes display settings
---- @param tooltip table The GameTooltip object being processed
-local function handleKeystoneTooltip(tooltip)
-    if not tooltip.GetItem then
+local function handleKeystoneTooltip(tooltip, data)
+    if not data then
         return
+    end
+
+    local link
+    if tooltip and tooltip.GetItem then
+        pcall(function()
+            local _
+            _, link = tooltip:GetItem()
+        end)
     end
 
     local pendingKeys = {}
     local parsedOk = false
 
-    pcall(function()
-        local _, link = tooltip:GetItem()
-        if not link then
-            return
-        end
-
+    if type(link) == "string" then
         for keystoneLink in string.gmatch(link, "|Hkeystone:.-|h.-|h|r") do
-            local data = KeystoneUtils.parseKeystoneData(keystoneLink)
-            if data then
-                table.insert(pendingKeys, data)
+            local parsed = KeystoneUtils.parseKeystoneData(keystoneLink)
+            if parsed then
+                table.insert(pendingKeys, parsed)
                 parsedOk = true
             end
         end
-    end)
+    end
 
     if parsedOk then
         tooltipKeystoneCache[tooltip] = pendingKeys
@@ -420,19 +407,25 @@ local function handleKeystoneTooltip(tooltip)
     end
 
     for _, keystoneData in ipairs(pendingKeys) do
-        local mapID = keystoneData.mapID
-        local keyLevel = keystoneData.level
-
-        debugLog("Processing keystone tooltip: level %d, map ID %d", keyLevel, mapID)
-
-        processKeystoneTooltip(tooltip, mapID, keyLevel, nil)
-        enhanceTooltipWithRewardInfo(tooltip, keystoneData.itemString, keyLevel, mapID)
+        processKeystoneTooltipData( data, keystoneData.mapID, keystoneData.level, nil )
     end
 end
 
---- Chat hyperlink hook handler for keystone links
---- Adds reward information to keystone links clicked in chat
---- @param link string The clicked hyperlink
+local function appendKeystoneRewardInfo(tooltip)
+    if not tooltip or not tooltip.GetItem then
+        return
+    end
+
+    local pendingKeys = tooltipKeystoneCache[tooltip]
+    if not pendingKeys then
+        return
+    end
+
+    for _, keystoneData in ipairs(pendingKeys) do
+        enhanceTooltipWithRewardInfo(tooltip, keystoneData.itemString, keystoneData.level, keystoneData.mapID)
+    end
+end
+
 local function handleKeystoneChatHyperlink(link)
     local keystoneData = KeystoneUtils.parseKeystoneData(link)
     if not keystoneData then
@@ -450,10 +443,10 @@ local function handleKeystoneChatHyperlink(link)
 end
 
 hooksecurefunc("SetItemRef", handleKeystoneChatHyperlink)
-TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, handleKeystoneTooltip)
 
--- Clear cached keystone data when the tooltip is hidden so stale data from
--- one item can never bleed onto a different item's tooltip.
+TooltipDataProcessor.AddTooltipPreCall(Enum.TooltipDataType.Item, handleKeystoneTooltip)
+TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, appendKeystoneRewardInfo)
+
 GameTooltip:HookScript("OnHide", function(self)
     tooltipKeystoneCache[self] = nil
 end)
@@ -475,9 +468,7 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         local addonName = ...
         if addonName == "MrMythical" then
             debugLog("MrMythical addon loaded, initializing...")
-
             Options.initializeSettings()
-
             addonInitialized = true
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
@@ -498,10 +489,8 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         local mapID = C_ChallengeMode.GetActiveChallengeMapID()
         local level = C_ChallengeMode.GetActiveKeystoneInfo()
 
-        if mapID and level then
-            if MrMythical.CompletionTracker then
-                MrMythical.CompletionTracker:trackRunStart(mapID, level)
-            end
+        if mapID and level and MrMythical.CompletionTracker then
+            MrMythical.CompletionTracker:trackRunStart(mapID, level)
         end
     elseif event == "CHALLENGE_MODE_COMPLETED" then
         local completionInfo = C_ChallengeMode.GetChallengeCompletionInfo()
