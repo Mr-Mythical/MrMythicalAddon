@@ -7,7 +7,7 @@ Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}
-MrMythical.KeystoneUtils = {}
+MrMythical.KeystoneUtils = MrMythical.KeystoneUtils or {}
 
 local KeystoneUtils = MrMythical.KeystoneUtils
 
@@ -15,6 +15,10 @@ local KeystoneUtils = MrMythical.KeystoneUtils
 --- @param keystoneLink string The full keystone link from chat or tooltip
 --- @return string|nil The item string portion, or nil if not found
 function KeystoneUtils.extractItemString(keystoneLink)
+    if type(keystoneLink) ~= "string" then
+        return nil
+    end
+
     return string.match(keystoneLink, "keystone[%-?%d:]+")
 end
 
@@ -22,10 +26,15 @@ end
 --- @param keystoneLink string The keystone link or item string
 --- @return number|nil The keystone level, or nil if not found
 function KeystoneUtils.extractKeystoneLevel(keystoneLink)
+    if type(keystoneLink) ~= "string" then
+        return nil
+    end
+
     local keyField = select(4, strsplit(":", keystoneLink))
     if keyField then
         return tonumber(string.sub(keyField, 1, 2))
     end
+
     return nil
 end
 
@@ -33,10 +42,15 @@ end
 --- @param keystoneLink string The keystone link or item string
 --- @return number|nil The map ID, or nil if not found
 function KeystoneUtils.extractMapID(keystoneLink)
+    if type(keystoneLink) ~= "string" then
+        return nil
+    end
+
     local linkParts = { strsplit(":", keystoneLink) }
     if #linkParts >= 3 then
         return tonumber(linkParts[3])
     end
+
     return nil
 end
 
@@ -44,7 +58,7 @@ end
 --- @param link string The link to validate
 --- @return boolean True if the link is a valid keystone link
 function KeystoneUtils.isKeystoneLink(link)
-    return link and link:find("keystone:") ~= nil
+    return type(link) == "string" and string.find(link, "keystone:") ~= nil
 end
 
 --- Parses all keystone data from a link in one call
@@ -54,22 +68,22 @@ function KeystoneUtils.parseKeystoneData(keystoneLink)
     if not KeystoneUtils.isKeystoneLink(keystoneLink) then
         return nil
     end
-    
+
     local itemString = KeystoneUtils.extractItemString(keystoneLink)
     if not itemString then
         return nil
     end
-    
+
     local level = KeystoneUtils.extractKeystoneLevel(itemString)
     local mapID = KeystoneUtils.extractMapID(itemString)
-    
+
     if not level or not mapID then
         return nil
     end
-    
+
     return {
         itemString = itemString,
         level = level,
-        mapID = mapID
+        mapID = mapID,
     }
 end

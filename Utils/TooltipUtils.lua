@@ -8,35 +8,71 @@ Author: Braunerr
 
 local MrMythical = MrMythical or {}
 MrMythical.TooltipUtils = MrMythical.TooltipUtils or {}
+
 local TooltipUtils = MrMythical.TooltipUtils
 local ParsingData = MrMythical.ParsingData
+
+local function safeGetText(fontString)
+    if not fontString then
+        return nil
+    end
+
+    local ok, text = pcall(function()
+        return fontString:GetText()
+    end)
+
+    if ok then
+        return text
+    end
+
+    return nil
+end
+
+local function safeGetTextColor(fontString)
+    if not fontString then
+        return 1, 1, 1
+    end
+
+    local ok, r, g, b = pcall(function()
+        return fontString:GetTextColor()
+    end)
+
+    if ok then
+        return r, g, b
+    end
+
+    return 1, 1, 1
+end
+
+TooltipUtils.safeGetText = safeGetText
+TooltipUtils.safeGetTextColor = safeGetTextColor
 
 --- Determines if tooltip text should be hidden based on user preferences
 --- @param text string The text to check
 --- @return boolean True if the text should be hidden
 function TooltipUtils.shouldHideTooltipText(text)
-    if not text then 
-        return false 
+    if not text or not ParsingData then
+        return false
     end
-    
-    for _, duration in ipairs(ParsingData.DURATION_STRINGS) do
-        if text:find(duration, 1, true) then
+
+    for _, duration in ipairs(ParsingData.DURATION_STRINGS or {}) do
+        if string.find(text, duration, 1, true) then
             return MRM_SavedVars.HIDE_DURATION
         end
     end
-    
-    for _, affix in ipairs(ParsingData.AFFIX_STRINGS) do
-        if text:find(affix, 1, true) then
+
+    for _, affix in ipairs(ParsingData.AFFIX_STRINGS or {}) do
+        if string.find(text, affix, 1, true) then
             return MRM_SavedVars.HIDE_AFFIX_TEXT
         end
     end
-    
-    for _, unwanted in ipairs(ParsingData.UNWANTED_STRINGS) do
-        if text:find(unwanted, 1, true) then
+
+    for _, unwanted in ipairs(ParsingData.UNWANTED_STRINGS or {}) do
+        if string.find(text, unwanted, 1, true) then
             return MRM_SavedVars.HIDE_UNWANTED_TEXT
         end
     end
-    
+
     return false
 end
 
@@ -48,21 +84,23 @@ end
 --- @return string titleText The modified title text
 function TooltipUtils.processLevelInTitle(titleText, keyLevel, resilientLevel, isShiftPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
-    
-    if MRM_SavedVars.SHORT_TITLE and titleText:find("^Keystone: ") then
-        titleText = titleText:gsub("^Keystone: ", "")
+
+    if MRM_SavedVars.SHORT_TITLE and string.find(titleText, "^Keystone: ") then
+        titleText = string.gsub(titleText, "^Keystone: ", "")
     end
-    
+
     if keyLevel and (shiftMode ~= "SHOW_BOTH" or isShiftPressed) then
         titleText = titleText .. " +" .. keyLevel
-        
-        if resilientLevel and (shiftMode == "NONE" or 
-            (shiftMode == "SHOW_RESILIENT" and isShiftPressed) or 
-            (shiftMode == "SHOW_BOTH" and isShiftPressed)) then
+
+        if resilientLevel and (
+            shiftMode == "NONE" or
+            (shiftMode == "SHOW_RESILIENT" and isShiftPressed) or
+            (shiftMode == "SHOW_BOTH" and isShiftPressed)
+        ) then
             titleText = titleText .. " (R" .. resilientLevel .. ")"
         end
     end
-    
+
     return titleText
 end
 
@@ -73,21 +111,25 @@ end
 --- @return string|nil lineText The processed line text, or nil if should be hidden
 function TooltipUtils.processCompactLevelDisplay(lineText, isShiftPressed, lineColor)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
-    local level = lineText:match("Mythic Level (%d+)")
-    
+    local level = string.match(lineText, "Mythic Level (%d+)")
+
     if level then
         if shiftMode == "SHOW_BOTH" and not isShiftPressed then
             return nil
         end
-        
+
         local levelText = "+" .. level
-        -- Note: Resilient level would need to be passed separately or found from context
-        return string.format("|cff%02x%02x%02x%s|r", 
-            lineColor[1] * 255, lineColor[2] * 255, lineColor[3] * 255, levelText)
-    elseif lineText:match("Resilient Level") then
+        return string.format(
+            "|cff%02x%02x%02x%s|r",
+            math.floor((lineColor[1] or 1) * 255),
+            math.floor((lineColor[2] or 1) * 255),
+            math.floor((lineColor[3] or 1) * 255),
+            levelText
+        )
+    elseif string.match(lineText, "Resilient Level") then
         return nil
     end
-    
+
     return lineText
 end
 
@@ -95,12 +137,12 @@ end
 --- @param lineText string The line text to check
 --- @param levelDisplayMode string The level display mode setting
 --- @param isShiftPressed boolean Whether shift key is pressed
---- @return boolean shiftMode True if the line should be hidden
+--- @return boolean True if the line should be hidden
 function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
-    local isMythicLevel = lineText:match("Mythic Level")
-    local isResilientLevel = lineText:match("Resilient Level")
-    
+    local isMythicLevel = string.match(lineText, "Mythic Level")
+    local isResilientLevel = string.match(lineText, "Resilient Level")
+
     if levelDisplayMode == "TITLE" then
         return isMythicLevel or isResilientLevel
     elseif levelDisplayMode == "OFF" then
@@ -108,61 +150,102 @@ function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPre
             return shiftMode == "SHOW_BOTH" and not isShiftPressed
         end
     end
-    
+
     return false
+end
+
+--- Extracts level information from tooltip lines
+--- @param tooltip table The GameTooltip object
+--- @param startLine number|nil Line number to start searching from
+--- @return number|nil keyLevel
+--- @return number|nil resilientLevel
+function TooltipUtils.extractLevelInfoFromTooltip(tooltip, startLine)
+    local keyLevel, resilientLevel
+
+    for i = startLine or 2, tooltip:NumLines() do
+        local fontString = _G["GameTooltipTextLeft" .. i]
+        if not fontString then
+            break
+        end
+
+        local text = safeGetText(fontString)
+        if text then
+            if not keyLevel then
+                local matchedKeyLevel = string.match(text, "Mythic Level (%d+)")
+                if matchedKeyLevel then
+                    keyLevel = tonumber(matchedKeyLevel)
+                end
+            end
+
+            if not resilientLevel then
+                local matchedResilientLevel = string.match(text, "Resilient Level (%d+)")
+                if matchedResilientLevel then
+                    resilientLevel = tonumber(matchedResilientLevel)
+                end
+            end
+        end
+
+        if keyLevel and resilientLevel then
+            break
+        end
+    end
+
+    return keyLevel, resilientLevel
+end
+
+--- Reads current tooltip lines into a plain Lua table
+--- @param tooltip table The GameTooltip object
+--- @return table lines
+function TooltipUtils.captureTooltipLines(tooltip)
+    local lines = {}
+
+    for i = 1, tooltip:NumLines() do
+        local leftFontString = _G["GameTooltipTextLeft" .. i]
+        local rightFontString = _G["GameTooltipTextRight" .. i]
+
+        if leftFontString then
+            local leftText = safeGetText(leftFontString)
+            local rightText = safeGetText(rightFontString)
+            local r, g, b = safeGetTextColor(leftFontString)
+
+            table.insert(lines, {
+                index = i,
+                left = leftText,
+                right = rightText,
+                color = { r, g, b },
+            })
+        end
+    end
+
+    return lines
 end
 
 --- Rebuilds a tooltip with processed lines according to user settings
 --- @param tooltip table The GameTooltip object
 --- @param validLines table Array of processed line data
 function TooltipUtils.rebuildTooltipWithProcessedLines(tooltip, validLines)
+    if not validLines or #validLines == 0 then
+        return
+    end
+
     tooltip:ClearLines()
-    
-    for i, line in ipairs(validLines) do
-        if line.color then
-            tooltip:AddLine(line.left, line.color[1], line.color[2], line.color[3])
-            
-            if line.right then
-                local rightLine = _G["GameTooltipTextRight" .. i]
-                if rightLine then
-                    rightLine:SetText(line.right)
-                end
+
+    for _, line in ipairs(validLines) do
+        if line and line.left and line.left ~= "" then
+            local r, g, b = 1, 1, 1
+            if line.color then
+                r = line.color[1] or 1
+                g = line.color[2] or 1
+                b = line.color[3] or 1
+            end
+
+            if line.right and line.right ~= "" then
+                tooltip:AddDoubleLine(line.left, line.right, r, g, b, r, g, b)
+            else
+                tooltip:AddLine(line.left, r, g, b)
             end
         end
     end
-    
+
     tooltip:Show()
-end
-
---- Extracts level information from tooltip lines
---- @param tooltip table The GameTooltip object
---- @param startLine number Line number to start searching from
---- @return number|nil keyLevel
---- @return number|nil resilientLevel
-function TooltipUtils.extractLevelInfoFromTooltip(tooltip, startLine)
-    local keyLevel, resilientLevel
-    
-    for i = startLine or 2, tooltip:NumLines() do
-        local fontString = _G["GameTooltipTextLeft"..i]
-        if not fontString then break end
-        -- GetText() may return a tainted string; string.match on a tainted string
-        -- also fails ("string conversion on secret value"), so keep every string
-        -- operation inside the same pcall closure so taint never escapes.
-        local ok, kl, rl = pcall(function()
-            local text = fontString:GetText()
-            if not text then return nil, nil end
-            local k = not keyLevel     and string.match(text, "Mythic Level (%d+)")     or nil
-            local r = not resilientLevel and string.match(text, "Resilient Level (%d+)") or nil
-            return k, r
-        end)
-
-        if ok then
-            if kl then keyLevel     = tonumber(kl) end
-            if rl then resilientLevel = tonumber(rl) end
-        end
-
-        if keyLevel and resilientLevel then break end
-    end
-    
-    return keyLevel, resilientLevel
 end
