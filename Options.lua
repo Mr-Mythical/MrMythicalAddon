@@ -25,6 +25,7 @@ local DEFAULTS = {
     SHORT_DUNGEON_NAMES = "OFF",
     PLAYER_BEST_DISPLAY = "WITH_SCORE",
     REWARDS_DISPLAY = "SHOW",
+    HIDE_REWARD_NUMBERS = false,
     UNIFIED_FRAME_POINT = "CENTER",
     UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
     UNIFIED_FRAME_X = 0,
@@ -94,7 +95,9 @@ local TOOLTIPS = {
     REWARDS_DISPLAY = "Choose how to display crest and gear rewards:\n\n" ..
         WHITE .. "Hide:|r Don't show reward information\n" ..
         WHITE .. "Always Show:|r Always display crest and gear rewards\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show rewards"
+        WHITE .. "Shift to Show:|r Hold Shift to show rewards",
+
+    HIDE_REWARD_NUMBERS = "Hide the numeric values (item level and crest amount) from reward displays, showing only the reward type names."
 }
 
 --- Creates a setting with appropriate UI element
@@ -330,6 +333,12 @@ function Options.createSettingsInCategory(category)
                     type = "string",
                     tooltip = TOOLTIPS.REWARDS_DISPLAY,
                     options = DROPDOWN_OPTIONS.REWARDS_DISPLAY
+                },
+                {
+                    name = "Hide Reward Numbers",
+                    key = "HIDE_REWARD_NUMBERS",
+                    type = "boolean",
+                    tooltip = TOOLTIPS.HIDE_REWARD_NUMBERS
                 },
                 {
                     name = "Remove Score Colors",

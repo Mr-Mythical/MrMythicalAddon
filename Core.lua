@@ -235,20 +235,35 @@ local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
 
     local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
     local crest = RewardsFunctions.getCrestReward(keyLevel)
-    tooltip:AddLine(string.format(
-        "%sGear: %s (%s) / Vault: %s (%s)|r",
-        ConfigData.COLORS.WHITE,
-        rewards.dungeonTrack,
-        rewards.dungeonItem,
-        rewards.vaultTrack,
-        rewards.vaultItem
-    ))
-    tooltip:AddLine(string.format(
-        "%sCrest: %s (%s)|r",
-        ConfigData.COLORS.WHITE,
-        crest.crestType,
-        tostring(crest.crestAmount)
-    ))
+    local hideNumbers = MRM_SavedVars.HIDE_REWARD_NUMBERS
+    if hideNumbers then
+        tooltip:AddLine(string.format(
+            "%sGear: %s / Vault: %s|r",
+            ConfigData.COLORS.WHITE,
+            rewards.dungeonTrack,
+            rewards.vaultTrack
+        ))
+        tooltip:AddLine(string.format(
+            "%sCrest: %s|r",
+            ConfigData.COLORS.WHITE,
+            crest.crestType
+        ))
+    else
+        tooltip:AddLine(string.format(
+            "%sGear: %s (%s) / Vault: %s (%s)|r",
+            ConfigData.COLORS.WHITE,
+            rewards.dungeonTrack,
+            rewards.dungeonItem,
+            rewards.vaultTrack,
+            rewards.vaultItem
+        ))
+        tooltip:AddLine(string.format(
+            "%sCrest: %s (%s)|r",
+            ConfigData.COLORS.WHITE,
+            crest.crestType,
+            tostring(crest.crestAmount)
+        ))
+    end
 end
 
 local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isShiftPressed)

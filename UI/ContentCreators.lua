@@ -91,17 +91,30 @@ function ContentCreators.createRewardRow(parentFrame, level, startY, index)
     
     local rewards = RewardsFunctions.getRewardsForKeyLevel(level)
     local crests = RewardsFunctions.getCrestReward(level)
-    
+    local hideNumbers = MRM_SavedVars and MRM_SavedVars.HIDE_REWARD_NUMBERS
+
     UIHelpers.createRowText(parentFrame, tostring(level), 0, yOffset, 80)
-    UIHelpers.createRowText(parentFrame, 
-        string.format("%s\n%s", rewards.dungeonItem, rewards.dungeonTrack), 
-        80, yOffset, 150)
-    UIHelpers.createRowText(parentFrame, 
-        string.format("%s\n%s", rewards.vaultItem, rewards.vaultTrack), 
-        230, yOffset, 150)
-    UIHelpers.createRowText(parentFrame, 
-        string.format("%s\n%d", crests.crestType, crests.crestAmount), 
-        380, yOffset, 150)
+    if hideNumbers then
+        UIHelpers.createRowText(parentFrame,
+            rewards.dungeonTrack,
+            80, yOffset, 150)
+        UIHelpers.createRowText(parentFrame,
+            rewards.vaultTrack,
+            230, yOffset, 150)
+        UIHelpers.createRowText(parentFrame,
+            crests.crestType,
+            380, yOffset, 150)
+    else
+        UIHelpers.createRowText(parentFrame,
+            string.format("%s\n%s", rewards.dungeonItem, rewards.dungeonTrack),
+            80, yOffset, 150)
+        UIHelpers.createRowText(parentFrame,
+            string.format("%s\n%s", rewards.vaultItem, rewards.vaultTrack),
+            230, yOffset, 150)
+        UIHelpers.createRowText(parentFrame,
+            string.format("%s\n%d", crests.crestType, crests.crestAmount),
+            380, yOffset, 150)
+    end
 end
 
 --- Creates the dungeon timer thresholds interface
