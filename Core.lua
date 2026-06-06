@@ -24,6 +24,9 @@ local Options = MrMythical.Options
 
 local GRADIENTS = GradientsData.GRADIENTS
 
+--- Writes a formatted debug message when debug mode is enabled.
+--- @param message string Format string.
+--- @param ... any Arguments for string.format.
 local function debugLog(message, ...)
     if MrMythicalDebug then
         local formattedMessage = string.format("[MrMythical Debug] " .. message, ...)
@@ -33,6 +36,12 @@ end
 
 MrMythical.debugLog = debugLog
 
+--- Builds the visible keystone tooltip title.
+--- Applies level formatting and short-name preferences from saved settings.
+--- @param mapID number|nil Dungeon map ID.
+--- @param keyLevel number|nil Keystone level.
+--- @param resilientLevel number|nil Resilient level (custom mode support).
+--- @return string|nil newTitle Formatted title or nil when no dungeon name is available.
 local function buildTooltipTitle(mapID, keyLevel, resilientLevel)
     local fullName = mapID and DungeonData.getDungeonName(mapID) or nil
     if not fullName then
@@ -69,6 +78,10 @@ local function buildTooltipTitle(mapID, keyLevel, resilientLevel)
     return newTitle
 end
 
+--- Extracts level values from raw tooltip data lines.
+--- @param lines table[]|nil Tooltip data line entries.
+--- @return number|nil keyLevel
+--- @return number|nil resilientLevel
 local function extractLevelsFromTooltipDataLines(lines)
     local keyLevel, resilientLevel
 
@@ -102,6 +115,12 @@ local function extractLevelsFromTooltipDataLines(lines)
     return keyLevel, resilientLevel
 end
 
+--- Mutates tooltip data lines to apply title/line visibility formatting.
+--- This function runs in TooltipDataProcessor pre-call and only updates text fields.
+--- @param data table Tooltip data object containing a lines array.
+--- @param mapID number Dungeon map ID.
+--- @param keyLevel number|nil Keystone level when already parsed from item link.
+--- @param resilientLevel number|nil Optional resilient level.
 local function processKeystoneTooltipData(data, mapID, keyLevel, resilientLevel)
     if not data or not data.lines then
         return
@@ -157,6 +176,9 @@ local function processKeystoneTooltipData(data, mapID, keyLevel, resilientLevel)
     end
 end
 
+--- Adds timer information lines to the tooltip based on timer display settings.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param mapID number Dungeon map ID.
 local function addTimerToTooltip(tooltip, mapID)
     local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
     if not DungeonData then
@@ -179,6 +201,11 @@ local function addTimerToTooltip(tooltip, mapID)
     end
 end
 
+--- Adds the current character personal-best line for this keystone.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param itemString string Keystone item string used for lookups.
+--- @param currentScore number Current character mythic score.
+--- @param isShiftPressed boolean Whether Shift is currently held.
 local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
     local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
     local shouldShow = playerBestDisplay == "WITH_SCORE"
@@ -225,6 +252,10 @@ local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShi
     end
 end
 
+--- Adds reward and crest information for a given keystone level.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param keyLevel number Keystone level.
+--- @param isShiftPressed boolean Whether Shift is currently held.
 local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
     local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
     local shouldShow = rewardsDisplay == "SHOW" or (rewardsDisplay == "SHIFT" and isShiftPressed)
@@ -266,6 +297,14 @@ local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
     end
 end
 
+--- Adds group-wide score gain details for party members.
+--- Shows summary by default and detailed per-player rows when Shift is held.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param groupScoreData table<string, number> Player name to score map.
+--- @param potentialScore number Score for completing this key.
+--- @param averageGroupGain number Average potential gain across the group.
+--- @param groupColor string Color code used for average gain.
+--- @param isShiftPressed boolean Whether Shift is currently held.
 local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isShiftPressed)
     if not (IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid()) then
         return
@@ -317,6 +356,11 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
     end
 end
 
+--- Composes all reward/scoring lines appended to keystone tooltips.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param itemString string Keystone item string.
+--- @param keyLevel number Keystone level.
+--- @param mapID number Dungeon map ID.
 local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID)
     debugLog("Enhancing tooltip with reward info: level=%d, mapID=%d", keyLevel, mapID)
 
@@ -387,8 +431,14 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     )
 end
 
+--- Cache of parsed keystones by tooltip frame.
+--- Used to share data between tooltip pre/post callbacks.
 local tooltipKeystoneCache = {}
 
+--- Tooltip pre-call handler.
+--- Parses keystone links and updates base tooltip data lines.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param data table Tooltip data object from TooltipDataProcessor.
 local function handleKeystoneTooltip(tooltip, data)
     if not data then
         return
@@ -426,6 +476,9 @@ local function handleKeystoneTooltip(tooltip, data)
     end
 end
 
+--- Tooltip post-call handler.
+--- Appends reward/score lines after the base tooltip content exists.
+--- @param tooltip GameTooltip Tooltip instance.
 local function appendKeystoneRewardInfo(tooltip)
     if not tooltip or not tooltip.GetItem then
         return
@@ -441,6 +494,8 @@ local function appendKeystoneRewardInfo(tooltip)
     end
 end
 
+--- Chat hyperlink handler for keystone links in ItemRefTooltip.
+--- @param link string Hyperlink string passed by SetItemRef.
 local function handleKeystoneChatHyperlink(link)
     local keystoneData = KeystoneUtils.parseKeystoneData(link)
     if not keystoneData then
@@ -478,6 +533,7 @@ eventFrame:RegisterEvent("CHALLENGE_MODE_START")
 
 local addonInitialized = false
 
+--- Main event dispatcher for addon lifecycle and challenge mode tracking.
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
