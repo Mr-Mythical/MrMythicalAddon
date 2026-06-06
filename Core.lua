@@ -533,7 +533,7 @@ eventFrame:RegisterEvent("CHALLENGE_MODE_START")
 
 local addonInitialized = false
 
---- Main event dispatcher for addon lifecycle and challenge mode tracking.
+--- Main event dispatcher for addon lifecycle and challenge mode tracking
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
