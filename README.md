@@ -18,19 +18,22 @@ Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone t
 Transform every Mythic+ keystone tooltip with detailed, customizable information:
 - **Reward Information**: Gear item levels and track info for dungeon drops and vault rewards
 - **Crest Details**: Types and quantities of crests earned for completion
-- **Score Calculations**: Potential Mythic+ score gains with timing bonuses clearly displayed
-- **Flexible Customization**: Choose what information to show or hide
-- **Display Options**: Full, compact, or minimal information modes
-- **Element Control**: Show or hide duration text, affix descriptions, or other elements
-- **Clean Formatting**: Customize titles and remove clutter for your preferred appearance
+- **Score Calculations**: Potential Mythic+ score gains with optional timing bonus ranges (+0–15)
+- **Personal Best**: Your best run for that dungeon, with optional score display
+- **Group Score Gains**: Average party score gain; hold Shift for per-player breakdown
+- **Dungeon Timers**: Optional par time or upgrade timer lines (+2/+3 thresholds)
+- **Level Display**: Default, compact (+X), or in-title formatting with Shift modifiers for resilient levels
+- **Element Control**: Hide duration text, affix descriptions, soulbound/unique lines, and other clutter
+- **Clean Formatting**: Short titles, short dungeon names, and optional plain score colors
+- **Chat Links**: Keystone links in chat show the same enhanced tooltip details
 
 ### **Dashboard & Planning Tools**
 Access powerful tools through an integrated dashboard interface:
 - **Rewards Calculator**: Browse gear rewards and crest earnings for any key level
 - **Interactive Score Calculator**: Calculate potential score gains for different key levels and timing
 - **Dungeon Timers**: Understand timer thresholds for chest rewards
-- **Statistics Overview**: Track your runs, completion rates, and timing success
-- **Run Tracking**: Automatic detection with simple overview of your recent Mythic+ activity
+- **Statistics Overview**: Per-character stats for the current season — completions, overtime, and abandoned runs
+- **Run Tracking**: Automatically logs runs on dungeon start and completion with recent activity and dungeon breakdowns
 
 ### **Command Interface**
 Access all features via convenient chat commands:
@@ -40,8 +43,17 @@ Access all features via convenient chat commands:
 - `/mrm score` - Open interactive score calculator
 - `/mrm stats` - Open simple statistics overview with run breakdown
 - `/mrm times` - Open dungeon timer calculator with chest thresholds
-- `/mrm settings` - Open addon settings panel
+- `/mrm settings` - Open addon settings panel (also `/mrm config` or `/mrm options`)
 - `/mrm help` - Display all available commands
+
+### **Settings & Keybinding**
+- **Settings**: `/mrm settings`, the dashboard **Settings** tab, or **Esc → Options → AddOns → Mr. Mythical → Keystone Tooltips**
+- **Keybinding**: Bind **Open Dashboard** under *Key Bindings → AddOns → Mr. Mythical* to toggle the dashboard
+
+## Requirements
+
+- **World of Warcraft: Retail** (Interface version 120005)
+- Not compatible with Classic era clients
 
 ## Download
 
@@ -50,6 +62,21 @@ Get the latest version from your preferred addon manager:
 [Download on CurseForge](https://www.curseforge.com/wow/addons/mr-mythical)
 
 [Download on Wago](https://addons.wago.io/addons/mrmythical)
+
+[Source on GitHub](https://github.com/Mr-Mythical/MrMythicalAddon)
+
+## Installation
+
+### Addon managers (recommended)
+Install via CurseForge or Wago using the links above. Addon managers handle updates automatically.
+
+### Manual install
+1. Download the latest release from CurseForge, Wago, or GitHub
+2. Ensure the addon folder is named **`MrMythical`** (it must match `MrMythical.toc`)
+3. Copy the folder to `World of Warcraft\_retail_\Interface\AddOns\`
+4. Restart WoW or type `/reload`
+
+> **Note:** This repository is named `MrMythicalAddon`, but the installed addon folder must be `MrMythical`.
 
 ## Related Addons
 

@@ -1,0 +1,32 @@
+---
+description: Publish WoW addon releases via release.sh instead of manual git commands
+alwaysApply: true
+---
+
+# WoW Addon Release Workflow
+
+When the user wants to **publish**, **release**, **ship**, **tag**, or **bump the version**:
+
+- **Do not** suggest manual `git add`, `git commit`, `git tag`, or `git push` as the release path.
+- **Do** suggest `./release.sh` — it handles staging, commit, annotated tag, and push in one flow.
+
+## Usage
+
+```bash
+./release.sh patch "Fix tooltip display for compact mode"
+./release.sh minor "Add dungeon timer breakdown to stats tab"
+./release.sh major "Breaking change: new settings schema"
+./release.sh patch   # Opens editor with auto-generated release notes (Ollama or template)
+```
+
+Version bump: `major` | `minor` | `patch` (semantic versioning from latest `v*` tag).
+
+## Agent behavior
+
+- Suggest the command and a draft message; let the user run it (script is interactive: confirmation + optional editor).
+- Do not run `release.sh` unless the user explicitly asks.
+- Tag push triggers `.github/workflows/release.yml` (CurseForge/Wago via BigWigs packager).
+
+## Regular git commits
+
+For non-release work (WIP, docs-only, no version bump), normal git workflow still applies — only **publishing** routes through `release.sh`.

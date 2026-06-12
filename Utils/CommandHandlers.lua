@@ -32,11 +32,12 @@ end
 function CommandHandlers.handleHelpCommand()
     print(ConfigData.COLORS.GOLD .. "MrMythical Commands:|r")
     print(ConfigData.COLORS.WHITE .. "  /mrm - Open main dashboard")
+    print(ConfigData.COLORS.WHITE .. "  /mrm dashboard - Open main dashboard explicitly")
     print(ConfigData.COLORS.WHITE .. "  /mrm rewards - Open keystone rewards UI")
     print(ConfigData.COLORS.WHITE .. "  /mrm score - Open score calculations UI")
     print(ConfigData.COLORS.WHITE .. "  /mrm stats - Open completion statistics dashboard")
     print(ConfigData.COLORS.WHITE .. "  /mrm times - Open dungeon timers with chest thresholds")
-    print(ConfigData.COLORS.WHITE .. "  /mrm settings - Open addon settings panel")
+    print(ConfigData.COLORS.WHITE .. "  /mrm settings - Open addon settings panel (config/options also work)")
     print(ConfigData.COLORS.WHITE .. "  /mrm help - Show this help message")
 end
 
