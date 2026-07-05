@@ -16,8 +16,8 @@ local CompletionTracker = {}
 local MAX_RUN_HISTORY = 5000
 
 local function debugLog(message, ...)
-    if MrMythicalDebug then
-        print(string.format("[MrMythical CompletionTracker] " .. message, ...))
+    if MrMythical.debugLog then
+        MrMythical.debugLog("[CompletionTracker] " .. message, ...)
     end
 end
 

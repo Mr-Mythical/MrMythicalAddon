@@ -34,8 +34,9 @@ function ContentCreators.dashboard(parentFrame)
     welcome:SetWidth(400)
     welcome:SetJustifyH("CENTER")
     
+    local addonVersion = C_AddOns.GetAddOnMetadata("MrMythical", "Version") or "?"
     local version = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontDisableSmall",
-        "Mr. Mythical by Braunerr", "BOTTOM", 0, UIConstants and UIConstants.LAYOUT.LARGE_PADDING or 20)
+        string.format("Mr. Mythical v%s by Braunerr", addonVersion), "BOTTOM", 0, UIConstants and UIConstants.LAYOUT.LARGE_PADDING or 20)
     UIHelpers.setTextColor(version, "DISABLED")
 end
 

@@ -52,7 +52,7 @@ Access all features via convenient chat commands:
 
 ## Requirements
 
-- **World of Warcraft: Retail** (Interface version 120005)
+- **World of Warcraft: Retail** (Interface version 120007)
 - Not compatible with Classic era clients
 
 ## Download
