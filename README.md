@@ -18,9 +18,10 @@ Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone t
 Transform every Mythic+ keystone tooltip with detailed, customizable information:
 - **Reward Information**: Gear item levels and track info for dungeon drops and vault rewards
 - **Crest Details**: Types and quantities of crests earned for completion
-- **Score Calculations**: Potential Mythic+ score gains with optional timing bonus ranges (+0–15)
+- **Score Calculations**: Potential Mythic+ score gains with optional timing bonus ranges (+0–15); hide, always show, or Shift to reveal
+- **Score Gain Display**: Optional toggle to show or hide your personal score gain
 - **Personal Best**: Your best run for that dungeon, with optional score display
-- **Group Score Gains**: Average party score gain; hold Shift for per-player breakdown
+- **Group Score Gains**: Hide, show average party gain only, or hold Shift for per-player breakdown
 - **Dungeon Timers**: Optional par time or upgrade timer lines (+2/+3 thresholds)
 - **Level Display**: Default, compact (+X), or in-title formatting with Shift modifiers for resilient levels
 - **Element Control**: Hide duration text, affix descriptions, soulbound/unique lines, and other clutter

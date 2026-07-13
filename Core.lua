@@ -310,7 +310,12 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
         return
     end
 
-    if isShiftPressed then
+    local groupScoreDisplay = MRM_SavedVars.GROUP_SCORE_DISPLAY or "SHIFT_DETAILS"
+    if groupScoreDisplay == "HIDE" then
+        return
+    end
+
+    if groupScoreDisplay == "SHIFT_DETAILS" and isShiftPressed then
         tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
 
         local sortedPlayers = {}
@@ -346,12 +351,17 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
             end
         end
     else
+        local shiftHint = ""
+        if groupScoreDisplay == "SHIFT_DETAILS" then
+            shiftHint = string.format(" %s(Hold Shift for details)|r", ConfigData.COLORS.GRAY)
+        end
+
         tooltip:AddLine(string.format(
-            "%sGroup Avg Gain: %s+%.1f|r %s(Hold Shift for details)|r",
+            "%sGroup Avg Gain: %s+%.1f|r%s",
             ConfigData.COLORS.WHITE,
             groupColor,
             averageGroupGain,
-            ConfigData.COLORS.GRAY
+            shiftHint
         ))
     end
 end
@@ -387,39 +397,46 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
     addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
 
-    local scoreLine = ""
-    local gainString = ""
+    local scoreDisplay = MRM_SavedVars.SCORE_DISPLAY or "SHOW"
+    local shouldShowScore = scoreDisplay == "SHOW"
+        or (scoreDisplay == "SHIFT" and isShiftPressed)
 
-    if MRM_SavedVars.SHOW_TIMING then
-        local maxScore = potentialScore + 15
-        scoreLine = string.format(
-            "%sScore: %s%d|r - %s%d|r",
-            ConfigData.COLORS.WHITE,
-            baseColor,
-            potentialScore,
-            baseColor,
-            maxScore
-        )
+    if shouldShowScore then
+        local scoreLine = ""
+        local gainString = ""
+        local showScoreGain = MRM_SavedVars.SHOW_SCORE_GAIN ~= false
 
-        local minGain = playerGain
-        local maxGain = math.max(maxScore - currentScore, 0)
-        if maxGain > 0 then
-            gainString = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
+        if MRM_SavedVars.SHOW_TIMING then
+            local maxScore = potentialScore + 15
+            scoreLine = string.format(
+                "%sScore: %s%d|r - %s%d|r",
+                ConfigData.COLORS.WHITE,
+                baseColor,
+                potentialScore,
+                baseColor,
+                maxScore
+            )
+
+            local minGain = playerGain
+            local maxGain = math.max(maxScore - currentScore, 0)
+            if showScoreGain and maxGain > 0 then
+                gainString = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
+            end
+        else
+            scoreLine = string.format(
+                "%sScore: %s%d|r",
+                ConfigData.COLORS.WHITE,
+                baseColor,
+                potentialScore
+            )
+
+            if showScoreGain and playerGain > 0 then
+                gainString = string.format(" %s(+%d)|r", gainColor, playerGain)
+            end
         end
-    else
-        scoreLine = string.format(
-            "%sScore: %s%d|r",
-            ConfigData.COLORS.WHITE,
-            baseColor,
-            potentialScore
-        )
 
-        if playerGain > 0 then
-            gainString = string.format(" %s(+%d)|r", gainColor, playerGain)
-        end
+        tooltip:AddLine(scoreLine .. gainString)
     end
-
-    tooltip:AddLine(scoreLine .. gainString)
 
     addGroupDetailsToTooltip(
         tooltip,

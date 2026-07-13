@@ -26,6 +26,9 @@ local DEFAULTS = {
     PLAYER_BEST_DISPLAY = "WITH_SCORE",
     REWARDS_DISPLAY = "SHOW",
     HIDE_REWARD_NUMBERS = false,
+    SCORE_DISPLAY = "SHOW",
+    SHOW_SCORE_GAIN = true,
+    GROUP_SCORE_DISPLAY = "SHIFT_DETAILS",
     UNIFIED_FRAME_POINT = "CENTER",
     UNIFIED_FRAME_RELATIVE_POINT = "CENTER",
     UNIFIED_FRAME_X = 0,
@@ -64,6 +67,16 @@ local DROPDOWN_OPTIONS = {
         { text = "Hide",          value = "HIDE" },
         { text = "Always Show",   value = "SHOW" },
         { text = "Shift to Show", value = "SHIFT" }
+    },
+    SCORE_DISPLAY = {
+        { text = "Hide",          value = "HIDE" },
+        { text = "Always Show",   value = "SHOW" },
+        { text = "Shift to Show", value = "SHIFT" }
+    },
+    GROUP_SCORE_DISPLAY = {
+        { text = "Hide",               value = "HIDE" },
+        { text = "Average Only",       value = "AVERAGE" },
+        { text = "Shift for Details",  value = "SHIFT_DETAILS" }
     }
 }
 
@@ -96,6 +109,16 @@ local TOOLTIPS = {
         WHITE .. "Hide:|r Don't show reward information\n" ..
         WHITE .. "Always Show:|r Always display crest and gear rewards\n" ..
         WHITE .. "Shift to Show:|r Hold Shift to show rewards",
+
+    SCORE_DISPLAY = "Choose how to display the potential score line:\n\n" ..
+        WHITE .. "Hide:|r Don't show score information\n" ..
+        WHITE .. "Always Show:|r Always display the score line\n" ..
+        WHITE .. "Shift to Show:|r Hold Shift to show score information",
+
+    GROUP_SCORE_DISPLAY = "Choose how to display group score information in parties:\n\n" ..
+        WHITE .. "Hide:|r Don't show group score information\n" ..
+        WHITE .. "Average Only:|r Show average party gain only\n" ..
+        WHITE .. "Shift for Details:|r Show average by default, hold Shift for per-player breakdown",
 
     HIDE_REWARD_NUMBERS = "Hide the numeric values (item level and crest amount) from reward displays, showing only the reward type names."
 }
@@ -312,6 +335,26 @@ function Options.createSettingsInCategory(category)
                     key = "SHOW_TIMING",
                     type = "boolean",
                     tooltip = "Show the potential timing bonus (0-15)."
+                },
+                {
+                    name = "Score Display",
+                    key = "SCORE_DISPLAY",
+                    type = "string",
+                    tooltip = TOOLTIPS.SCORE_DISPLAY,
+                    options = DROPDOWN_OPTIONS.SCORE_DISPLAY
+                },
+                {
+                    name = "Show Score Gain",
+                    key = "SHOW_SCORE_GAIN",
+                    type = "boolean",
+                    tooltip = "Show your personal score gain alongside the score line."
+                },
+                {
+                    name = "Group Score Display",
+                    key = "GROUP_SCORE_DISPLAY",
+                    type = "string",
+                    tooltip = TOOLTIPS.GROUP_SCORE_DISPLAY,
+                    options = DROPDOWN_OPTIONS.GROUP_SCORE_DISPLAY
                 },
                 {
                     name = "Timer Display",
