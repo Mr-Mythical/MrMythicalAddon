@@ -51,11 +51,6 @@ Access all features via convenient chat commands:
 - **Settings**: `/mrm settings`, the dashboard **Settings** tab, or **Esc → Options → AddOns → Mr. Mythical → Keystone Tooltips**
 - **Keybinding**: Bind **Open Dashboard** under *Key Bindings → AddOns → Mr. Mythical* to toggle the dashboard
 
-## Requirements
-
-- **World of Warcraft: Retail** (Interface version 120007)
-- Not compatible with Classic era clients
-
 ## Download
 
 Get the latest version from your preferred addon manager:
