@@ -6,6 +6,7 @@ Stores individual run records and generates statistics dynamically.
 
 Data Structure: MRM_RunHistory (global storage with character filtering)
 Dependencies: WoW APIs, MrMythical.DungeonData
+Author: Braunerr
 --]]
 
 local MrMythical = MrMythical or {}
