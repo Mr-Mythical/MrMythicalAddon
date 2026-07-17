@@ -26,6 +26,11 @@ local DEFAULTS = {
     PLAYER_BEST_DISPLAY = "WITH_SCORE",
     REWARDS_DISPLAY = "SHOW",
     HIDE_REWARD_NUMBERS = false,
+    GEAR_REWARD_DISPLAY = "SHOW",
+    VAULT_REWARD_DISPLAY = "SHOW",
+    CREST_REWARD_DISPLAY = "SHOW",
+    REWARD_LINE_STYLE = "TWO_LINES",
+    TIMER_LABEL_STYLE = "FULL",
     SCORE_DISPLAY = "SHOW",
     SHOW_SCORE_GAIN = true,
     GROUP_SCORE_DISPLAY = "SHIFT_DETAILS",
@@ -68,6 +73,31 @@ local DROPDOWN_OPTIONS = {
         { text = "Always Show",   value = "SHOW" },
         { text = "Shift to Show", value = "SHIFT" }
     },
+    GEAR_REWARD_DISPLAY = {
+        { text = "Hide",          value = "HIDE" },
+        { text = "Always Show",   value = "SHOW" },
+        { text = "Shift to Show", value = "SHIFT" }
+    },
+    VAULT_REWARD_DISPLAY = {
+        { text = "Hide",          value = "HIDE" },
+        { text = "Always Show",   value = "SHOW" },
+        { text = "Shift to Show", value = "SHIFT" }
+    },
+    CREST_REWARD_DISPLAY = {
+        { text = "Hide",          value = "HIDE" },
+        { text = "Always Show",   value = "SHOW" },
+        { text = "Shift to Show", value = "SHIFT" }
+    },
+    REWARD_LINE_STYLE = {
+        { text = "Two Lines",   value = "TWO_LINES" },
+        { text = "Single Line", value = "SINGLE_LINE" },
+        { text = "Compact",     value = "COMPACT" }
+    },
+    TIMER_LABEL_STYLE = {
+        { text = "Full (Dungeon Timer)", value = "FULL" },
+        { text = "Short (Timer)",        value = "SHORT" },
+        { text = "Times Only",           value = "TIMES_ONLY" }
+    },
     SCORE_DISPLAY = {
         { text = "Hide",          value = "HIDE" },
         { text = "Always Show",   value = "SHOW" },
@@ -105,10 +135,35 @@ local TOOLTIPS = {
         WHITE .. "With Score:|r Show level, time, upgrades, and score\n" ..
         WHITE .. "Shift to Show:|r Hold Shift to show personal best with score",
 
-    REWARDS_DISPLAY = "Choose how to display crest and gear rewards:\n\n" ..
-        WHITE .. "Hide:|r Don't show reward information\n" ..
-        WHITE .. "Always Show:|r Always display crest and gear rewards\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show rewards",
+    REWARDS_DISPLAY = "Master control for all reward lines. When hidden or gated by Shift, individual gear/vault/crest settings are ignored.\n\n" ..
+        WHITE .. "Hide:|r Don't show any reward information\n" ..
+        WHITE .. "Always Show:|r Allow individual reward settings to apply\n" ..
+        WHITE .. "Shift to Show:|r Hold Shift to show rewards (then apply individual settings)",
+
+    GEAR_REWARD_DISPLAY = "Choose how to display dungeon gear rewards:\n\n" ..
+        WHITE .. "Hide:|r Don't show gear reward information\n" ..
+        WHITE .. "Always Show:|r Always display gear rewards\n" ..
+        WHITE .. "Shift to Show:|r Hold Shift to show gear rewards",
+
+    VAULT_REWARD_DISPLAY = "Choose how to display Great Vault rewards:\n\n" ..
+        WHITE .. "Hide:|r Don't show vault reward information\n" ..
+        WHITE .. "Always Show:|r Always display vault rewards\n" ..
+        WHITE .. "Shift to Show:|r Hold Shift to show vault rewards",
+
+    CREST_REWARD_DISPLAY = "Choose how to display crest rewards:\n\n" ..
+        WHITE .. "Hide:|r Don't show crest reward information\n" ..
+        WHITE .. "Always Show:|r Always display crest rewards\n" ..
+        WHITE .. "Shift to Show:|r Hold Shift to show crest rewards",
+
+    REWARD_LINE_STYLE = "Choose how reward information is laid out:\n\n" ..
+        WHITE .. "Two Lines:|r Gear and vault on one line, crest on a second line\n" ..
+        WHITE .. "Single Line:|r All visible rewards on one line\n" ..
+        WHITE .. "Compact:|r Abbreviated labels (G/V/C) on one line",
+
+    TIMER_LABEL_STYLE = "Choose how timer labels are written:\n\n" ..
+        WHITE .. "Full:|r 'Dungeon Timer: 30:00'\n" ..
+        WHITE .. "Short:|r 'Timer: 30:00'\n" ..
+        WHITE .. "Times Only:|r '30:00' with no label",
 
     SCORE_DISPLAY = "Choose how to display the potential score line:\n\n" ..
         WHITE .. "Hide:|r Don't show score information\n" ..
@@ -364,12 +419,30 @@ function Options.createSettingsInCategory(category)
                     options = DROPDOWN_OPTIONS.TIMER_DISPLAY_MODE
                 },
                 {
+                    name = "Timer Label Style",
+                    key = "TIMER_LABEL_STYLE",
+                    type = "string",
+                    tooltip = TOOLTIPS.TIMER_LABEL_STYLE,
+                    options = DROPDOWN_OPTIONS.TIMER_LABEL_STYLE
+                },
+                {
                     name = "Player Best Display",
                     key = "PLAYER_BEST_DISPLAY",
                     type = "string",
                     tooltip = TOOLTIPS.PLAYER_BEST_DISPLAY,
                     options = DROPDOWN_OPTIONS.PLAYER_BEST_DISPLAY
                 },
+                {
+                    name = "Remove Score Colors",
+                    key = "PLAIN_SCORE_COLORS",
+                    type = "boolean",
+                    tooltip = "Display score and score gains in white instead of gradient colors."
+                }
+            }
+        },
+        {
+            header = { name = "Rewards Options", tooltip = "Settings that control gear, vault, and crest reward lines" },
+            settings = {
                 {
                     name = "Rewards Display",
                     key = "REWARDS_DISPLAY",
@@ -378,16 +451,38 @@ function Options.createSettingsInCategory(category)
                     options = DROPDOWN_OPTIONS.REWARDS_DISPLAY
                 },
                 {
+                    name = "Gear Reward Display",
+                    key = "GEAR_REWARD_DISPLAY",
+                    type = "string",
+                    tooltip = TOOLTIPS.GEAR_REWARD_DISPLAY,
+                    options = DROPDOWN_OPTIONS.GEAR_REWARD_DISPLAY
+                },
+                {
+                    name = "Vault Reward Display",
+                    key = "VAULT_REWARD_DISPLAY",
+                    type = "string",
+                    tooltip = TOOLTIPS.VAULT_REWARD_DISPLAY,
+                    options = DROPDOWN_OPTIONS.VAULT_REWARD_DISPLAY
+                },
+                {
+                    name = "Crest Reward Display",
+                    key = "CREST_REWARD_DISPLAY",
+                    type = "string",
+                    tooltip = TOOLTIPS.CREST_REWARD_DISPLAY,
+                    options = DROPDOWN_OPTIONS.CREST_REWARD_DISPLAY
+                },
+                {
+                    name = "Reward Line Style",
+                    key = "REWARD_LINE_STYLE",
+                    type = "string",
+                    tooltip = TOOLTIPS.REWARD_LINE_STYLE,
+                    options = DROPDOWN_OPTIONS.REWARD_LINE_STYLE
+                },
+                {
                     name = "Hide Reward Numbers",
                     key = "HIDE_REWARD_NUMBERS",
                     type = "boolean",
                     tooltip = TOOLTIPS.HIDE_REWARD_NUMBERS
-                },
-                {
-                    name = "Remove Score Colors",
-                    key = "PLAIN_SCORE_COLORS",
-                    type = "boolean",
-                    tooltip = "Display score and score gains in white instead of gradient colors."
                 }
             }
         }

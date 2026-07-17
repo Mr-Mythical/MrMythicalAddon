@@ -181,7 +181,7 @@ end
 --- @param mapID number Dungeon map ID.
 local function addTimerToTooltip(tooltip, mapID)
     local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
-    if not DungeonData then
+    if timerMode == "NONE" or not DungeonData then
         return
     end
 
@@ -190,14 +190,115 @@ local function addTimerToTooltip(tooltip, mapID)
         return
     end
 
+    local timesText
     if timerMode == "DUNGEON" then
-        local formattedTime = DungeonData.formatTime(parTime)
-        tooltip:AddLine(string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, formattedTime))
+        timesText = DungeonData.formatTime(parTime)
     elseif timerMode == "UPGRADE" or (timerMode == "SHIFT" and IsShiftKeyDown()) then
         local timer1 = DungeonData.formatTime(parTime)
         local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
         local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
-        tooltip:AddLine(string.format("%sDungeon Timer: %s/%s/%s|r", ConfigData.COLORS.WHITE, timer1, timer2, timer3))
+        timesText = string.format("%s/%s/%s", timer1, timer2, timer3)
+    else
+        return
+    end
+
+    local labelStyle = MRM_SavedVars.TIMER_LABEL_STYLE or "FULL"
+    local lineText
+    if labelStyle == "TIMES_ONLY" then
+        lineText = string.format("%s%s|r", ConfigData.COLORS.WHITE, timesText)
+    elseif labelStyle == "SHORT" then
+        lineText = string.format("%sTimer: %s|r", ConfigData.COLORS.WHITE, timesText)
+    else
+        lineText = string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, timesText)
+    end
+
+    tooltip:AddLine(lineText)
+end
+
+--- Returns whether a Hide/Show/Shift display setting should render.
+--- @param displayMode string Display mode value.
+--- @param isShiftPressed boolean Whether Shift is currently held.
+--- @return boolean
+local function shouldShowDisplayMode(displayMode, isShiftPressed)
+    return displayMode == "SHOW" or (displayMode == "SHIFT" and isShiftPressed)
+end
+
+--- Formats a reward segment with optional numeric value.
+--- @param label string Display label.
+--- @param trackOrType string Track name or crest type.
+--- @param numberValue string|number|nil Optional numeric value.
+--- @param hideNumbers boolean Whether to omit numbers.
+--- @return string
+local function formatRewardSegment(label, trackOrType, numberValue, hideNumbers)
+    if hideNumbers or numberValue == nil then
+        return string.format("%s: %s", label, trackOrType)
+    end
+    return string.format("%s: %s (%s)", label, trackOrType, tostring(numberValue))
+end
+
+--- Adds reward and crest information for a given keystone level.
+--- Respects master REWARDS_DISPLAY plus per-type gear/vault/crest settings.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param keyLevel number Keystone level.
+--- @param isShiftPressed boolean Whether Shift is currently held.
+local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
+    local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
+    if not shouldShowDisplayMode(rewardsDisplay, isShiftPressed) then
+        return
+    end
+
+    local showGear = shouldShowDisplayMode(MRM_SavedVars.GEAR_REWARD_DISPLAY or "SHOW", isShiftPressed)
+    local showVault = shouldShowDisplayMode(MRM_SavedVars.VAULT_REWARD_DISPLAY or "SHOW", isShiftPressed)
+    local showCrest = shouldShowDisplayMode(MRM_SavedVars.CREST_REWARD_DISPLAY or "SHOW", isShiftPressed)
+
+    if not (showGear or showVault or showCrest) then
+        return
+    end
+
+    local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
+    local crest = RewardsFunctions.getCrestReward(keyLevel)
+    local hideNumbers = MRM_SavedVars.HIDE_REWARD_NUMBERS
+    local lineStyle = MRM_SavedVars.REWARD_LINE_STYLE or "TWO_LINES"
+    local compact = lineStyle == "COMPACT"
+
+    local gearLabel = compact and "G" or "Gear"
+    local vaultLabel = compact and "V" or "Vault"
+    local crestLabel = compact and "C" or "Crest"
+
+    local gearText = showGear and formatRewardSegment(gearLabel, rewards.dungeonTrack, rewards.dungeonItem, hideNumbers) or nil
+    local vaultText = showVault and formatRewardSegment(vaultLabel, rewards.vaultTrack, rewards.vaultItem, hideNumbers) or nil
+    local crestText = showCrest and formatRewardSegment(crestLabel, crest.crestType, crest.crestAmount, hideNumbers) or nil
+
+    if lineStyle == "TWO_LINES" then
+        local gearVaultParts = {}
+        if gearText then
+            table.insert(gearVaultParts, gearText)
+        end
+        if vaultText then
+            table.insert(gearVaultParts, vaultText)
+        end
+
+        if #gearVaultParts > 0 then
+            tooltip:AddLine(string.format("%s%s|r", ConfigData.COLORS.WHITE, table.concat(gearVaultParts, " / ")))
+        end
+        if crestText then
+            tooltip:AddLine(string.format("%s%s|r", ConfigData.COLORS.WHITE, crestText))
+        end
+    else
+        -- SINGLE_LINE and COMPACT both join all visible parts on one line
+        local parts = {}
+        if gearText then
+            table.insert(parts, gearText)
+        end
+        if vaultText then
+            table.insert(parts, vaultText)
+        end
+        if crestText then
+            table.insert(parts, crestText)
+        end
+        if #parts > 0 then
+            tooltip:AddLine(string.format("%s%s|r", ConfigData.COLORS.WHITE, table.concat(parts, " / ")))
+        end
     end
 end
 
@@ -248,51 +349,6 @@ local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShi
             "%sPersonal Best: %sNo data|r",
             ConfigData.COLORS.WHITE,
             ConfigData.COLORS.GRAY
-        ))
-    end
-end
-
---- Adds reward and crest information for a given keystone level.
---- @param tooltip GameTooltip Tooltip instance.
---- @param keyLevel number Keystone level.
---- @param isShiftPressed boolean Whether Shift is currently held.
-local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
-    local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
-    local shouldShow = rewardsDisplay == "SHOW" or (rewardsDisplay == "SHIFT" and isShiftPressed)
-
-    if not shouldShow then
-        return
-    end
-
-    local rewards = RewardsFunctions.getRewardsForKeyLevel(keyLevel)
-    local crest = RewardsFunctions.getCrestReward(keyLevel)
-    local hideNumbers = MRM_SavedVars.HIDE_REWARD_NUMBERS
-    if hideNumbers then
-        tooltip:AddLine(string.format(
-            "%sGear: %s / Vault: %s|r",
-            ConfigData.COLORS.WHITE,
-            rewards.dungeonTrack,
-            rewards.vaultTrack
-        ))
-        tooltip:AddLine(string.format(
-            "%sCrest: %s|r",
-            ConfigData.COLORS.WHITE,
-            crest.crestType
-        ))
-    else
-        tooltip:AddLine(string.format(
-            "%sGear: %s (%s) / Vault: %s (%s)|r",
-            ConfigData.COLORS.WHITE,
-            rewards.dungeonTrack,
-            rewards.dungeonItem,
-            rewards.vaultTrack,
-            rewards.vaultItem
-        ))
-        tooltip:AddLine(string.format(
-            "%sCrest: %s (%s)|r",
-            ConfigData.COLORS.WHITE,
-            crest.crestType,
-            tostring(crest.crestAmount)
         ))
     end
 end
