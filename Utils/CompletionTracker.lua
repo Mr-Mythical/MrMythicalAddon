@@ -1,9 +1,8 @@
 --[[
 CompletionTracker.lua - Mythic+ Run History & Analytics
 
-Tracks Mythic+ dungeon completion statistics with analytics capabilities.
+Purpose: Tracks Mythic+ dungeon completion statistics with analytics capabilities.
 Stores individual run records and generates statistics dynamically.
-
 Data Structure: MRM_RunHistory (global storage with character filtering)
 Dependencies: WoW APIs, MrMythical.DungeonData
 Author: Braunerr
