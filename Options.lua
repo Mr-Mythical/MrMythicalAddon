@@ -31,6 +31,7 @@ local DEFAULTS = {
     CREST_REWARD_DISPLAY = "SHOW",
     REWARD_LINE_STYLE = "TWO_LINES",
     TIMER_LABEL_STYLE = "FULL",
+    REVEAL_MODIFIER = "SHIFT",
     SCORE_DISPLAY = "SHOW",
     SHOW_SCORE_GAIN = true,
     GROUP_SCORE_DISPLAY = "SHIFT_DETAILS",
@@ -52,16 +53,16 @@ local DROPDOWN_OPTIONS = {
         { text = "Show Both",      value = "SHOW_BOTH" }
     },
     TIMER_DISPLAY_MODE = {
-        { text = "None",           value = "NONE" },
-        { text = "Dungeon Timer",  value = "DUNGEON" },
-        { text = "Upgrade Timers", value = "UPGRADE" },
-        { text = "Shift to Show",  value = "SHIFT" }
+        { text = "None",                 value = "NONE" },
+        { text = "Dungeon Timer",        value = "DUNGEON" },
+        { text = "Upgrade Timers",       value = "UPGRADE" },
+        { text = "Hold Modifier to Show", value = "SHIFT" }
     },
     PLAYER_BEST_DISPLAY = {
-        { text = "None",          value = "NONE" },
-        { text = "Without Score", value = "WITHOUT_SCORE" },
-        { text = "With Score",    value = "WITH_SCORE" },
-        { text = "Shift to Show", value = "SHIFT_WITH_SCORE" }
+        { text = "None",                  value = "NONE" },
+        { text = "Without Score",         value = "WITHOUT_SCORE" },
+        { text = "With Score",            value = "WITH_SCORE" },
+        { text = "Hold Modifier to Show", value = "SHIFT_WITH_SCORE" }
     },
     SHORT_DUNGEON_NAMES = {
         { text = "Full Name",       value = "OFF" },
@@ -69,24 +70,24 @@ local DROPDOWN_OPTIONS = {
         { text = "Short - Full",    value = "SHORT_FULL" }
     },
     REWARDS_DISPLAY = {
-        { text = "Hide",          value = "HIDE" },
-        { text = "Always Show",   value = "SHOW" },
-        { text = "Shift to Show", value = "SHIFT" }
+        { text = "Hide",                  value = "HIDE" },
+        { text = "Always Show",           value = "SHOW" },
+        { text = "Hold Modifier to Show", value = "SHIFT" }
     },
     GEAR_REWARD_DISPLAY = {
-        { text = "Hide",          value = "HIDE" },
-        { text = "Always Show",   value = "SHOW" },
-        { text = "Shift to Show", value = "SHIFT" }
+        { text = "Hide",                  value = "HIDE" },
+        { text = "Always Show",           value = "SHOW" },
+        { text = "Hold Modifier to Show", value = "SHIFT" }
     },
     VAULT_REWARD_DISPLAY = {
-        { text = "Hide",          value = "HIDE" },
-        { text = "Always Show",   value = "SHOW" },
-        { text = "Shift to Show", value = "SHIFT" }
+        { text = "Hide",                  value = "HIDE" },
+        { text = "Always Show",           value = "SHOW" },
+        { text = "Hold Modifier to Show", value = "SHIFT" }
     },
     CREST_REWARD_DISPLAY = {
-        { text = "Hide",          value = "HIDE" },
-        { text = "Always Show",   value = "SHOW" },
-        { text = "Shift to Show", value = "SHIFT" }
+        { text = "Hide",                  value = "HIDE" },
+        { text = "Always Show",           value = "SHOW" },
+        { text = "Hold Modifier to Show", value = "SHIFT" }
     },
     REWARD_LINE_STYLE = {
         { text = "Two Lines",   value = "TWO_LINES" },
@@ -98,15 +99,20 @@ local DROPDOWN_OPTIONS = {
         { text = "Short (Timer)",        value = "SHORT" },
         { text = "Times Only",           value = "TIMES_ONLY" }
     },
+    REVEAL_MODIFIER = {
+        { text = "Shift",   value = "SHIFT" },
+        { text = "Alt",     value = "ALT" },
+        { text = "Control", value = "CTRL" }
+    },
     SCORE_DISPLAY = {
-        { text = "Hide",          value = "HIDE" },
-        { text = "Always Show",   value = "SHOW" },
-        { text = "Shift to Show", value = "SHIFT" }
+        { text = "Hide",                  value = "HIDE" },
+        { text = "Always Show",           value = "SHOW" },
+        { text = "Hold Modifier to Show", value = "SHIFT" }
     },
     GROUP_SCORE_DISPLAY = {
-        { text = "Hide",               value = "HIDE" },
-        { text = "Average Only",       value = "AVERAGE" },
-        { text = "Shift for Details",  value = "SHIFT_DETAILS" }
+        { text = "Hide",                    value = "HIDE" },
+        { text = "Average Only",            value = "AVERAGE" },
+        { text = "Modifier for Details",    value = "SHIFT_DETAILS" }
     }
 }
 
@@ -118,42 +124,42 @@ local TOOLTIPS = {
         WHITE .. "Compact:|r Show level as +X (e.g. '+15')\n\n" ..
         WHITE .. "In Title:|r Add level to keystone title (e.g. 'Windrunner Spire +15')",
 
-    LEVEL_SHIFT_MODE = "Choose how holding Shift affects level display (Mythic & Resilient):\n\n" ..
+    LEVEL_SHIFT_MODE = "Choose how holding the reveal modifier affects level display (Mythic & Resilient):\n\n" ..
         WHITE .. "None:|r Show both levels always\n\n" ..
-        WHITE .. "Show Resilient:|r Show only Mythic level, hold Shift for Resilient\n\n" ..
-        WHITE .. "Show Both:|r Hide levels, hold Shift shows both",
+        WHITE .. "Show Resilient:|r Show only Mythic level, hold the reveal modifier for Resilient\n\n" ..
+        WHITE .. "Show Both:|r Hide levels, hold the reveal modifier to show both",
 
     TIMER_DISPLAY_MODE = "Choose which timer(s) to display in the keystone tooltip:\n\n" ..
         WHITE .. "None:|r No timer\n" ..
         WHITE .. "Dungeon Timer:|r Show only the dungeon timer\n" ..
         WHITE .. "Upgrade Timers:|r Show +2/+3 upgrade timers and the dungeon timer on one line\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show upgrade timers",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show upgrade timers",
 
     PLAYER_BEST_DISPLAY = "Choose how to display your personal best run for this dungeon:\n\n" ..
         WHITE .. "None:|r Don't show personal best information\n" ..
         WHITE .. "Without Score:|r Show level, time, and upgrades only\n" ..
         WHITE .. "With Score:|r Show level, time, upgrades, and score\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show personal best with score",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show personal best with score",
 
-    REWARDS_DISPLAY = "Master control for all reward lines. When hidden or gated by Shift, individual gear/vault/crest settings are ignored.\n\n" ..
+    REWARDS_DISPLAY = "Master control for all reward lines. When hidden or gated by the reveal modifier, individual gear/vault/crest settings are ignored.\n\n" ..
         WHITE .. "Hide:|r Don't show any reward information\n" ..
         WHITE .. "Always Show:|r Allow individual reward settings to apply\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show rewards (then apply individual settings)",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show rewards (then apply individual settings)",
 
     GEAR_REWARD_DISPLAY = "Choose how to display dungeon gear rewards:\n\n" ..
         WHITE .. "Hide:|r Don't show gear reward information\n" ..
         WHITE .. "Always Show:|r Always display gear rewards\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show gear rewards",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show gear rewards",
 
     VAULT_REWARD_DISPLAY = "Choose how to display Great Vault rewards:\n\n" ..
         WHITE .. "Hide:|r Don't show vault reward information\n" ..
         WHITE .. "Always Show:|r Always display vault rewards\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show vault rewards",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show vault rewards",
 
     CREST_REWARD_DISPLAY = "Choose how to display crest rewards:\n\n" ..
         WHITE .. "Hide:|r Don't show crest reward information\n" ..
         WHITE .. "Always Show:|r Always display crest rewards\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show crest rewards",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show crest rewards",
 
     REWARD_LINE_STYLE = "Choose how reward information is laid out:\n\n" ..
         WHITE .. "Two Lines:|r Gear and vault on one line, crest on a second line\n" ..
@@ -165,15 +171,20 @@ local TOOLTIPS = {
         WHITE .. "Short:|r 'Timer: 30:00'\n" ..
         WHITE .. "Times Only:|r '30:00' with no label",
 
+    REVEAL_MODIFIER = "Choose which key reveals gated tooltip details (levels, rewards, score, group breakdown, etc.).\n\n" ..
+        WHITE .. "Shift:|r Hold Shift to reveal\n" ..
+        WHITE .. "Alt:|r Hold Alt to reveal\n" ..
+        WHITE .. "Control:|r Hold Control to reveal",
+
     SCORE_DISPLAY = "Choose how to display the potential score line:\n\n" ..
         WHITE .. "Hide:|r Don't show score information\n" ..
         WHITE .. "Always Show:|r Always display the score line\n" ..
-        WHITE .. "Shift to Show:|r Hold Shift to show score information",
+        WHITE .. "Hold Modifier to Show:|r Hold the reveal modifier to show score information",
 
     GROUP_SCORE_DISPLAY = "Choose how to display group score information in parties:\n\n" ..
         WHITE .. "Hide:|r Don't show group score information\n" ..
         WHITE .. "Average Only:|r Show average party gain only\n" ..
-        WHITE .. "Shift for Details:|r Show average by default, hold Shift for per-player breakdown",
+        WHITE .. "Modifier for Details:|r Show average by default, hold the reveal modifier for per-player breakdown",
 
     HIDE_REWARD_NUMBERS = "Hide the numeric values (item level and crest amount) from reward displays, showing only the reward type names."
 }
@@ -333,6 +344,18 @@ function Options.createSettingsInCategory(category)
 
     local settingsConfig = {
         {
+            header = { name = "Modifier Options", tooltip = "Choose which key reveals gated tooltip details" },
+            settings = {
+                {
+                    name = "Reveal Modifier",
+                    key = "REVEAL_MODIFIER",
+                    type = "string",
+                    tooltip = TOOLTIPS.REVEAL_MODIFIER,
+                    options = DROPDOWN_OPTIONS.REVEAL_MODIFIER
+                }
+            }
+        },
+        {
             header = { name = "Compact Mode Options", tooltip = "Settings that affect the appearance of keystone tooltips" },
             settings = {
                 {
@@ -361,7 +384,7 @@ function Options.createSettingsInCategory(category)
                     options = DROPDOWN_OPTIONS.LEVEL_DISPLAY
                 },
                 {
-                    name = "Shift Modifier Behavior for Levels",
+                    name = "Reveal Modifier Behavior for Levels",
                     key = "LEVEL_SHIFT_MODE",
                     type = "string",
                     tooltip = TOOLTIPS.LEVEL_SHIFT_MODE,

@@ -48,12 +48,12 @@ local function buildTooltipTitle(mapID, keyLevel, resilientLevel)
         return nil
     end
 
-    local isShiftPressed = IsShiftKeyDown()
+    local isRevealPressed = TooltipUtils.isRevealModifierPressed()
     local levelDisplayMode = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
     local newTitle = "Keystone: " .. fullName
 
     if levelDisplayMode == "TITLE" then
-        newTitle = TooltipUtils.processLevelInTitle(newTitle, keyLevel, resilientLevel, isShiftPressed)
+        newTitle = TooltipUtils.processLevelInTitle(newTitle, keyLevel, resilientLevel, isRevealPressed)
     elseif MRM_SavedVars.SHORT_TITLE and string.find(newTitle, "^Keystone: ") then
         newTitle = string.gsub(newTitle, "^Keystone: ", "")
     end
@@ -126,7 +126,7 @@ local function processKeystoneTooltipData(data, mapID, keyLevel, resilientLevel)
         return
     end
 
-    local isShiftPressed = IsShiftKeyDown()
+    local isRevealPressed = TooltipUtils.isRevealModifierPressed()
     local levelDisplayMode = MRM_SavedVars.LEVEL_DISPLAY or "OFF"
 
     if levelDisplayMode == "TITLE" and not keyLevel then
@@ -146,7 +146,7 @@ local function processKeystoneTooltipData(data, mapID, keyLevel, resilientLevel)
                     local leftColor = line.leftColor or {}
                     local processed = TooltipUtils.processCompactLevelDisplay(
                         leftText,
-                        isShiftPressed,
+                        isRevealPressed,
                         {
                             leftColor.r or 1,
                             leftColor.g or 1,
@@ -163,7 +163,7 @@ local function processKeystoneTooltipData(data, mapID, keyLevel, resilientLevel)
                     end
                 else
                     local shouldHide =
-                        TooltipUtils.shouldHideLevelLine(leftText, levelDisplayMode, isShiftPressed)
+                        TooltipUtils.shouldHideLevelLine(leftText, levelDisplayMode, isRevealPressed)
                         or TooltipUtils.shouldHideTooltipText(leftText)
 
                     if shouldHide then
@@ -193,7 +193,7 @@ local function addTimerToTooltip(tooltip, mapID)
     local timesText
     if timerMode == "DUNGEON" then
         timesText = DungeonData.formatTime(parTime)
-    elseif timerMode == "UPGRADE" or (timerMode == "SHIFT" and IsShiftKeyDown()) then
+    elseif timerMode == "UPGRADE" or (timerMode == "SHIFT" and TooltipUtils.isRevealModifierPressed()) then
         local timer1 = DungeonData.formatTime(parTime)
         local timer2 = DungeonData.formatTime(math.floor(parTime * 0.8))
         local timer3 = DungeonData.formatTime(math.floor(parTime * 0.6))
@@ -217,10 +217,10 @@ end
 
 --- Returns whether a Hide/Show/Shift display setting should render.
 --- @param displayMode string Display mode value.
---- @param isShiftPressed boolean Whether Shift is currently held.
+--- @param isRevealPressed boolean Whether the reveal modifier is currently held.
 --- @return boolean
-local function shouldShowDisplayMode(displayMode, isShiftPressed)
-    return displayMode == "SHOW" or (displayMode == "SHIFT" and isShiftPressed)
+local function shouldShowDisplayMode(displayMode, isRevealPressed)
+    return displayMode == "SHOW" or (displayMode == "SHIFT" and isRevealPressed)
 end
 
 --- Formats a reward segment with optional numeric value.
@@ -240,16 +240,16 @@ end
 --- Respects master REWARDS_DISPLAY plus per-type gear/vault/crest settings.
 --- @param tooltip GameTooltip Tooltip instance.
 --- @param keyLevel number Keystone level.
---- @param isShiftPressed boolean Whether Shift is currently held.
-local function addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
+--- @param isRevealPressed boolean Whether the reveal modifier is currently held.
+local function addRewardsToTooltip(tooltip, keyLevel, isRevealPressed)
     local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
-    if not shouldShowDisplayMode(rewardsDisplay, isShiftPressed) then
+    if not shouldShowDisplayMode(rewardsDisplay, isRevealPressed) then
         return
     end
 
-    local showGear = shouldShowDisplayMode(MRM_SavedVars.GEAR_REWARD_DISPLAY or "SHOW", isShiftPressed)
-    local showVault = shouldShowDisplayMode(MRM_SavedVars.VAULT_REWARD_DISPLAY or "SHOW", isShiftPressed)
-    local showCrest = shouldShowDisplayMode(MRM_SavedVars.CREST_REWARD_DISPLAY or "SHOW", isShiftPressed)
+    local showGear = shouldShowDisplayMode(MRM_SavedVars.GEAR_REWARD_DISPLAY or "SHOW", isRevealPressed)
+    local showVault = shouldShowDisplayMode(MRM_SavedVars.VAULT_REWARD_DISPLAY or "SHOW", isRevealPressed)
+    local showCrest = shouldShowDisplayMode(MRM_SavedVars.CREST_REWARD_DISPLAY or "SHOW", isRevealPressed)
 
     if not (showGear or showVault or showCrest) then
         return
@@ -306,12 +306,12 @@ end
 --- @param tooltip GameTooltip Tooltip instance.
 --- @param itemString string Keystone item string used for lookups.
 --- @param currentScore number Current character mythic score.
---- @param isShiftPressed boolean Whether Shift is currently held.
-local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
+--- @param isRevealPressed boolean Whether the reveal modifier is currently held.
+local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isRevealPressed)
     local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
     local shouldShow = playerBestDisplay == "WITH_SCORE"
         or playerBestDisplay == "WITHOUT_SCORE"
-        or (playerBestDisplay == "SHIFT_WITH_SCORE" and isShiftPressed)
+        or (playerBestDisplay == "SHIFT_WITH_SCORE" and isRevealPressed)
 
     if not shouldShow then
         return
@@ -354,14 +354,14 @@ local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isShi
 end
 
 --- Adds group-wide score gain details for party members.
---- Shows summary by default and detailed per-player rows when Shift is held.
+--- Shows summary by default and detailed per-player rows when the reveal modifier is held.
 --- @param tooltip GameTooltip Tooltip instance.
 --- @param groupScoreData table<string, number> Player name to score map.
 --- @param potentialScore number Score for completing this key.
 --- @param averageGroupGain number Average potential gain across the group.
 --- @param groupColor string Color code used for average gain.
---- @param isShiftPressed boolean Whether Shift is currently held.
-local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isShiftPressed)
+--- @param isRevealPressed boolean Whether the reveal modifier is currently held.
+local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isRevealPressed)
     if not (IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid()) then
         return
     end
@@ -371,7 +371,7 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
         return
     end
 
-    if groupScoreDisplay == "SHIFT_DETAILS" and isShiftPressed then
+    if groupScoreDisplay == "SHIFT_DETAILS" and isRevealPressed then
         tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
 
         local sortedPlayers = {}
@@ -407,9 +407,13 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
             end
         end
     else
-        local shiftHint = ""
+        local revealHint = ""
         if groupScoreDisplay == "SHIFT_DETAILS" then
-            shiftHint = string.format(" %s(Hold Shift for details)|r", ConfigData.COLORS.GRAY)
+            revealHint = string.format(
+                " %s%s|r",
+                ConfigData.COLORS.GRAY,
+                TooltipUtils.getRevealHint("for details")
+            )
         end
 
         tooltip:AddLine(string.format(
@@ -417,7 +421,7 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
             ConfigData.COLORS.WHITE,
             groupColor,
             averageGroupGain,
-            shiftHint
+            revealHint
         ))
     end
 end
@@ -447,15 +451,15 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     local baseColor = ColorUtils.calculateGradientColor(potentialScore, 165, 500, GRADIENTS)
     local playerGain = math.max(potentialScore - currentScore, 0)
     local gainColor = ColorUtils.calculateGradientColor(playerGain, 0, 200, GRADIENTS)
-    local isShiftPressed = IsShiftKeyDown()
+    local isRevealPressed = TooltipUtils.isRevealModifierPressed()
 
     addTimerToTooltip(tooltip, mapID)
-    addPersonalBestToTooltip(tooltip, itemString, currentScore, isShiftPressed)
-    addRewardsToTooltip(tooltip, keyLevel, isShiftPressed)
+    addPersonalBestToTooltip(tooltip, itemString, currentScore, isRevealPressed)
+    addRewardsToTooltip(tooltip, keyLevel, isRevealPressed)
 
     local scoreDisplay = MRM_SavedVars.SCORE_DISPLAY or "SHOW"
     local shouldShowScore = scoreDisplay == "SHOW"
-        or (scoreDisplay == "SHIFT" and isShiftPressed)
+        or (scoreDisplay == "SHIFT" and isRevealPressed)
 
     if shouldShowScore then
         local scoreLine = ""
@@ -500,7 +504,7 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
         potentialScore,
         averageGroupGain,
         groupColor,
-        isShiftPressed
+        isRevealPressed
     )
 end
 

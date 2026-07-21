@@ -16,14 +16,15 @@ Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone t
 
 ### **Customizable Keystone Tooltips**
 Transform every Mythic+ keystone tooltip with detailed, customizable information:
-- **Reward Information**: Gear, vault, and crest lines with independent visibility (hide / show / Shift) and layout styles (two lines, single line, compact)
+- **Reward Information**: Gear, vault, and crest lines with independent visibility (hide / show / hold modifier) and layout styles (two lines, single line, compact)
 - **Crest Details**: Types and quantities of crests earned for completion
-- **Score Calculations**: Potential Mythic+ score gains with optional timing bonus ranges (+0–15); hide, always show, or Shift to reveal
+- **Score Calculations**: Potential Mythic+ score gains with optional timing bonus ranges (+0–15); hide, always show, or hold modifier to reveal
 - **Score Gain Display**: Optional toggle to show or hide your personal score gain
 - **Personal Best**: Your best run for that dungeon, with optional score display
-- **Group Score Gains**: Hide, show average party gain only, or hold Shift for per-player breakdown
+- **Group Score Gains**: Hide, show average party gain only, or hold the reveal modifier for per-player breakdown
 - **Dungeon Timers**: Optional par time or upgrade timer lines with full, short, or times-only labels
-- **Level Display**: Default, compact (+X), or in-title formatting with Shift modifiers for resilient levels
+- **Reveal Modifier**: Choose Shift, Alt, or Control to reveal gated tooltip details
+- **Level Display**: Default, compact (+X), or in-title formatting with reveal-modifier behavior for resilient levels
 - **Element Control**: Hide duration text, affix descriptions, soulbound/unique lines, and other clutter
 - **Clean Formatting**: Short titles, short dungeon names, and optional plain score colors
 - **Chat Links**: Keystone links in chat show the same enhanced tooltip details

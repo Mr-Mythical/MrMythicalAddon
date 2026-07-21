@@ -47,6 +47,42 @@ end
 TooltipUtils.safeGetText = safeGetText
 TooltipUtils.safeGetTextColor = safeGetTextColor
 
+local REVEAL_MODIFIER_NAMES = {
+    SHIFT = "Shift",
+    ALT = "Alt",
+    CTRL = "Ctrl",
+}
+
+--- Returns the display name for the configured reveal modifier key.
+--- @return string
+function TooltipUtils.getRevealModifierName()
+    local modifier = MRM_SavedVars and MRM_SavedVars.REVEAL_MODIFIER or "SHIFT"
+    return REVEAL_MODIFIER_NAMES[modifier] or "Shift"
+end
+
+--- Returns whether the configured reveal modifier key is currently held.
+--- @return boolean
+function TooltipUtils.isRevealModifierPressed()
+    local modifier = MRM_SavedVars and MRM_SavedVars.REVEAL_MODIFIER or "SHIFT"
+    if modifier == "ALT" then
+        return IsAltKeyDown()
+    elseif modifier == "CTRL" then
+        return IsControlKeyDown()
+    end
+    return IsShiftKeyDown()
+end
+
+--- Builds a reveal hint such as "(Hold Alt for details)".
+--- @param actionText string|nil Text after the key name (default: "for details").
+--- @return string
+function TooltipUtils.getRevealHint(actionText)
+    return string.format(
+        "(Hold %s %s)",
+        TooltipUtils.getRevealModifierName(),
+        actionText or "for details"
+    )
+end
+
 --- Determines if tooltip text should be hidden based on user preferences
 --- @param text string The text to check
 --- @return boolean True if the text should be hidden
@@ -80,22 +116,22 @@ end
 --- @param titleText string The original title text
 --- @param keyLevel number The keystone level
 --- @param resilientLevel number|nil The resilient level if available
---- @param isShiftPressed boolean Whether shift key is pressed
+--- @param isRevealPressed boolean Whether the reveal modifier is pressed
 --- @return string titleText The modified title text
-function TooltipUtils.processLevelInTitle(titleText, keyLevel, resilientLevel, isShiftPressed)
+function TooltipUtils.processLevelInTitle(titleText, keyLevel, resilientLevel, isRevealPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
 
     if MRM_SavedVars.SHORT_TITLE and string.find(titleText, "^Keystone: ") then
         titleText = string.gsub(titleText, "^Keystone: ", "")
     end
 
-    if keyLevel and (shiftMode ~= "SHOW_BOTH" or isShiftPressed) then
+    if keyLevel and (shiftMode ~= "SHOW_BOTH" or isRevealPressed) then
         titleText = titleText .. " +" .. keyLevel
 
         if resilientLevel and (
             shiftMode == "NONE" or
-            (shiftMode == "SHOW_RESILIENT" and isShiftPressed) or
-            (shiftMode == "SHOW_BOTH" and isShiftPressed)
+            (shiftMode == "SHOW_RESILIENT" and isRevealPressed) or
+            (shiftMode == "SHOW_BOTH" and isRevealPressed)
         ) then
             titleText = titleText .. " (R" .. resilientLevel .. ")"
         end
@@ -106,15 +142,15 @@ end
 
 --- Processes level display in compact mode
 --- @param lineText string The line text containing level info
---- @param isShiftPressed boolean Whether shift key is pressed
+--- @param isRevealPressed boolean Whether the reveal modifier is pressed
 --- @param lineColor table RGB color values for the line
 --- @return string|nil lineText The processed line text, or nil if should be hidden
-function TooltipUtils.processCompactLevelDisplay(lineText, isShiftPressed, lineColor)
+function TooltipUtils.processCompactLevelDisplay(lineText, isRevealPressed, lineColor)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     local level = string.match(lineText, "Mythic Level (%d+)")
 
     if level then
-        if shiftMode == "SHOW_BOTH" and not isShiftPressed then
+        if shiftMode == "SHOW_BOTH" and not isRevealPressed then
             return nil
         end
 
@@ -136,9 +172,9 @@ end
 --- Checks if a level line should be hidden based on display settings
 --- @param lineText string The line text to check
 --- @param levelDisplayMode string The level display mode setting
---- @param isShiftPressed boolean Whether shift key is pressed
+--- @param isRevealPressed boolean Whether the reveal modifier is pressed
 --- @return boolean True if the line should be hidden
-function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPressed)
+function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isRevealPressed)
     local shiftMode = MRM_SavedVars.LEVEL_SHIFT_MODE or "NONE"
     local isMythicLevel = string.match(lineText, "Mythic Level")
     local isResilientLevel = string.match(lineText, "Resilient Level")
@@ -147,7 +183,7 @@ function TooltipUtils.shouldHideLevelLine(lineText, levelDisplayMode, isShiftPre
         return isMythicLevel or isResilientLevel
     elseif levelDisplayMode == "OFF" then
         if isMythicLevel or isResilientLevel then
-            return shiftMode == "SHOW_BOTH" and not isShiftPressed
+            return shiftMode == "SHOW_BOTH" and not isRevealPressed
         end
     end
 
