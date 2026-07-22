@@ -83,6 +83,46 @@ function TooltipUtils.getRevealHint(actionText)
     )
 end
 
+local FULL_LABELS = {
+    personalBest = "Personal Best",
+    groupAvgGain = "Group Avg Gain",
+    groupDetails = "Group Details",
+    dungeonTimer = "Dungeon Timer",
+    score = "Score",
+}
+
+local ABBREVIATED_LABELS = {
+    personalBest = "PB",
+    groupAvgGain = "Grp",
+    groupDetails = "Grp",
+    dungeonTimer = "Timer",
+    score = "Scr",
+}
+
+--- Returns a tooltip label based on TOOLTIP_LABEL_STYLE.
+--- @param key string Label key (personalBest, groupAvgGain, groupDetails, dungeonTimer, score).
+--- @return string
+function TooltipUtils.getLabel(key)
+    local style = MRM_SavedVars and MRM_SavedVars.TOOLTIP_LABEL_STYLE or "FULL"
+    local labels = (style == "ABBREVIATED") and ABBREVIATED_LABELS or FULL_LABELS
+    return labels[key] or key
+end
+
+--- Ordered section IDs for each TOOLTIP_LINE_ORDER preset.
+TooltipUtils.LINE_ORDER_PRESETS = {
+    DEFAULT = { "timer", "personalBest", "rewards", "score", "group" },
+    SCORE_FIRST = { "score", "timer", "personalBest", "rewards", "group" },
+    REWARDS_FIRST = { "rewards", "timer", "personalBest", "score", "group" },
+    TIMERS_LAST = { "personalBest", "rewards", "score", "group", "timer" },
+}
+
+--- Returns the section order for the configured line-order preset.
+--- @return string[]
+function TooltipUtils.getLineOrder()
+    local preset = MRM_SavedVars and MRM_SavedVars.TOOLTIP_LINE_ORDER or "DEFAULT"
+    return TooltipUtils.LINE_ORDER_PRESETS[preset] or TooltipUtils.LINE_ORDER_PRESETS.DEFAULT
+end
+
 --- Determines if tooltip text should be hidden based on user preferences
 --- @param text string The text to check
 --- @return boolean True if the text should be hidden

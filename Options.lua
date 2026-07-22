@@ -32,6 +32,9 @@ local DEFAULTS = {
     REWARD_LINE_STYLE = "TWO_LINES",
     TIMER_LABEL_STYLE = "FULL",
     REVEAL_MODIFIER = "SHIFT",
+    TOOLTIP_LABEL_STYLE = "FULL",
+    TOOLTIP_SEPARATOR = false,
+    TOOLTIP_LINE_ORDER = "DEFAULT",
     SCORE_DISPLAY = "SHOW",
     SHOW_SCORE_GAIN = true,
     GROUP_SCORE_DISPLAY = "SHIFT_DETAILS",
@@ -104,6 +107,16 @@ local DROPDOWN_OPTIONS = {
         { text = "Alt",     value = "ALT" },
         { text = "Control", value = "CTRL" }
     },
+    TOOLTIP_LABEL_STYLE = {
+        { text = "Full",         value = "FULL" },
+        { text = "Abbreviated",  value = "ABBREVIATED" }
+    },
+    TOOLTIP_LINE_ORDER = {
+        { text = "Default",       value = "DEFAULT" },
+        { text = "Score First",   value = "SCORE_FIRST" },
+        { text = "Rewards First", value = "REWARDS_FIRST" },
+        { text = "Timers Last",   value = "TIMERS_LAST" }
+    },
     SCORE_DISPLAY = {
         { text = "Hide",                  value = "HIDE" },
         { text = "Always Show",           value = "SHOW" },
@@ -175,6 +188,16 @@ local TOOLTIPS = {
         WHITE .. "Shift:|r Hold Shift to reveal\n" ..
         WHITE .. "Alt:|r Hold Alt to reveal\n" ..
         WHITE .. "Control:|r Hold Control to reveal",
+
+    TOOLTIP_LABEL_STYLE = "Choose how Mr. Mythical tooltip labels are written:\n\n" ..
+        WHITE .. "Full:|r Personal Best, Group Avg Gain, Score, Dungeon Timer\n" ..
+        WHITE .. "Abbreviated:|r PB, Grp, Scr, Timer",
+
+    TOOLTIP_LINE_ORDER = "Choose the order of Mr. Mythical lines on keystone tooltips:\n\n" ..
+        WHITE .. "Default:|r Timer, Personal Best, Rewards, Score, Group\n" ..
+        WHITE .. "Score First:|r Score, Timer, Personal Best, Rewards, Group\n" ..
+        WHITE .. "Rewards First:|r Rewards, Timer, Personal Best, Score, Group\n" ..
+        WHITE .. "Timers Last:|r Personal Best, Rewards, Score, Group, Timer",
 
     SCORE_DISPLAY = "Choose how to display the potential score line:\n\n" ..
         WHITE .. "Hide:|r Don't show score information\n" ..
@@ -506,6 +529,31 @@ function Options.createSettingsInCategory(category)
                     key = "HIDE_REWARD_NUMBERS",
                     type = "boolean",
                     tooltip = TOOLTIPS.HIDE_REWARD_NUMBERS
+                }
+            }
+        },
+        {
+            header = { name = "Layout Options", tooltip = "Settings that control tooltip labels, spacing, and line order" },
+            settings = {
+                {
+                    name = "Tooltip Label Style",
+                    key = "TOOLTIP_LABEL_STYLE",
+                    type = "string",
+                    tooltip = TOOLTIPS.TOOLTIP_LABEL_STYLE,
+                    options = DROPDOWN_OPTIONS.TOOLTIP_LABEL_STYLE
+                },
+                {
+                    name = "Blank Line Before Addon Info",
+                    key = "TOOLTIP_SEPARATOR",
+                    type = "boolean",
+                    tooltip = "Insert a blank line before Mr. Mythical tooltip lines."
+                },
+                {
+                    name = "Tooltip Line Order",
+                    key = "TOOLTIP_LINE_ORDER",
+                    type = "string",
+                    tooltip = TOOLTIPS.TOOLTIP_LINE_ORDER,
+                    options = DROPDOWN_OPTIONS.TOOLTIP_LINE_ORDER
                 }
             }
         }

@@ -179,7 +179,8 @@ end
 --- Adds timer information lines to the tooltip based on timer display settings.
 --- @param tooltip GameTooltip Tooltip instance.
 --- @param mapID number Dungeon map ID.
-local function addTimerToTooltip(tooltip, mapID)
+--- @param addLine fun(tooltip: GameTooltip, text: string) Line writer (handles separator).
+local function addTimerToTooltip(tooltip, mapID, addLine)
     local timerMode = MRM_SavedVars.TIMER_DISPLAY_MODE or "NONE"
     if timerMode == "NONE" or not DungeonData then
         return
@@ -209,10 +210,15 @@ local function addTimerToTooltip(tooltip, mapID)
     elseif labelStyle == "SHORT" then
         lineText = string.format("%sTimer: %s|r", ConfigData.COLORS.WHITE, timesText)
     else
-        lineText = string.format("%sDungeon Timer: %s|r", ConfigData.COLORS.WHITE, timesText)
+        lineText = string.format(
+            "%s%s: %s|r",
+            ConfigData.COLORS.WHITE,
+            TooltipUtils.getLabel("dungeonTimer"),
+            timesText
+        )
     end
 
-    tooltip:AddLine(lineText)
+    addLine(tooltip, lineText)
 end
 
 --- Returns whether a Hide/Show/Shift display setting should render.
@@ -241,7 +247,8 @@ end
 --- @param tooltip GameTooltip Tooltip instance.
 --- @param keyLevel number Keystone level.
 --- @param isRevealPressed boolean Whether the reveal modifier is currently held.
-local function addRewardsToTooltip(tooltip, keyLevel, isRevealPressed)
+--- @param addLine fun(tooltip: GameTooltip, text: string) Line writer (handles separator).
+local function addRewardsToTooltip(tooltip, keyLevel, isRevealPressed, addLine)
     local rewardsDisplay = MRM_SavedVars.REWARDS_DISPLAY or "SHOW"
     if not shouldShowDisplayMode(rewardsDisplay, isRevealPressed) then
         return
@@ -279,13 +286,12 @@ local function addRewardsToTooltip(tooltip, keyLevel, isRevealPressed)
         end
 
         if #gearVaultParts > 0 then
-            tooltip:AddLine(string.format("%s%s|r", ConfigData.COLORS.WHITE, table.concat(gearVaultParts, " / ")))
+            addLine(tooltip, string.format("%s%s|r", ConfigData.COLORS.WHITE, table.concat(gearVaultParts, " / ")))
         end
         if crestText then
-            tooltip:AddLine(string.format("%s%s|r", ConfigData.COLORS.WHITE, crestText))
+            addLine(tooltip, string.format("%s%s|r", ConfigData.COLORS.WHITE, crestText))
         end
     else
-        -- SINGLE_LINE and COMPACT both join all visible parts on one line
         local parts = {}
         if gearText then
             table.insert(parts, gearText)
@@ -297,7 +303,7 @@ local function addRewardsToTooltip(tooltip, keyLevel, isRevealPressed)
             table.insert(parts, crestText)
         end
         if #parts > 0 then
-            tooltip:AddLine(string.format("%s%s|r", ConfigData.COLORS.WHITE, table.concat(parts, " / ")))
+            addLine(tooltip, string.format("%s%s|r", ConfigData.COLORS.WHITE, table.concat(parts, " / ")))
         end
     end
 end
@@ -307,7 +313,8 @@ end
 --- @param itemString string Keystone item string used for lookups.
 --- @param currentScore number Current character mythic score.
 --- @param isRevealPressed boolean Whether the reveal modifier is currently held.
-local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isRevealPressed)
+--- @param addLine fun(tooltip: GameTooltip, text: string) Line writer (handles separator).
+local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isRevealPressed, addLine)
     local playerBestDisplay = MRM_SavedVars.PLAYER_BEST_DISPLAY or "WITH_SCORE"
     local shouldShow = playerBestDisplay == "WITH_SCORE"
         or playerBestDisplay == "WITHOUT_SCORE"
@@ -317,6 +324,8 @@ local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isRev
         return
     end
 
+    local pbLabel = TooltipUtils.getLabel("personalBest")
+    local scoreLabel = TooltipUtils.getLabel("score")
     local bestRun = MrMythical.DungeonData.getCharacterBestRun(itemString)
     if bestRun then
         local timeColor = bestRun.wasInTime and ConfigData.COLORS.GREEN or ConfigData.COLORS.YELLOW
@@ -326,28 +335,32 @@ local function addPersonalBestToTooltip(tooltip, itemString, currentScore, isRev
 
         if playerBestDisplay == "WITH_SCORE" or playerBestDisplay == "SHIFT_WITH_SCORE" then
             local personalBestColor = ColorUtils.calculateGradientColor(currentScore, 165, 500, GRADIENTS)
-            tooltip:AddLine(string.format(
-                "%sPersonal Best: %s (%s%s|r) - Score: %s%d|r",
+            addLine(tooltip, string.format(
+                "%s%s: %s (%s%s|r) - %s: %s%d|r",
                 ConfigData.COLORS.WHITE,
+                pbLabel,
                 levelText,
                 timeColor,
                 formattedTime,
+                scoreLabel,
                 personalBestColor,
                 currentScore
             ))
         else
-            tooltip:AddLine(string.format(
-                "%sPersonal Best: %s (%s%s|r)|r",
+            addLine(tooltip, string.format(
+                "%s%s: %s (%s%s|r)|r",
                 ConfigData.COLORS.WHITE,
+                pbLabel,
                 levelText,
                 timeColor,
                 formattedTime
             ))
         end
     else
-        tooltip:AddLine(string.format(
-            "%sPersonal Best: %sNo data|r",
+        addLine(tooltip, string.format(
+            "%s%s: %sNo data|r",
             ConfigData.COLORS.WHITE,
+            pbLabel,
             ConfigData.COLORS.GRAY
         ))
     end
@@ -361,7 +374,8 @@ end
 --- @param averageGroupGain number Average potential gain across the group.
 --- @param groupColor string Color code used for average gain.
 --- @param isRevealPressed boolean Whether the reveal modifier is currently held.
-local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isRevealPressed)
+--- @param addLine fun(tooltip: GameTooltip, text: string) Line writer (handles separator).
+local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore, averageGroupGain, groupColor, isRevealPressed, addLine)
     if not (IsInGroup() and GetNumGroupMembers() > 1 and not IsInRaid()) then
         return
     end
@@ -372,7 +386,7 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
     end
 
     if groupScoreDisplay == "SHIFT_DETAILS" and isRevealPressed then
-        tooltip:AddLine(string.format("%sGroup Details:|r", ConfigData.COLORS.WHITE))
+        addLine(tooltip, string.format("%s%s:|r", ConfigData.COLORS.WHITE, TooltipUtils.getLabel("groupDetails")))
 
         local sortedPlayers = {}
         for playerName, playerScore in pairs(groupScoreData) do
@@ -392,14 +406,14 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
 
         for _, player in ipairs(sortedPlayers) do
             if player.gain > 0 then
-                tooltip:AddLine(string.format(
+                addLine(tooltip, string.format(
                     "  %s: %s+%d|r",
                     player.name,
                     player.gainColor,
                     player.gain
                 ))
             else
-                tooltip:AddLine(string.format(
+                addLine(tooltip, string.format(
                     "  %s: %sNo gain|r",
                     player.name,
                     ConfigData.COLORS.GRAY
@@ -416,14 +430,72 @@ local function addGroupDetailsToTooltip(tooltip, groupScoreData, potentialScore,
             )
         end
 
-        tooltip:AddLine(string.format(
-            "%sGroup Avg Gain: %s+%.1f|r%s",
+        addLine(tooltip, string.format(
+            "%s%s: %s+%.1f|r%s",
             ConfigData.COLORS.WHITE,
+            TooltipUtils.getLabel("groupAvgGain"),
             groupColor,
             averageGroupGain,
             revealHint
         ))
     end
+end
+
+--- Adds the potential score line when enabled.
+--- @param tooltip GameTooltip Tooltip instance.
+--- @param potentialScore number Score for completing this key.
+--- @param currentScore number Current character mythic score.
+--- @param playerGain number Potential personal score gain.
+--- @param baseColor string Color code for score values.
+--- @param gainColor string Color code for gain values.
+--- @param isRevealPressed boolean Whether the reveal modifier is currently held.
+--- @param addLine fun(tooltip: GameTooltip, text: string) Line writer (handles separator).
+local function addScoreToTooltip(tooltip, potentialScore, currentScore, playerGain, baseColor, gainColor, isRevealPressed, addLine)
+    local scoreDisplay = MRM_SavedVars.SCORE_DISPLAY or "SHOW"
+    local shouldShowScore = scoreDisplay == "SHOW"
+        or (scoreDisplay == "SHIFT" and isRevealPressed)
+
+    if not shouldShowScore then
+        return
+    end
+
+    local scoreLabel = TooltipUtils.getLabel("score")
+    local scoreLine = ""
+    local gainString = ""
+    local showScoreGain = MRM_SavedVars.SHOW_SCORE_GAIN ~= false
+
+    if MRM_SavedVars.SHOW_TIMING then
+        local maxScore = potentialScore + 15
+        scoreLine = string.format(
+            "%s%s: %s%d|r - %s%d|r",
+            ConfigData.COLORS.WHITE,
+            scoreLabel,
+            baseColor,
+            potentialScore,
+            baseColor,
+            maxScore
+        )
+
+        local minGain = playerGain
+        local maxGain = math.max(maxScore - currentScore, 0)
+        if showScoreGain and maxGain > 0 then
+            gainString = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
+        end
+    else
+        scoreLine = string.format(
+            "%s%s: %s%d|r",
+            ConfigData.COLORS.WHITE,
+            scoreLabel,
+            baseColor,
+            potentialScore
+        )
+
+        if showScoreGain and playerGain > 0 then
+            gainString = string.format(" %s(+%d)|r", gainColor, playerGain)
+        end
+    end
+
+    addLine(tooltip, scoreLine .. gainString)
 end
 
 --- Composes all reward/scoring lines appended to keystone tooltips.
@@ -453,59 +525,56 @@ local function enhanceTooltipWithRewardInfo(tooltip, itemString, keyLevel, mapID
     local gainColor = ColorUtils.calculateGradientColor(playerGain, 0, 200, GRADIENTS)
     local isRevealPressed = TooltipUtils.isRevealModifierPressed()
 
-    addTimerToTooltip(tooltip, mapID)
-    addPersonalBestToTooltip(tooltip, itemString, currentScore, isRevealPressed)
-    addRewardsToTooltip(tooltip, keyLevel, isRevealPressed)
-
-    local scoreDisplay = MRM_SavedVars.SCORE_DISPLAY or "SHOW"
-    local shouldShowScore = scoreDisplay == "SHOW"
-        or (scoreDisplay == "SHIFT" and isRevealPressed)
-
-    if shouldShowScore then
-        local scoreLine = ""
-        local gainString = ""
-        local showScoreGain = MRM_SavedVars.SHOW_SCORE_GAIN ~= false
-
-        if MRM_SavedVars.SHOW_TIMING then
-            local maxScore = potentialScore + 15
-            scoreLine = string.format(
-                "%sScore: %s%d|r - %s%d|r",
-                ConfigData.COLORS.WHITE,
-                baseColor,
-                potentialScore,
-                baseColor,
-                maxScore
-            )
-
-            local minGain = playerGain
-            local maxGain = math.max(maxScore - currentScore, 0)
-            if showScoreGain and maxGain > 0 then
-                gainString = string.format(" %s(+%d-%d)|r", gainColor, minGain, maxGain)
-            end
-        else
-            scoreLine = string.format(
-                "%sScore: %s%d|r",
-                ConfigData.COLORS.WHITE,
-                baseColor,
-                potentialScore
-            )
-
-            if showScoreGain and playerGain > 0 then
-                gainString = string.format(" %s(+%d)|r", gainColor, playerGain)
-            end
+    local separatorPending = MRM_SavedVars.TOOLTIP_SEPARATOR == true
+    local function addLine(targetTooltip, text)
+        if separatorPending then
+            targetTooltip:AddLine(" ")
+            separatorPending = false
         end
-
-        tooltip:AddLine(scoreLine .. gainString)
+        targetTooltip:AddLine(text)
     end
 
-    addGroupDetailsToTooltip(
-        tooltip,
-        groupScoreData,
-        potentialScore,
-        averageGroupGain,
-        groupColor,
-        isRevealPressed
-    )
+    local sectionBuilders = {
+        timer = function()
+            addTimerToTooltip(tooltip, mapID, addLine)
+        end,
+        personalBest = function()
+            addPersonalBestToTooltip(tooltip, itemString, currentScore, isRevealPressed, addLine)
+        end,
+        rewards = function()
+            addRewardsToTooltip(tooltip, keyLevel, isRevealPressed, addLine)
+        end,
+        score = function()
+            addScoreToTooltip(
+                tooltip,
+                potentialScore,
+                currentScore,
+                playerGain,
+                baseColor,
+                gainColor,
+                isRevealPressed,
+                addLine
+            )
+        end,
+        group = function()
+            addGroupDetailsToTooltip(
+                tooltip,
+                groupScoreData,
+                potentialScore,
+                averageGroupGain,
+                groupColor,
+                isRevealPressed,
+                addLine
+            )
+        end,
+    }
+
+    for _, sectionId in ipairs(TooltipUtils.getLineOrder()) do
+        local builder = sectionBuilders[sectionId]
+        if builder then
+            builder()
+        end
+    end
 end
 
 --- Cache of parsed keystones by tooltip frame.
@@ -579,7 +648,6 @@ local function handleKeystoneChatHyperlink(link)
         return
     end
 
-    ItemRefTooltip:AddLine(" ")
     enhanceTooltipWithRewardInfo(
         ItemRefTooltip,
         keystoneData.itemString,

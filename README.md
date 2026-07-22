@@ -24,6 +24,7 @@ Transform every Mythic+ keystone tooltip with detailed, customizable information
 - **Group Score Gains**: Hide, show average party gain only, or hold the reveal modifier for per-player breakdown
 - **Dungeon Timers**: Optional par time or upgrade timer lines with full, short, or times-only labels
 - **Reveal Modifier**: Choose Shift, Alt, or Control to reveal gated tooltip details
+- **Tooltip Layout**: Full or abbreviated labels, optional blank separator line, and line-order presets (default, score first, rewards first, timers last)
 - **Level Display**: Default, compact (+X), or in-title formatting with reveal-modifier behavior for resilient levels
 - **Element Control**: Hide duration text, affix descriptions, soulbound/unique lines, and other clutter
 - **Clean Formatting**: Short titles, short dungeon names, and optional plain score colors
