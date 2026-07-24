@@ -12,10 +12,16 @@ Mr. Mythical enhances your Mythic+ experience with rich, customizable keystone t
 
 ---
 
+
+
 ## Key Features
 
+
+
 ### **Customizable Keystone Tooltips**
+
 Transform every Mythic+ keystone tooltip with detailed, customizable information:
+
 - **Reward Information**: Gear, vault, and crest lines with independent visibility (hide / show / hold modifier) and layout styles (two lines, single line, compact)
 - **Crest Details**: Types and quantities of crests earned for completion
 - **Score Calculations**: Potential Mythic+ score gains with optional timing bonus ranges (+0–15); hide, always show, or hold modifier to reveal
@@ -30,16 +36,24 @@ Transform every Mythic+ keystone tooltip with detailed, customizable information
 - **Clean Formatting**: Short titles, short dungeon names, and optional plain score colors
 - **Chat Links**: Keystone links in chat show the same enhanced tooltip details
 
+
+
 ### **Dashboard & Planning Tools**
+
 Access powerful tools through an integrated dashboard interface:
+
 - **Rewards Calculator**: Browse gear rewards and crest earnings for any key level
 - **Interactive Score Calculator**: Calculate potential score gains for different key levels and timing
 - **Dungeon Timers**: Understand timer thresholds for chest rewards
 - **Statistics Overview**: Per-character stats for the current season — completions, overtime, and abandoned runs
 - **Run Tracking**: Automatically logs runs on dungeon start and completion with recent activity and dungeon breakdowns
 
+
+
 ### **Command Interface**
+
 Access all features via convenient chat commands:
+
 - `/mrm` - Open main dashboard with access to all tools
 - `/mrm dashboard` - Open main dashboard explicitly
 - `/mrm rewards` - Open reward calculator and browser
@@ -49,11 +63,16 @@ Access all features via convenient chat commands:
 - `/mrm settings` - Open addon settings panel (also `/mrm config` or `/mrm options`)
 - `/mrm help` - Display all available commands
 
+
+
 ### **Settings & Keybinding**
+
 - **Settings**: `/mrm settings`, the dashboard **Settings** tab, or **Esc → Options → AddOns → Mr. Mythical → Keystone Tooltips**
 - **Keybinding**: Bind **Open Dashboard** under *Key Bindings → AddOns → Mr. Mythical* to toggle the dashboard
 
-## Download 
+
+
+## Download
 
 Get the latest version from your preferred addon manager:
 
@@ -62,19 +81,6 @@ Get the latest version from your preferred addon manager:
 [Download on Wago](https://addons.wago.io/addons/mrmythical)
 
 [Source on GitHub](https://github.com/Mr-Mythical/MrMythicalAddon)
-
-## Installation
-
-### Addon managers (recommended)
-Install via CurseForge or Wago using the links above. Addon managers handle updates automatically.
-
-### Manual install
-1. Download the latest release from CurseForge, Wago, or GitHub
-2. Ensure the addon folder is named **`MrMythical`** (it must match `MrMythical.toc`)
-3. Copy the folder to `World of Warcraft\_retail_\Interface\AddOns\`
-4. Restart WoW or type `/reload`
-
-> **Note:** This repository is named `MrMythicalAddon`, but the installed addon folder must be `MrMythical`.
 
 ## Related Addons
 
@@ -103,6 +109,7 @@ Looking for more Mythic+ tools? Check out our companion addons:
 Visit **[MrMythical.com](https://mrmythical.com)** for additional Mythic+ & Raid tools.
 
 ### **Want to report a bug or suggest a feature?**
+
 Visit our [GitHub Issues](https://github.com/Mr-Mythical/MrMythicalAddon/issues) page for bug reports and feature requests.
 
 ## Author
@@ -110,7 +117,5 @@ Visit our [GitHub Issues](https://github.com/Mr-Mythical/MrMythicalAddon/issues)
 **Braunerr** - Addon developer
 
 ---
-
-**Mr. Mythical - Enhanced Mythic+ keystone tooltips with rewards and score information.**
 
 *Part of the Mr. Mythical addon ecosystem.*
