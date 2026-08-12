@@ -21,8 +21,8 @@ function ContentCreators.dashboard(parentFrame)
         return
     end
     
-    local title = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge", 
-        "Mr. Mythical Dashboard", "TOP", 0, UIConstants and -UIConstants.LAYOUT.LARGE_PADDING or -20)
+    local title = UIHelpers.createTitle(parentFrame, "Mr. Mythical Dashboard",
+        "TOP", 0, UIConstants and -UIConstants.LAYOUT.LARGE_PADDING or -20, 400)
     
     local subtitle = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontHighlight",
         "Mythic+ Tools & Information", "TOP", 0, -5)

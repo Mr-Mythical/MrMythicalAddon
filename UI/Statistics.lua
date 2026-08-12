@@ -41,9 +41,8 @@ function Statistics.create(parentFrame)
 end
 
 function Statistics.createStatsOverview(parentFrame)
-    local statsLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Statistics Overview", "TOPLEFT", 0, 0)
-    UIHelpers.setTextColor(statsLabel, "SUCCESS_HIGH")
+    local statsLabel = UIHelpers.createTitle(parentFrame, "Statistics Overview", "TOPLEFT", 0, 0, 320)
+    UIHelpers.setTextColor(statsLabel.Label or statsLabel, "SUCCESS_HIGH")
 
     local statsOverview = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
         "", "TOPLEFT", 0, -30)
@@ -56,9 +55,8 @@ function Statistics.createStatsOverview(parentFrame)
 end
 
 function Statistics.createRecentActivity(parentFrame)
-    local activityLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Recent Activity", "TOPLEFT", 340, 0)
-    UIHelpers.setTextColor(activityLabel, "SUCCESS_HIGH")
+    local activityLabel = UIHelpers.createTitle(parentFrame, "Recent Activity", "TOPLEFT", 340, 0, 320)
+    UIHelpers.setTextColor(activityLabel.Label or activityLabel, "SUCCESS_HIGH")
     
     local recentActivity = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormal",
         "", "TOPLEFT", 340, -30)
@@ -71,9 +69,8 @@ function Statistics.createRecentActivity(parentFrame)
 end
 
 function Statistics.createDungeonBreakdown(parentFrame)
-    local dungeonLabel = UIHelpers.createFontString(parentFrame, "OVERLAY", "GameFontNormalLarge",
-        "Dungeon Breakdown", "TOPLEFT", 0, 0)
-    UIHelpers.setTextColor(dungeonLabel, "SUCCESS_HIGH")
+    local dungeonLabel = UIHelpers.createTitle(parentFrame, "Dungeon Breakdown", "TOPLEFT", 0, 0, 400)
+    UIHelpers.setTextColor(dungeonLabel.Label or dungeonLabel, "SUCCESS_HIGH")
     
     local dungeonTableFrame = Statistics.createDungeonTable(parentFrame)
     

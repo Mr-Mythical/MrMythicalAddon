@@ -1,0 +1,93 @@
+{
+  "name": "MrMythical",
+  "note": "Addon-owned layout (not LibMrMythicalUI). Generic regions[] schema — edit in Layout Lab via Import, or by hand.",
+  "outputPath": "MrMythical/design/screens.json",
+  "frame": { "w": 850, "h": 500 },
+  "regions": [
+    { "id": "logo", "x": 12, "y": -10, "size": 28 },
+    { "id": "close", "x": -8, "y": -8, "w": 24, "h": 24, "anchor": "TOPRIGHT" },
+    { "id": "nav", "x": 10, "y": -34, "w": 140, "h": 456, "style": "panel" },
+    { "id": "content", "x": 160, "y": -34, "w": 680, "h": 456, "style": "panel" },
+    { "id": "nav:dashboard", "parent": "nav", "x": 10, "y": -20, "w": 120, "h": 30, "text": "Dashboard", "style": "nav" },
+    { "id": "nav:rewards", "parent": "nav", "x": 10, "y": -60, "w": 120, "h": 30, "text": "Rewards", "style": "nav" },
+    { "id": "nav:scores", "parent": "nav", "x": 10, "y": -100, "w": 120, "h": 30, "text": "Scores", "style": "nav", "selected": true },
+    { "id": "nav:stats", "parent": "nav", "x": 10, "y": -140, "w": 120, "h": 30, "text": "Statistics", "style": "nav" },
+    { "id": "nav:times", "parent": "nav", "x": 10, "y": -180, "w": 120, "h": 30, "text": "Times", "style": "nav" },
+    { "id": "nav:settings", "parent": "nav", "x": 10, "y": -220, "w": 120, "h": 30, "text": "Settings", "style": "nav" },
+    { "id": "scores:title", "parent": "content", "x": 140, "y": -12, "w": 400, "h": 22, "text": "Mythic+ Score Calculator", "style": "title" },
+    {
+      "id": "scores:desc",
+      "parent": "content",
+      "x": 20,
+      "y": -40,
+      "w": 640,
+      "h": 28,
+      "text": "Hover over key levels in the left table to see potential score gains for your dungeons on the right",
+      "style": "body"
+    },
+    {
+      "id": "scores:slider",
+      "parent": "content",
+      "x": 20,
+      "y": -88,
+      "w": 220,
+      "h": 48,
+      "text": "Timer %",
+      "style": "slider",
+      "lowText": "0%",
+      "highText": "40%",
+      "valueText": "0%"
+    },
+    { "id": "scores:dropdownLabel", "parent": "content", "x": 270, "y": -82, "w": 90, "h": 16, "text": "Key level", "style": "label" },
+    { "id": "scores:dropdown", "parent": "content", "x": 270, "y": -100, "w": 90, "h": 30, "text": "2", "style": "dropdown" },
+    {
+      "id": "scores:scoreScroll",
+      "parent": "content",
+      "x": 20,
+      "y": -140,
+      "w": 320,
+      "h": 300,
+      "style": "table",
+      "headers": [
+        { "text": "Key Level", "x": 0, "w": 70 },
+        { "text": "Base Score", "x": 70, "w": 80 },
+        { "text": "Timer Bonus", "x": 150, "w": 80 },
+        { "text": "Final Score", "x": 230, "w": 90 }
+      ],
+      "rows": [
+        ["2", "155", "+0", "155"],
+        ["3", "170", "+0", "170"],
+        ["4", "185", "+0", "185"],
+        ["5", "200", "+0", "200"],
+        ["6", "215", "+0", "215"],
+        ["7", "230", "+0", "230"],
+        ["8", "245", "+0", "245"],
+        ["9", "260", "+0", "260"],
+        ["10", "275", "+0", "275"]
+      ]
+    },
+    {
+      "id": "scores:gainsTable",
+      "parent": "content",
+      "x": 360,
+      "y": -140,
+      "w": 300,
+      "h": 300,
+      "style": "table",
+      "headers": [
+        { "text": "Dungeon", "x": 0, "w": 110 },
+        { "text": "Level", "x": 110, "w": 40 },
+        { "text": "Score", "x": 150, "w": 50 },
+        { "text": "Time", "x": 200, "w": 60 },
+        { "text": "Gain", "x": 260, "w": 50 }
+      ],
+      "rows": [
+        ["Ara-Kara", "10", "275", "28:12", "+12"],
+        ["Dawnbreaker", "8", "240", "31:04", "--"],
+        ["Priory", "12", "300", "25:40", "+18"],
+        ["City of Threads", "7", "220", "34:10", "--"],
+        ["Stonevault", "11", "288", "27:55", "+8"]
+      ]
+    }
+  ]
+}

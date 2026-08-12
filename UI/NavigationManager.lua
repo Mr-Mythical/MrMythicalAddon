@@ -2,7 +2,7 @@
 NavigationManager.lua - Navigation and Content Switching Module
 
 Purpose: Handles navigation buttons and content switching in the unified interface
-Dependencies: UIConstants, UIHelpers
+Dependencies: UIConstants, UIHelpers, LibMrMythicalUI-1.0
 Author: Braunerr
 --]]
 
@@ -20,36 +20,62 @@ NavigationManager.BUTTON_DATA = {
     {id = "settings", text = "Settings", y = -220}
 }
 
+local function getUILib()
+    return LibStub and LibStub("LibMrMythicalUI-1.0", true) or nil
+end
+
+local function getNavButtonData()
+    local tabs = MrMythical.Layout and MrMythical.Layout.navTabs
+    if tabs and #tabs > 0 then
+        return tabs
+    end
+    return NavigationManager.BUTTON_DATA
+end
+
 --- Creates all navigation buttons for the interface
 --- @param navPanel Frame The navigation panel to attach buttons to
 --- @param contentFrame Frame The content frame for displaying tab content
 --- @return table Table of created navigation buttons indexed by content type
 function NavigationManager.createButtons(navPanel, contentFrame)
     local navButtons = {}
-    
-    for _, buttonInfo in ipairs(NavigationManager.BUTTON_DATA) do
+
+    for _, buttonInfo in ipairs(getNavButtonData()) do
         local button = NavigationManager.createNavigationButton(navPanel, buttonInfo, contentFrame, navButtons)
         navButtons[buttonInfo.id] = button
-        
-        if buttonInfo.id == "dashboard" then
-            button:SetNormalFontObject("GameFontHighlight")
-        end
     end
-    
+
+    if navButtons.dashboard then
+        NavigationManager.updateButtonStates(navButtons.dashboard, navButtons)
+    end
+
     return navButtons
 end
 
 function NavigationManager.createNavigationButton(navPanel, buttonInfo, contentFrame, navButtons)
     local UIConstants = MrMythical.UIConstants
-    local button = CreateFrame("Button", nil, navPanel, "UIPanelButtonTemplate")
-    button:SetPoint("TOPLEFT", UIConstants and UIConstants.LAYOUT.PADDING or 10, buttonInfo.y)
-    button:SetSize(120, UIConstants and UIConstants.LAYOUT.BUTTON_HEIGHT or 30)
-    button:SetText(buttonInfo.text)
-    
+    local Lib = getUILib()
+    local button
+
+    if Lib then
+        button = Lib:CreateNavTab(navPanel, {
+            text = buttonInfo.text,
+            id = buttonInfo.id,
+            width = 120,
+            height = UIConstants and UIConstants.LAYOUT.BUTTON_HEIGHT or 30,
+            selected = buttonInfo.id == "dashboard",
+        })
+        button:SetPoint("TOPLEFT", UIConstants and UIConstants.LAYOUT.PADDING or 10, buttonInfo.y)
+    else
+        button = CreateFrame("Button", nil, navPanel, "UIPanelButtonTemplate")
+        button:SetPoint("TOPLEFT", UIConstants and UIConstants.LAYOUT.PADDING or 10, buttonInfo.y)
+        button:SetSize(120, UIConstants and UIConstants.LAYOUT.BUTTON_HEIGHT or 30)
+        button:SetText(buttonInfo.text)
+    end
+
     button:SetScript("OnClick", function()
         NavigationManager.handleButtonClick(buttonInfo, button, navButtons, contentFrame)
     end)
-    
+
     return button
 end
 
@@ -66,16 +92,19 @@ function NavigationManager.handleButtonClick(buttonInfo, button, navButtons, con
         end
         return
     end
-    
+
     NavigationManager.updateButtonStates(button, navButtons)
     NavigationManager.showContent(buttonInfo.id, contentFrame)
 end
 
 function NavigationManager.updateButtonStates(activeButton, navButtons)
     for _, button in pairs(navButtons) do
-        button:SetNormalFontObject("GameFontNormal")
+        if button.SetSelected then
+            button:SetSelected(button == activeButton)
+        else
+            button:SetNormalFontObject(button == activeButton and "GameFontHighlight" or "GameFontNormal")
+        end
     end
-    activeButton:SetNormalFontObject("GameFontHighlight")
 end
 
 function NavigationManager.clearContent(contentFrame)
@@ -95,19 +124,16 @@ end
 --- @param contentFrame Frame The frame to display content in
 function NavigationManager.showContent(contentType, contentFrame)
     NavigationManager.clearContent(contentFrame)
-    
-    -- Get ContentCreators module
+
     local ContentCreators = MrMythical.ContentCreators
     if ContentCreators and ContentCreators[contentType] then
         ContentCreators[contentType](contentFrame)
     else
-        -- Fallback to UIHelpers if it exists
         local UIHelpers = MrMythical.UIHelpers
         if UIHelpers then
             UIHelpers.createFontString(contentFrame, "OVERLAY", "GameFontNormal",
                 "Content not available: " .. contentType, "CENTER", 0, 0)
         else
-            -- Last resort fallback
             local fontString = contentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             fontString:SetPoint("CENTER", 0, 0)
             fontString:SetText("Content not available: " .. contentType)

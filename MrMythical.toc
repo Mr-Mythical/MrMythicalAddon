@@ -1,4 +1,4 @@
-## Interface: 120007
+## Interface: 120100
 ## Title: Mr. Mythical: Mythic+ Dashboard & Tooltips
 ## Notes: Your all-in-one Mythic+ toolkit with enhanced customizable tooltips, run tracking, score calculations, and reward information
 ## Version: @project-version@
@@ -8,7 +8,7 @@
 ## X-Wago-ID: kNMdrZGz
 ## SavedVariables: MRM_SavedVars, MRM_RunHistory
 
-
+Libs\LibMrMythicalUI\embeds.xml
 Data/ConfigData.lua
 Data/DungeonData.lua
 Data/ParsingData.lua
@@ -23,6 +23,7 @@ Utils/CommandHandlers.lua
 Options.lua
 UI/UIConstants.lua
 UI/UIHelpers.lua
+UI/Layout.lua
 UI/MainFrameManager.lua
 UI/NavigationManager.lua
 UI/ContentCreators.lua

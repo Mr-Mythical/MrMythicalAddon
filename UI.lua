@@ -27,10 +27,18 @@ local function initializeUnifiedUI()
     local navPanel = MainFrameManager.createNavigationPanel(unifiedFrame)
     local contentFrame = MainFrameManager.createContentFrame(unifiedFrame)
     local navButtons = NavigationManager.createButtons(navPanel, contentFrame)
-    
-    local closeButton = CreateFrame("Button", nil, unifiedFrame, "UIPanelCloseButton")
-    closeButton:SetPoint("TOPRIGHT", -5, -5)
-    
+
+    -- Lib close is created in MainFrameManager; no Blizzard UIPanelCloseButton
+    if not unifiedFrame.CloseButton then
+        local Lib = LibStub and LibStub("LibMrMythicalUI-1.0", true)
+        if Lib then
+            unifiedFrame.CloseButton = Lib:CreateCloseButton(unifiedFrame, function()
+                unifiedFrame:Hide()
+            end)
+            unifiedFrame.CloseButton:SetPoint("TOPRIGHT", -8, -8)
+        end
+    end
+
     -- Store references for the public API
     UnifiedUI._unifiedFrame = unifiedFrame
     UnifiedUI._contentFrame = contentFrame
