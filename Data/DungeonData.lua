@@ -18,15 +18,16 @@ MrMythical.DungeonData = {
     },
 
     -- Short names for dungeons (keyed by challenge_mode_id)
+    -- Midnight Season 2 pool (SavedInstances / DBM keystone IDs).
     SHORT_NAMES = {
-        [402] = "AA",    -- Algeth'ar Academy
-        [558] = "MT",    -- Magisters' Terrace
-        [560] = "MC",    -- Maisara Caverns
-        [559] = "NPX",   -- Nexus-Point Xenas
-        [556] = "POS",   -- Pit of Saron
-        [239] = "SEAT",  -- Seat of the Triumvirate
-        [161] = "SR",    -- Skyreach
-        [557] = "WS"     -- Windrunner Spire
+        [588] = "AOF",   -- Altar of Fangs
+        [584] = "BV",    -- The Blinding Vale
+        [586] = "DON",   -- Den of Nalorakk
+        [249] = "KR",    -- Kings' Rest
+        [587] = "MR",    -- Murder Row
+        [399] = "RLP",   -- Ruby Life Pools
+        [250] = "TOS",   -- Temple of Sethraliss
+        [585] = "VA",    -- Voidscar Arena
     }
 }
 
