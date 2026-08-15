@@ -8,7 +8,7 @@
 ## X-Wago-ID: kNMdrZGz
 ## SavedVariables: MRM_SavedVars, MRM_RunHistory
 
-Libs\LibMrMythicalUI\embeds.xml
+Libs/LibMrMythicalUI\embeds.xml
 Data/ConfigData.lua
 Data/DungeonData.lua
 Data/ParsingData.lua
